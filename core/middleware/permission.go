@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 	"go-admin/config/base/constant"
 	"go-admin/core/config"
 	"go-admin/core/dto/response"
@@ -10,6 +9,8 @@ import (
 	"go-admin/core/utils/ginutils"
 	"go-admin/core/utils/log"
 	"go-admin/core/utils/strutils"
+
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
@@ -90,14 +91,13 @@ func Permission(tableName string, p *DataPermission) func(db *gorm.DB) *gorm.DB 
 }
 
 func getPermissionFromContext(c *gin.Context) *DataPermission {
-	p := new(DataPermission)
 	if pm, ok := c.Get(PermissionKey); ok {
-		switch pm.(type) {
+		switch v := pm.(type) {
 		case *DataPermission:
-			p = pm.(*DataPermission)
+			return v
 		}
 	}
-	return p
+	return new(DataPermission)
 }
 
 // GetPermissionFromContext 提供非action写法数据范围约束

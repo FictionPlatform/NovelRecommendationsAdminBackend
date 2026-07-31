@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/bitxx/load-config/source/file"
 	"go-admin/app"
 	mycasbin "go-admin/core/casbin"
 	"go-admin/core/config"
@@ -24,11 +23,14 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/cobra"
+	"github.com/bitxx/load-config/source/file"
+
 	"go-admin/app/admin/sys/models"
 	"go-admin/core/global"
 	"go-admin/core/middleware"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/cobra"
 )
 
 var (

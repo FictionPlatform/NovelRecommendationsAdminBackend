@@ -1,9 +1,12 @@
 package middleware
 
 import (
+	"go-admin/core/runtime"
+	"go-admin/core/utils/log"
+
 	jwt "github.com/appleboy/gin-jwt/v3"
 	"github.com/gin-gonic/gin"
-	"go-admin/core/runtime"
+	"github.com/wprimadi/brandy"
 )
 
 const (
@@ -25,6 +28,19 @@ func InitMiddleware(r *gin.Engine) {
 	r.Use(Options)
 	// Secure is a middleware function that appends security
 	r.Use(Secure)
+
+	// 1. 初始化 WAF 引擎并加载规则集
+	rulesetPaths := []string{
+		"rulesets/default.conf",
+		"rulesets/owasp-crs/rules/*.conf",
+	}
+	waf, err := brandy.InitWaf(rulesetPaths)
+	if err != nil {
+		log.Fatalf("加载 WAF 规则失败: %v", err)
+	}
+
+	// 2. 应用 WAF 中间件
+	r.Use(brandy.Waf(waf, ""))
 	// 链路追踪
 	r.Use(Trace())
 	runtime.RuntimeConfig.SetMiddleware(JwtTokenCheck, (*jwt.GinJWTMiddleware).MiddlewareFunc)
