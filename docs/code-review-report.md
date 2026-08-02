@@ -30,10 +30,10 @@
   3. 密钥已进入 git 历史，仅修改当前文件无法清除。
 - **建议**: 密钥从环境变量/密钥管理服务注入；启动时校验拒绝默认值；JWT 签名密钥与数据加密密钥分离；git filter-repo 清理历史并轮换密钥。
 
-### C2. app_user 登录密码/提现密码明文存储
-- **位置**: `app_mysql.sql:1374-1375`、`app_pgsql.sql:1610-1611`（`pwd`/`pay_pwd` 列）、种子数据明文 `pwd='akIiWm'`；`app/app/user/models/user.go:18-19` 仅普通 string 字段，service 层无哈希逻辑
-- **问题**: 登录密码与**提现密码（资金相关）**均为明文落库；且 `Pwd`/`PayPwd` 带 `json:"pwd"/"payPwd"` 标签，任何用户列表/详情接口都会泄露口令；`user.go:42-43` DTO 还允许按密码列排序。
-- **建议**: 改用 bcrypt/scrypt 哈希（项目已有 `core/utils/encrypt/security.go` 可复用）；模型字段 `json:"-"`；对外使用脱敏响应 DTO；存量数据迁移脚本。
+### C2. app_user 登录密码/提现密码明文存储（设计缺陷，尚未被触发）
+- **位置**: `app_mysql.sql:1374-1375`、`app_pgsql.sql:1610-1611`（`pwd`/`pay_pwd` 明文 `varchar(100)` 列）、`app/app/user/models/user.go:18-19`（字段带 `json:"pwd"/"payPwd"` 标签）、`app/app/user/service/dto/user.go:42-43`（`pwdOrder`/`payPwdOrder` 排序字段）
+- **问题**: ① 种子数据中 `pwd`/`pay_pwd` 均为空（`ref_code` 列的 `akIiWm` 等为推荐码，非密码），无明文密码数据；② 但表结构为明文列且 service 层全项目无任何 bcrypt/scrypt 哈希逻辑——一旦 app 端注册/登录功能启用写入密码，写进去即为明文；③ `Pwd`/`PayPwd` 带 `json` 标签，字段一旦有值，任何接口响应都会泄露口令；④ DTO 允许按密码列排序，可探测字段存在性。
+- **建议**: 改用 bcrypt/scrypt 哈希（项目已有 `core/utils/encrypt/security.go` 可复用）；模型字段 `json:"-"`；删除按密码列排序的字段；存量数据迁移脚本。
 
 ### C3. 代码生成接口可任意文件写入（路径穿越 → 潜在 RCE）
 - **位置**: `app/admin/sys/router/sys_gen_table.go:15`（路由组仅 `middleware.Auth()` 无角色校验）、`app/admin/sys/service/sys_gen_table.go:539-571`（GenCode 用 `os.Create` 写文件）、`core/utils/fileutils/file.go:113-123`

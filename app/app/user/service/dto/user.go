@@ -39,8 +39,6 @@ type UserOrder struct {
 	MobileTitleOrder string          `form:"mobileTitleOrder"  search:"type:order;column:mobile_title;table:app_user"`
 	MobileOrder      string          `form:"mobileOrder"  search:"type:order;column:mobile;table:app_user"`
 	AvatarOrder      string          `form:"avatarOrder"  search:"type:order;column:avatar;table:app_user"`
-	PayPwdOrder      string          `form:"payPwdOrder"  search:"type:order;column:pay_pwd;table:app_user"`
-	PwdOrder         string          `form:"pwdOrder"  search:"type:order;column:pwd;table:app_user"`
 	RefCodeOrder     string          `form:"refCodeOrder"  search:"type:order;column:ref_code;table:app_user"`
 	ParentIdOrder    int64           `form:"parentIdOrder"  search:"type:order;column:parent_id;table:app_user"`
 	ParentIdsOrder   string          `form:"parentIdsOrder"  search:"type:order;column:parent_ids;table:app_user"`

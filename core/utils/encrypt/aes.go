@@ -7,22 +7,6 @@ import (
 	"errors"
 )
 
-var defaultKey = []byte{34, 54, 12, 3, 43, 12, 132, 126, 32, 45, 74, 23, 201, 23, 14, 142}
-
-func AesEncryptDefault(text string) (string, error) {
-	if text == "" {
-		return "", nil
-	}
-	return AesEncrypt(text, defaultKey)
-}
-
-func AesDecryptDefault(text string) (string, error) {
-	if text == "" {
-		return "", nil
-	}
-	return AesDecrypt(text, defaultKey)
-}
-
 func AesEncrypt(v string, k []byte) (string, error) {
 	value := []byte(v)
 
