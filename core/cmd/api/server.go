@@ -31,6 +31,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "go-admin/docs"
 )
 
 var (
@@ -165,6 +169,9 @@ func initRouter() {
 	}
 	//r.Use(middleware.Metrics())
 	r.Use(middleware.RequestId()).Use(log.SetRequestLogger)
+
+	//swagger文档
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	middleware.InitMiddleware(r)
 }

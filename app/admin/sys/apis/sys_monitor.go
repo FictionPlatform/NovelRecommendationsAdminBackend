@@ -33,6 +33,15 @@ type Monitor struct {
 }
 
 // GetMonitor admin-获取服务器信息
+// @Summary 获取服务器信息
+// @Description 获取服务器信息
+// @Tags 系统监控管理
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-monitor [get]
 func (e Monitor) GetMonitor(c *gin.Context) {
 	e.Context = c
 
@@ -103,6 +112,15 @@ func (e Monitor) GetMonitor(c *gin.Context) {
 }
 
 // Ping admin-ping测试
+// @Summary ping测试
+// @Description ping测试
+// @Tags 系统监控管理
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-monitor/ping [get]
 func (e Monitor) Ping(c *gin.Context) {
 	c.Status(http.StatusOK)
 }

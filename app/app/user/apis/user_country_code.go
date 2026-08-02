@@ -20,6 +20,20 @@ type UserCountryCode struct {
 }
 
 // GetPage app-获取国家区号管理分页列表
+// @Summary 获取国家区号管理分页列表
+// @Description 获取国家区号管理分页列表
+// @Tags 国家区号管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Param country query string false "国家地区"
+// @Param code query string false "区号"
+// @Param status query string false "状态(1-可用 2-停用)"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-country-code [get]
 func (e UserCountryCode) GetPage(c *gin.Context) {
 	req := dto.UserCountryCodeQueryReq{}
 	s := service.UserCountryCode{}
@@ -42,6 +56,16 @@ func (e UserCountryCode) GetPage(c *gin.Context) {
 }
 
 // Get app-获取国家区号管理详情
+// @Summary 获取国家区号管理详情
+// @Description 获取国家区号管理详情
+// @Tags 国家区号管理
+// @Accept json
+// @Produce json
+// @Param id path int true "区号编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-country-code/{id} [get]
 func (e UserCountryCode) Get(c *gin.Context) {
 	req := dto.UserCountryCodeGetReq{}
 	s := service.UserCountryCode{}
@@ -64,6 +88,16 @@ func (e UserCountryCode) Get(c *gin.Context) {
 }
 
 // Insert app-新增国家区号管理
+// @Summary 新增国家区号管理
+// @Description 新增国家区号管理
+// @Tags 国家区号管理
+// @Accept json
+// @Produce json
+// @Param body body dto.UserCountryCodeInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-country-code [post]
 func (e UserCountryCode) Insert(c *gin.Context) {
 	req := dto.UserCountryCodeInsertReq{}
 	s := service.UserCountryCode{}
@@ -91,6 +125,17 @@ func (e UserCountryCode) Insert(c *gin.Context) {
 }
 
 // Update app-更新国家区号管理
+// @Summary 更新国家区号管理
+// @Description 更新国家区号管理
+// @Tags 国家区号管理
+// @Accept json
+// @Produce json
+// @Param id path int true "区号编号"
+// @Param body body dto.UserCountryCodeUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-country-code/{id} [put]
 func (e UserCountryCode) Update(c *gin.Context) {
 	req := dto.UserCountryCodeUpdateReq{}
 	s := service.UserCountryCode{}
@@ -123,6 +168,16 @@ func (e UserCountryCode) Update(c *gin.Context) {
 }
 
 // Delete app-删除国家区号管理
+// @Summary 删除国家区号管理
+// @Description 删除国家区号管理
+// @Tags 国家区号管理
+// @Accept json
+// @Produce json
+// @Param body body dto.UserCountryCodeDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-country-code [delete]
 func (e UserCountryCode) Delete(c *gin.Context) {
 	s := service.UserCountryCode{}
 	req := dto.UserCountryCodeDeleteReq{}
@@ -146,6 +201,17 @@ func (e UserCountryCode) Delete(c *gin.Context) {
 }
 
 // Export app-导出国家区号管理
+// @Summary 导出国家区号管理
+// @Description 导出国家区号管理
+// @Tags 国家区号管理
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Param country query string false "国家地区"
+// @Param status query string false "状态(1-可用 2-停用)"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-country-code/export [get]
 func (e UserCountryCode) Export(c *gin.Context) {
 	req := dto.UserCountryCodeQueryReq{}
 	s := service.UserCountryCode{}

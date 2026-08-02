@@ -17,6 +17,19 @@ type SysDept struct {
 }
 
 // GetTree admin-获取部门管理树
+// @Summary 获取部门管理树
+// @Description 获取部门管理树
+// @Tags 系统部门管理
+// @Accept json
+// @Produce json
+// @Param deptName query string false "部门名称"
+// @Param leader query string false "负责人"
+// @Param phone query string false "手机"
+// @Param email query string false "邮箱"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dept/dept-tree [get]
 func (e SysDept) GetTree(c *gin.Context) {
 	s := service.SysDept{}
 	req := dto.SysDeptQueryReq{}
@@ -38,6 +51,16 @@ func (e SysDept) GetTree(c *gin.Context) {
 }
 
 // Get admin-获取部门管理详情
+// @Summary 获取部门管理详情
+// @Description 获取部门管理详情
+// @Tags 系统部门管理
+// @Accept json
+// @Produce json
+// @Param id path int true "部门编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dept/{id} [get]
 func (e SysDept) Get(c *gin.Context) {
 	s := service.SysDept{}
 	req := dto.SysDeptGetReq{}
@@ -60,6 +83,16 @@ func (e SysDept) Get(c *gin.Context) {
 }
 
 // Insert admin-新增部门管理
+// @Summary 新增部门管理
+// @Description 新增部门管理
+// @Tags 系统部门管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysDeptInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dept [post]
 func (e SysDept) Insert(c *gin.Context) {
 	s := service.SysDept{}
 	req := dto.SysDeptInsertReq{}
@@ -87,6 +120,17 @@ func (e SysDept) Insert(c *gin.Context) {
 }
 
 // Update admin-更新部门管理
+// @Summary 更新部门管理
+// @Description 更新部门管理
+// @Tags 系统部门管理
+// @Accept json
+// @Produce json
+// @Param id path int true "部门编号"
+// @Param body body dto.SysDeptUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dept/{id} [put]
 func (e SysDept) Update(c *gin.Context) {
 	s := service.SysDept{}
 	req := dto.SysDeptUpdateReq{}
@@ -119,6 +163,16 @@ func (e SysDept) Update(c *gin.Context) {
 }
 
 // Delete admin-删除部门管理
+// @Summary 删除部门管理
+// @Description 删除部门管理
+// @Tags 系统部门管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysDeptDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dept [delete]
 func (e SysDept) Delete(c *gin.Context) {
 	s := service.SysDept{}
 	req := dto.SysDeptDeleteReq{}
@@ -142,6 +196,16 @@ func (e SysDept) Delete(c *gin.Context) {
 }
 
 // GetDeptTreeByRole admin-根据角色获取部门
+// @Summary 根据角色获取部门
+// @Description 根据角色获取部门
+// @Tags 系统部门管理
+// @Accept json
+// @Produce json
+// @Param roleId path int true "角色编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dept/role-dept-tree-select/{roleId} [get]
 func (e SysDept) GetDeptTreeByRole(c *gin.Context) {
 	s := service.SysDept{}
 	req := dto.SelectDeptRole{}

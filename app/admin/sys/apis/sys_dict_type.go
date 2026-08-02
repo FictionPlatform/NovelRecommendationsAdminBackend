@@ -21,6 +21,21 @@ type SysDictType struct {
 }
 
 // GetPage admin-获取字典类型分页列表
+// @Summary 获取字典类型分页列表
+// @Description 获取字典类型分页列表
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Param dictName query string false "字典名称"
+// @Param dictType query string false "字典类型"
+// @Param beginCreatedAt query string false "创建开始时间"
+// @Param endCreatedAt query string false "创建结束时间"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/type [get]
 func (e SysDictType) GetPage(c *gin.Context) {
 	s := service.SysDictType{}
 	req := dto.SysDictTypeQueryReq{}
@@ -43,6 +58,16 @@ func (e SysDictType) GetPage(c *gin.Context) {
 }
 
 // Get admin-获取字典类型详情
+// @Summary 获取字典类型详情
+// @Description 获取字典类型详情
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param id path int true "字典类型编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/type/{id} [get]
 func (e SysDictType) Get(c *gin.Context) {
 	s := service.SysDictType{}
 	req := dto.SysDictTypeGetReq{}
@@ -65,6 +90,16 @@ func (e SysDictType) Get(c *gin.Context) {
 }
 
 // Insert admin-新增字典类型
+// @Summary 新增字典类型
+// @Description 新增字典类型
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysDictTypeInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/type [post]
 func (e SysDictType) Insert(c *gin.Context) {
 	s := service.SysDictType{}
 	req := dto.SysDictTypeInsertReq{}
@@ -92,6 +127,17 @@ func (e SysDictType) Insert(c *gin.Context) {
 }
 
 // Update admin-更新字典类型
+// @Summary 更新字典类型
+// @Description 更新字典类型
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param id path int true "字典类型编号"
+// @Param body body dto.SysDictTypeUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/type/{id} [put]
 func (e SysDictType) Update(c *gin.Context) {
 	s := service.SysDictType{}
 	req := dto.SysDictTypeUpdateReq{}
@@ -124,6 +170,16 @@ func (e SysDictType) Update(c *gin.Context) {
 }
 
 // Delete admin-删除字典类型
+// @Summary 删除字典类型
+// @Description 删除字典类型
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysDictrDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/type [delete]
 func (e SysDictType) Delete(c *gin.Context) {
 	s := service.SysDictType{}
 	req := dto.SysDictrDeleteReq{}
@@ -146,6 +202,17 @@ func (e SysDictType) Delete(c *gin.Context) {
 }
 
 // GetList admin-获取字典类型全部列表
+// @Summary 获取字典类型全部列表
+// @Description 获取字典类型全部列表
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param dictName query string false "字典名称"
+// @Param dictType query string false "字典类型"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/type/option-select [get]
 func (e SysDictType) GetList(c *gin.Context) {
 	s := service.SysDictType{}
 	req := dto.SysDictTypeQueryReq{}
@@ -168,6 +235,17 @@ func (e SysDictType) GetList(c *gin.Context) {
 }
 
 // Export admin-导出字典类型
+// @Summary 导出字典类型
+// @Description 导出字典类型
+// @Tags 系统字典管理
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Param dictName query string false "字典名称"
+// @Param dictType query string false "字典类型"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/type/export [get]
 func (e SysDictType) Export(c *gin.Context) {
 	req := dto.SysDictTypeQueryReq{}
 	s := service.SysDictType{}

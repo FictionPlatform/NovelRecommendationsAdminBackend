@@ -19,6 +19,22 @@ type SysLoginLog struct {
 }
 
 // GetPage admin-获取登录日志分页列表
+// @Summary 获取登录日志分页列表
+// @Description 获取登录日志分页列表
+// @Tags 系统日志管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Param userId query string false "用户编号"
+// @Param username query string false "用户名"
+// @Param status query string false "状态"
+// @Param ipaddr query string false "ip地址"
+// @Param loginLocation query string false "归属地"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-login-log [get]
 func (e SysLoginLog) GetPage(c *gin.Context) {
 	s := service.SysLoginLog{}
 	req := dto.SysLoginLogQueryReq{}
@@ -41,6 +57,16 @@ func (e SysLoginLog) GetPage(c *gin.Context) {
 }
 
 // Get admin-获取登录日志详情
+// @Summary 获取登录日志详情
+// @Description 获取登录日志详情
+// @Tags 系统日志管理
+// @Accept json
+// @Produce json
+// @Param id path int true "日志编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-login-log/{id} [get]
 func (e SysLoginLog) Get(c *gin.Context) {
 	s := service.SysLoginLog{}
 	req := dto.SysLoginLogGetReq{}
@@ -63,6 +89,16 @@ func (e SysLoginLog) Get(c *gin.Context) {
 }
 
 // Delete admin-删除登录日志
+// @Summary 删除登录日志
+// @Description 删除登录日志
+// @Tags 系统日志管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysLoginLogDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-login-log [delete]
 func (e SysLoginLog) Delete(c *gin.Context) {
 	s := service.SysLoginLog{}
 	req := dto.SysLoginLogDeleteReq{}
@@ -86,6 +122,17 @@ func (e SysLoginLog) Delete(c *gin.Context) {
 }
 
 // Export admin-导出登录日志
+// @Summary 导出登录日志
+// @Description 导出登录日志
+// @Tags 系统日志管理
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Param username query string false "用户名"
+// @Param status query string false "状态"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-login-log/export [get]
 func (e SysLoginLog) Export(c *gin.Context) {
 	req := dto.SysLoginLogQueryReq{}
 	s := service.SysLoginLog{}

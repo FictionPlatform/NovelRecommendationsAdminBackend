@@ -43,11 +43,11 @@ func (e *User) GetPage(c *dto.UserQueryReq, p *middleware.DataPermission) ([]mod
 	var list []models.User
 	var count int64
 	if c.Mobile != "" {
-		c.Mobile, _ = encrypt.AesEncrypt(c.Mobile, []byte(config.AuthConfig.Secret))
+		c.Mobile, _ = encrypt.AesEncrypt(c.Mobile, []byte(config.AuthConfig.SecretAes))
 	}
 
 	if c.Email != "" {
-		c.Email, _ = encrypt.AesEncrypt(c.Email, []byte(config.AuthConfig.Secret))
+		c.Email, _ = encrypt.AesEncrypt(c.Email, []byte(config.AuthConfig.SecretAes))
 	}
 
 	//上级邀请码查询
@@ -94,12 +94,12 @@ func (e *User) GetPage(c *dto.UserQueryReq, p *middleware.DataPermission) ([]mod
 
 		}
 
-		mobile, err := encrypt.AesDecrypt(user.Mobile, []byte(config.AuthConfig.Secret))
+		mobile, err := encrypt.AesDecrypt(user.Mobile, []byte(config.AuthConfig.SecretAes))
 		if err == nil {
 			list[index].Mobile = strutils.HidePartStr(mobile, 3)
 		}
 
-		email, err := encrypt.AesDecrypt(user.Email, []byte(config.AuthConfig.Secret))
+		email, err := encrypt.AesDecrypt(user.Email, []byte(config.AuthConfig.SecretAes))
 		if err == nil {
 			list[index].Email = strutils.HidePartStr(email, 5)
 		}
@@ -123,10 +123,10 @@ func (e *User) Get(id int64, p *middleware.DataPermission) (*models.User, int, e
 		return nil, baseLang.DataNotFoundCode, lang.MsgErr(baseLang.DataNotFoundCode, e.Lang)
 	}
 	if data.Mobile != "" {
-		data.Mobile, _ = encrypt.AesDecrypt(data.Mobile, []byte(config.AuthConfig.Secret))
+		data.Mobile, _ = encrypt.AesDecrypt(data.Mobile, []byte(config.AuthConfig.SecretAes))
 	}
 	if data.Email != "" {
-		data.Email, _ = encrypt.AesDecrypt(data.Email, []byte(config.AuthConfig.Secret))
+		data.Email, _ = encrypt.AesDecrypt(data.Email, []byte(config.AuthConfig.SecretAes))
 	}
 	return data, baseLang.SuccessCode, nil
 }
@@ -233,7 +233,7 @@ func (e *User) Insert(c *dto.UserInsertReq) (int, error) {
 	}()
 
 	for _, mobile := range mobiles {
-		mobile, err = encrypt.AesEncrypt(mobile, []byte(config.AuthConfig.Secret))
+		mobile, err = encrypt.AesEncrypt(mobile, []byte(config.AuthConfig.SecretAes))
 		if err != nil {
 			return baseLang.UserMobileEncryptErrLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.UserMobileEncryptErrCode, baseLang.UserMobileEncryptErrLogCode, err)
 		}
@@ -243,7 +243,7 @@ func (e *User) Insert(c *dto.UserInsertReq) (int, error) {
 		}
 	}
 	for _, email := range emails {
-		email, err = encrypt.AesEncrypt(email, []byte(config.AuthConfig.Secret))
+		email, err = encrypt.AesEncrypt(email, []byte(config.AuthConfig.SecretAes))
 		if err != nil {
 			return baseLang.UserEmailEncryptErrLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.UserEmailEncryptErrCode, baseLang.UserEmailEncryptErrLogCode, err)
 		}
@@ -279,9 +279,9 @@ func (e *User) register(registerType, email, mobile, mobileTitle string, refUser
 	if count > 0 {
 		account := ""
 		if email != "" {
-			account, _ = encrypt.AesDecrypt(email, []byte(config.AuthConfig.Secret))
+			account, _ = encrypt.AesDecrypt(email, []byte(config.AuthConfig.SecretAes))
 		} else if mobile != "" {
-			account, _ = encrypt.AesDecrypt(mobile, []byte(config.AuthConfig.Secret))
+			account, _ = encrypt.AesDecrypt(mobile, []byte(config.AuthConfig.SecretAes))
 		}
 		return baseLang.UserAccountExistLogCode, lang.MsgErrf(baseLang.UserAccountExistLogCode, e.Lang, account)
 	}
@@ -414,7 +414,7 @@ func (e *User) Update(c *dto.UserUpdateReq, p *middleware.DataPermission) (bool,
 
 	mobile := ""
 	if c.Mobile != "" {
-		mobile, err = encrypt.AesEncrypt(strings.TrimSpace(c.Mobile), []byte(config.AuthConfig.Secret))
+		mobile, err = encrypt.AesEncrypt(strings.TrimSpace(c.Mobile), []byte(config.AuthConfig.SecretAes))
 		if err != nil {
 			return false, baseLang.UserMobileEncryptErrLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.UserMobileEncryptErrCode, baseLang.UserMobileEncryptErrLogCode, err)
 		}
@@ -423,7 +423,7 @@ func (e *User) Update(c *dto.UserUpdateReq, p *middleware.DataPermission) (bool,
 	//邮箱加密
 	email := ""
 	if c.Email != "" {
-		email, err = encrypt.AesEncrypt(c.Email, []byte(config.AuthConfig.Secret))
+		email, err = encrypt.AesEncrypt(c.Email, []byte(config.AuthConfig.SecretAes))
 		if err != nil {
 			return false, baseLang.UserEmailEncryptErrLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.UserEmailEncryptErrCode, baseLang.UserEmailEncryptErrLogCode, err)
 		}

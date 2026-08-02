@@ -2,6 +2,7 @@ package jwtauth
 
 import (
 	"errors"
+	"fmt"
 	jwt "github.com/appleboy/gin-jwt/v3"
 	"github.com/appleboy/gin-jwt/v3/core"
 	"github.com/casbin/casbin/v2/util"
@@ -66,9 +67,37 @@ type JwtAuth struct {
 	deviceLocks       *deviceLockManager
 }
 
+// validateSecrets 启动时校验 JWT/AES 密钥：必须非空、不得使用默认值或已泄露的旧值
+func validateSecrets() error {
+	invalid := func(name string) error {
+		return fmt.Errorf("auth.%s 必须设置为自定义密钥，禁止使用空值、占位符或历史默认值", name)
+	}
+
+	secret := config.AuthConfig.Secret
+	if secret == "" || secret == PlaceholderJwtSecret || secret == LegacyDefaultSecret {
+		return invalid("secret")
+	}
+
+	secretAes := config.AuthConfig.SecretAes
+	if secretAes == "" || secretAes == PlaceholderAesSecret || secretAes == LegacyDefaultSecret || secretAes == config.AuthConfig.Secret {
+		return invalid("secretAes")
+	}
+	if len(secretAes) != 16 && len(secretAes) != 24 && len(secretAes) != 32 {
+		return fmt.Errorf("auth.secretAes 长度必须为 16/24/32 字节（AES-128/192/256），当前为 %d 字节", len(secretAes))
+	}
+	return nil
+}
+
+// 已泄露到仓库历史/文档中的旧默认密钥，必须更换
+const (
+	LegacyDefaultSecret  = "admin-api-20231019-jason"
+	PlaceholderJwtSecret = "CHANGE_ME_JWT_SECRET"
+	PlaceholderAesSecret = "CHANGE_ME_AES_SECRET"
+)
+
 func NewJwtAuth() (*JwtAuth, error) {
-	if config.AuthConfig.Secret == "" {
-		return nil, errors.New("jwt secret is required")
+	if err := validateSecrets(); err != nil {
+		return nil, err
 	}
 
 	timeout := time.Duration(config.AuthConfig.Timeout) * time.Second

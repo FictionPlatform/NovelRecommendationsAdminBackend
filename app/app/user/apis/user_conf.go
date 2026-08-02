@@ -17,6 +17,17 @@ type UserConf struct {
 }
 
 // GetPage app-获取用户配置管理分页列表
+// @Summary 获取用户配置管理分页列表
+// @Description 获取用户配置管理分页列表
+// @Tags 用户配置管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-conf [get]
 func (e UserConf) GetPage(c *gin.Context) {
 	req := dto.UserConfQueryReq{}
 	s := service.UserConf{}
@@ -40,6 +51,16 @@ func (e UserConf) GetPage(c *gin.Context) {
 }
 
 // Get app-获取用户配置管理详情
+// @Summary 获取用户配置管理详情
+// @Description 获取用户配置管理详情
+// @Tags 用户配置管理
+// @Accept json
+// @Produce json
+// @Param id path int true "配置编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-conf/{id} [get]
 func (e UserConf) Get(c *gin.Context) {
 	req := dto.UserConfGetReq{}
 	s := service.UserConf{}
@@ -62,6 +83,17 @@ func (e UserConf) Get(c *gin.Context) {
 }
 
 // Update app-更新用户配置管理
+// @Summary 更新用户配置管理
+// @Description 更新用户配置管理
+// @Tags 用户配置管理
+// @Accept json
+// @Produce json
+// @Param id path int true "配置编号"
+// @Param body body dto.UserConfUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-conf/{id} [put]
 func (e UserConf) Update(c *gin.Context) {
 	req := dto.UserConfUpdateReq{}
 	s := service.UserConf{}

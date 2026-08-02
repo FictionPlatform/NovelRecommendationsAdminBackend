@@ -19,6 +19,17 @@ type UserOperLog struct {
 }
 
 // GetPage app-获取用户操作日志分页列表
+// @Summary 获取用户操作日志分页列表
+// @Description 获取用户操作日志分页列表
+// @Tags 用户操作日志
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-oper-log [get]
 func (e UserOperLog) GetPage(c *gin.Context) {
 	req := dto.UserOperLogQueryReq{}
 	s := service.UserOperLog{}
@@ -42,6 +53,16 @@ func (e UserOperLog) GetPage(c *gin.Context) {
 }
 
 // Get app-获取用户操作日志详情
+// @Summary 获取用户操作日志详情
+// @Description 获取用户操作日志详情
+// @Tags 用户操作日志
+// @Accept json
+// @Produce json
+// @Param id path int true "日志编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-oper-log/{id} [get]
 func (e UserOperLog) Get(c *gin.Context) {
 	req := dto.UserOperLogGetReq{}
 	s := service.UserOperLog{}
@@ -64,6 +85,15 @@ func (e UserOperLog) Get(c *gin.Context) {
 }
 
 // Export app-导出用户操作日志
+// @Summary 导出用户操作日志
+// @Description 导出用户操作日志
+// @Tags 用户操作日志
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-oper-log/export [get]
 func (e UserOperLog) Export(c *gin.Context) {
 	req := dto.UserOperLogQueryReq{}
 	s := service.UserOperLog{}

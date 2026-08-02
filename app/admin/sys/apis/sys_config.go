@@ -19,6 +19,21 @@ type SysConfig struct {
 }
 
 // GetPage admin-获取配置管理分页列表
+// @Summary 获取配置管理分页列表
+// @Description 获取配置管理分页列表
+// @Tags 系统配置管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Param configName query string false "参数名称"
+// @Param configKey query string false "参数键名"
+// @Param configType query string false "参数类型"
+// @Param isFrontend query string false "是否前台"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-config [get]
 func (e SysConfig) GetPage(c *gin.Context) {
 	s := service.SysConfig{}
 	req := dto.SysConfigQueryReq{}
@@ -41,6 +56,16 @@ func (e SysConfig) GetPage(c *gin.Context) {
 }
 
 // Get admin-获取配置管理详情
+// @Summary 获取配置管理详情
+// @Description 获取配置管理详情
+// @Tags 系统配置管理
+// @Accept json
+// @Produce json
+// @Param id path int true "配置编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-config/{id} [get]
 func (e SysConfig) Get(c *gin.Context) {
 	req := dto.SysConfigGetReq{}
 	s := service.SysConfig{}
@@ -63,6 +88,16 @@ func (e SysConfig) Get(c *gin.Context) {
 }
 
 // Insert admin-新增配置管理
+// @Summary 新增配置管理
+// @Description 新增配置管理
+// @Tags 系统配置管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysConfigInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-config [post]
 func (e SysConfig) Insert(c *gin.Context) {
 	s := service.SysConfig{}
 	req := dto.SysConfigInsertReq{}
@@ -90,6 +125,17 @@ func (e SysConfig) Insert(c *gin.Context) {
 }
 
 // Update admin-更新配置管理
+// @Summary 更新配置管理
+// @Description 更新配置管理
+// @Tags 系统配置管理
+// @Accept json
+// @Produce json
+// @Param id path int true "配置编号"
+// @Param body body dto.SysConfigUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-config/{id} [put]
 func (e SysConfig) Update(c *gin.Context) {
 	s := service.SysConfig{}
 	req := dto.SysConfigUpdateReq{}
@@ -122,6 +168,16 @@ func (e SysConfig) Update(c *gin.Context) {
 }
 
 // Delete admin-删除配置管理
+// @Summary 删除配置管理
+// @Description 删除配置管理
+// @Tags 系统配置管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysConfigDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-config [delete]
 func (e SysConfig) Delete(c *gin.Context) {
 	s := service.SysConfig{}
 	req := dto.SysConfigDeleteReq{}
@@ -145,6 +201,17 @@ func (e SysConfig) Delete(c *gin.Context) {
 }
 
 // Export admin-导出配置管理
+// @Summary 导出配置管理
+// @Description 导出配置管理
+// @Tags 系统配置管理
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Param configName query string false "参数名称"
+// @Param configKey query string false "参数键名"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-config/export [get]
 func (e SysConfig) Export(c *gin.Context) {
 	req := dto.SysConfigQueryReq{}
 	s := service.SysConfig{}
@@ -178,6 +245,16 @@ func (e SysConfig) Export(c *gin.Context) {
 }
 
 // GetByKey admin-根据Key获取配置值
+// @Summary 根据Key获取配置值
+// @Description 根据Key获取配置值
+// @Tags 系统配置管理
+// @Accept json
+// @Produce json
+// @Param configKey path string true "参数键名"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-config/key/{configKey} [get]
 func (e SysConfig) GetByKey(c *gin.Context) {
 	var s = new(service.SysConfig)
 	var req = new(dto.SysConfigByKeyReq)

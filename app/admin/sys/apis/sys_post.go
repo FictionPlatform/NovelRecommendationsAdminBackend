@@ -20,6 +20,19 @@ type SysPost struct {
 }
 
 // GetTotalList admin-获取岗位管理全部列表
+// @Summary 获取岗位管理全部列表
+// @Description 获取岗位管理全部列表
+// @Tags 系统岗位管理
+// @Accept json
+// @Produce json
+// @Param id query int false "id"
+// @Param postName query string false "名称"
+// @Param postCode query string false "编码"
+// @Param status query string false "状态"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-post/list [get]
 func (e SysPost) GetTotalList(c *gin.Context) {
 	s := service.SysPost{}
 	req := dto.SysPostQueryReq{}
@@ -42,6 +55,23 @@ func (e SysPost) GetTotalList(c *gin.Context) {
 }
 
 // GetPage admin-获取岗位管理分页列表
+// @Summary 获取岗位管理分页列表
+// @Description 获取岗位管理分页列表
+// @Tags 系统岗位管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Param id query int false "id"
+// @Param postName query string false "名称"
+// @Param postCode query string false "编码"
+// @Param status query string false "状态"
+// @Param beginCreatedAt query string false "创建开始时间"
+// @Param endCreatedAt query string false "创建结束时间"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-post [get]
 func (e SysPost) GetPage(c *gin.Context) {
 	s := service.SysPost{}
 	req := dto.SysPostQueryReq{}
@@ -64,6 +94,16 @@ func (e SysPost) GetPage(c *gin.Context) {
 }
 
 // Get admin-获取岗位管理详情
+// @Summary 获取岗位管理详情
+// @Description 获取岗位管理详情
+// @Tags 系统岗位管理
+// @Accept json
+// @Produce json
+// @Param id path int true "岗位编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-post/{id} [get]
 func (e SysPost) Get(c *gin.Context) {
 	s := service.SysPost{}
 	req := dto.SysPostGetReq{}
@@ -86,6 +126,16 @@ func (e SysPost) Get(c *gin.Context) {
 }
 
 // Insert admin-新增岗位管理
+// @Summary 新增岗位管理
+// @Description 新增岗位管理
+// @Tags 系统岗位管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysPostInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-post [post]
 func (e SysPost) Insert(c *gin.Context) {
 	s := service.SysPost{}
 	req := dto.SysPostInsertReq{}
@@ -113,6 +163,17 @@ func (e SysPost) Insert(c *gin.Context) {
 }
 
 // Update admin-更新岗位管理
+// @Summary 更新岗位管理
+// @Description 更新岗位管理
+// @Tags 系统岗位管理
+// @Accept json
+// @Produce json
+// @Param id path int true "岗位编号"
+// @Param body body dto.SysPostUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-post/{id} [put]
 func (e SysPost) Update(c *gin.Context) {
 	s := service.SysPost{}
 	req := dto.SysPostUpdateReq{}
@@ -145,6 +206,16 @@ func (e SysPost) Update(c *gin.Context) {
 }
 
 // Delete admin-删除岗位管理
+// @Summary 删除岗位管理
+// @Description 删除岗位管理
+// @Tags 系统岗位管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysPostDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-post [delete]
 func (e SysPost) Delete(c *gin.Context) {
 	s := service.SysPost{}
 	req := dto.SysPostDeleteReq{}
@@ -168,6 +239,18 @@ func (e SysPost) Delete(c *gin.Context) {
 }
 
 // Export admin-导出岗位管理
+// @Summary 导出岗位管理
+// @Description 导出岗位管理
+// @Tags 系统岗位管理
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Param postName query string false "名称"
+// @Param postCode query string false "编码"
+// @Param status query string false "状态"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-post/export [get]
 func (e SysPost) Export(c *gin.Context) {
 	req := dto.SysPostQueryReq{}
 	s := service.SysPost{}

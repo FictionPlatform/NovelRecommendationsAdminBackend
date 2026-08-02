@@ -50,6 +50,7 @@ type Config struct {
 	Cache       *Cache                `yaml:"cache"`
 	Queue       *Queue                `yaml:"queue"`
 	Locker      *Locker               `yaml:"locker"`
+	RateLimiter *RateLimiter          `yaml:"rateLimiter"`
 }
 
 // 多db改造
@@ -76,6 +77,7 @@ func Setup(s source.Source,
 			Cache:       CacheConfig,
 			Queue:       QueueConfig,
 			Locker:      LockerConfig,
+			RateLimiter: RateLimiterConfig,
 		},
 		callbacks: fs,
 	}

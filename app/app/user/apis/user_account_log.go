@@ -19,6 +19,17 @@ type UserAccountLog struct {
 }
 
 // GetPage app-获取账变记录分页列表
+// @Summary 获取账变记录分页列表
+// @Description 获取账变记录分页列表
+// @Tags 账变记录管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-account-log [get]
 func (e UserAccountLog) GetPage(c *gin.Context) {
 	req := dto.UserAccountLogQueryReq{}
 	s := service.UserAccountLog{}
@@ -42,6 +53,16 @@ func (e UserAccountLog) GetPage(c *gin.Context) {
 }
 
 // Get app-获取账变记录详情
+// @Summary 获取账变记录详情
+// @Description 获取账变记录详情
+// @Tags 账变记录管理
+// @Accept json
+// @Produce json
+// @Param id path int true "记录编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-account-log/{id} [get]
 func (e UserAccountLog) Get(c *gin.Context) {
 	req := dto.UserAccountLogGetReq{}
 	s := service.UserAccountLog{}
@@ -64,6 +85,15 @@ func (e UserAccountLog) Get(c *gin.Context) {
 }
 
 // Export app-导出账变记录
+// @Summary 导出账变记录
+// @Description 导出账变记录
+// @Tags 账变记录管理
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-account-log/export [get]
 func (e UserAccountLog) Export(c *gin.Context) {
 	req := dto.UserAccountLogQueryReq{}
 	s := service.UserAccountLog{}

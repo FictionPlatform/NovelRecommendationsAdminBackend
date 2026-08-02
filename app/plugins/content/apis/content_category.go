@@ -20,6 +20,17 @@ type ContentCategory struct {
 }
 
 // GetPage plugins-获取内容分类管理分页列表
+// @Summary 获取内容分类管理分页列表
+// @Description 获取内容分类管理分页列表
+// @Tags 内容管理-内容分类
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-category [get]
 func (e ContentCategory) GetPage(c *gin.Context) {
 	req := dto.ContentCategoryQueryReq{}
 	s := service.ContentCategory{}
@@ -42,6 +53,16 @@ func (e ContentCategory) GetPage(c *gin.Context) {
 }
 
 // Get plugins-获取内容分类管理详情
+// @Summary 获取内容分类管理详情
+// @Description 获取内容分类管理详情
+// @Tags 内容管理-内容分类
+// @Accept json
+// @Produce json
+// @Param id path int true "分类编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-category/{id} [get]
 func (e ContentCategory) Get(c *gin.Context) {
 	req := dto.ContentCategoryGetReq{}
 	s := service.ContentCategory{}
@@ -64,6 +85,16 @@ func (e ContentCategory) Get(c *gin.Context) {
 }
 
 // Insert plugins-新增内容分类管理详情
+// @Summary 新增内容分类管理
+// @Description 新增内容分类管理
+// @Tags 内容管理-内容分类
+// @Accept json
+// @Produce json
+// @Param body body dto.ContentCategoryInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-category [post]
 func (e ContentCategory) Insert(c *gin.Context) {
 	req := dto.ContentCategoryInsertReq{}
 	s := service.ContentCategory{}
@@ -91,6 +122,17 @@ func (e ContentCategory) Insert(c *gin.Context) {
 }
 
 // Update plugins-更新内容分类管理
+// @Summary 更新内容分类管理
+// @Description 更新内容分类管理
+// @Tags 内容管理-内容分类
+// @Accept json
+// @Produce json
+// @Param id path int true "分类编号"
+// @Param body body dto.ContentCategoryUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-category/{id} [put]
 func (e ContentCategory) Update(c *gin.Context) {
 	req := dto.ContentCategoryUpdateReq{}
 	s := service.ContentCategory{}
@@ -123,6 +165,16 @@ func (e ContentCategory) Update(c *gin.Context) {
 }
 
 // Delete plugins-删除内容分类管理
+// @Summary 删除内容分类管理
+// @Description 删除内容分类管理
+// @Tags 内容管理-内容分类
+// @Accept json
+// @Produce json
+// @Param body body dto.ContentCategoryDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-category [delete]
 func (e ContentCategory) Delete(c *gin.Context) {
 	s := service.ContentCategory{}
 	req := dto.ContentCategoryDeleteReq{}
@@ -146,6 +198,15 @@ func (e ContentCategory) Delete(c *gin.Context) {
 }
 
 // Export plugins-导出内容分类管理
+// @Summary 导出内容分类管理
+// @Description 导出内容分类管理
+// @Tags 内容管理-内容分类
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-category/export [get]
 func (e ContentCategory) Export(c *gin.Context) {
 	req := dto.ContentCategoryQueryReq{}
 	s := service.ContentCategory{}

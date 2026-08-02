@@ -7,6 +7,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
@@ -40,7 +41,7 @@ func getApiDescriptions() (map[string]string, error) {
 			return nil, err
 		}
 
-		handlerBase := filepath.Dir(global.ModelName+string(filepath.Separator)+dir) + "."
+		handlerBase := path.Dir(global.ModelName+"/"+dir) + "."
 		for _, apiInfo := range apiParseInfos {
 			handler := handlerBase + apiInfo.ClassName + "." + apiInfo.MethodName + "-fm"
 			apiInfos[handler] = apiInfo.Description

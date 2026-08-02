@@ -18,6 +18,20 @@ type SysDictData struct {
 }
 
 // GetPage admin-获取字典数据分页列表
+// @Summary 获取字典数据分页列表
+// @Description 获取字典数据分页列表
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Param dictLabel query string false "字典标签"
+// @Param dictValue query string false "字典键值"
+// @Param dictType query string false "字典类型"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/data [get]
 func (e SysDictData) GetPage(c *gin.Context) {
 	s := service.SysDictData{}
 	req := dto.SysDictDataQueryReq{}
@@ -40,6 +54,16 @@ func (e SysDictData) GetPage(c *gin.Context) {
 }
 
 // Get admin-获取字典数据详情
+// @Summary 获取字典数据详情
+// @Description 获取字典数据详情
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param id path int true "字典数据编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/data/{id} [get]
 func (e SysDictData) Get(c *gin.Context) {
 	s := service.SysDictData{}
 	req := dto.SysDictDataGetReq{}
@@ -62,6 +86,16 @@ func (e SysDictData) Get(c *gin.Context) {
 }
 
 // Insert admin-新增字典数据
+// @Summary 新增字典数据
+// @Description 新增字典数据
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysDictDataInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/data [post]
 func (e SysDictData) Insert(c *gin.Context) {
 	s := service.SysDictData{}
 	req := dto.SysDictDataInsertReq{}
@@ -89,6 +123,17 @@ func (e SysDictData) Insert(c *gin.Context) {
 }
 
 // Update admin-更新字典数据
+// @Summary 更新字典数据
+// @Description 更新字典数据
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param id path int true "字典数据编号"
+// @Param body body dto.SysDictDataUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/data/{id} [put]
 func (e SysDictData) Update(c *gin.Context) {
 	s := service.SysDictData{}
 	req := dto.SysDictDataUpdateReq{}
@@ -121,6 +166,16 @@ func (e SysDictData) Update(c *gin.Context) {
 }
 
 // Delete admin-删除字典数据
+// @Summary 删除字典数据
+// @Description 删除字典数据
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysDictDataDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/data [delete]
 func (e SysDictData) Delete(c *gin.Context) {
 	s := service.SysDictData{}
 	req := dto.SysDictDataDeleteReq{}
@@ -143,6 +198,18 @@ func (e SysDictData) Delete(c *gin.Context) {
 }
 
 // GetList admin-获取字典数据全部列表
+// @Summary 获取字典数据全部列表
+// @Description 获取字典数据全部列表
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Param dictLabel query string false "字典标签"
+// @Param dictValue query string false "字典键值"
+// @Param dictType query string false "字典类型"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/data/select [get]
 func (e SysDictData) GetList(c *gin.Context) {
 	s := service.SysDictData{}
 	req := dto.SysDictDataQueryReq{}

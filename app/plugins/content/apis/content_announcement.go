@@ -20,6 +20,17 @@ type ContentAnnouncement struct {
 }
 
 // GetPage plugins-获取公告管理分页列表
+// @Summary 获取公告管理分页列表
+// @Description 获取公告管理分页列表
+// @Tags 内容管理-公告管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-announcement [get]
 func (e ContentAnnouncement) GetPage(c *gin.Context) {
 	req := dto.ContentAnnouncementQueryReq{}
 	s := service.ContentAnnouncement{}
@@ -42,6 +53,16 @@ func (e ContentAnnouncement) GetPage(c *gin.Context) {
 }
 
 // Get plugins-获取公告管理详情
+// @Summary 获取公告管理详情
+// @Description 获取公告管理详情
+// @Tags 内容管理-公告管理
+// @Accept json
+// @Produce json
+// @Param id path int true "公告编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-announcement/{id} [get]
 func (e ContentAnnouncement) Get(c *gin.Context) {
 	req := dto.ContentAnnouncementGetReq{}
 	s := service.ContentAnnouncement{}
@@ -64,6 +85,16 @@ func (e ContentAnnouncement) Get(c *gin.Context) {
 }
 
 // Insert plugins-新增公告管理
+// @Summary 新增公告管理
+// @Description 新增公告管理
+// @Tags 内容管理-公告管理
+// @Accept json
+// @Produce json
+// @Param body body dto.ContentAnnouncementInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-announcement [post]
 func (e ContentAnnouncement) Insert(c *gin.Context) {
 	req := dto.ContentAnnouncementInsertReq{}
 	s := service.ContentAnnouncement{}
@@ -91,6 +122,17 @@ func (e ContentAnnouncement) Insert(c *gin.Context) {
 }
 
 // Update plugins-更新公告管理
+// @Summary 更新公告管理
+// @Description 更新公告管理
+// @Tags 内容管理-公告管理
+// @Accept json
+// @Produce json
+// @Param id path int true "公告编号"
+// @Param body body dto.ContentAnnouncementUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-announcement/{id} [put]
 func (e ContentAnnouncement) Update(c *gin.Context) {
 	req := dto.ContentAnnouncementUpdateReq{}
 	s := service.ContentAnnouncement{}
@@ -123,6 +165,16 @@ func (e ContentAnnouncement) Update(c *gin.Context) {
 }
 
 // Delete plugins-删除公告管理
+// @Summary 删除公告管理
+// @Description 删除公告管理
+// @Tags 内容管理-公告管理
+// @Accept json
+// @Produce json
+// @Param body body dto.ContentAnnouncementDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-announcement [delete]
 func (e ContentAnnouncement) Delete(c *gin.Context) {
 	s := service.ContentAnnouncement{}
 	req := dto.ContentAnnouncementDeleteReq{}
@@ -146,6 +198,15 @@ func (e ContentAnnouncement) Delete(c *gin.Context) {
 }
 
 // Export plugins-导出公告管理
+// @Summary 导出公告管理
+// @Description 导出公告管理
+// @Tags 内容管理-公告管理
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-announcement/export [get]
 func (e ContentAnnouncement) Export(c *gin.Context) {
 	req := dto.ContentAnnouncementQueryReq{}
 	s := service.ContentAnnouncement{}

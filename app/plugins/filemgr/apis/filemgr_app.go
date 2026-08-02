@@ -21,6 +21,22 @@ type FilemgrApp struct {
 }
 
 // GetPage plugins-获取APP管理分页列表
+// @Summary 获取APP管理分页列表
+// @Description 获取APP管理分页列表
+// @Tags 文件管理-APP管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Param version query string false "版本号"
+// @Param platform query string false "平台 (1-安卓 2-苹果)"
+// @Param appType query string false "版本(1-默认)"
+// @Param downloadType query string false "下载类型(1-本地 2-外链 3-oss )"
+// @Param status query string false "状态（1-已发布 2-待发布）"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/filemgr/filemgr-app [get]
 func (e FilemgrApp) GetPage(c *gin.Context) {
 	req := dto.FilemgrAppQueryReq{}
 	s := service.FilemgrApp{}
@@ -43,6 +59,16 @@ func (e FilemgrApp) GetPage(c *gin.Context) {
 }
 
 // Get plugins-获取APP管理详情
+// @Summary 获取APP管理详情
+// @Description 获取APP管理详情
+// @Tags 文件管理-APP管理
+// @Accept json
+// @Produce json
+// @Param id path int true "App编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/filemgr/filemgr-app/{id} [get]
 func (e FilemgrApp) Get(c *gin.Context) {
 	req := dto.FilemgrAppGetReq{}
 	s := service.FilemgrApp{}
@@ -65,6 +91,16 @@ func (e FilemgrApp) Get(c *gin.Context) {
 }
 
 // Insert plugins-新增APP管理
+// @Summary 新增APP管理
+// @Description 新增APP管理
+// @Tags 文件管理-APP管理
+// @Accept json
+// @Produce json
+// @Param body body dto.FilemgrAppInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/filemgr/filemgr-app [post]
 func (e FilemgrApp) Insert(c *gin.Context) {
 	req := dto.FilemgrAppInsertReq{}
 	s := service.FilemgrApp{}
@@ -92,6 +128,16 @@ func (e FilemgrApp) Insert(c *gin.Context) {
 }
 
 // Delete plugins-删除APP管理
+// @Summary 删除APP管理
+// @Description 删除APP管理
+// @Tags 文件管理-APP管理
+// @Accept json
+// @Produce json
+// @Param body body dto.FilemgrAppDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/filemgr/filemgr-app [delete]
 func (e FilemgrApp) Delete(c *gin.Context) {
 	s := service.FilemgrApp{}
 	req := dto.FilemgrAppDeleteReq{}
@@ -115,6 +161,16 @@ func (e FilemgrApp) Delete(c *gin.Context) {
 }
 
 // Upload  plugins-上传APP
+// @Summary 上传APP
+// @Description 上传APP
+// @Tags 文件管理-APP管理
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "APP安装包文件"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/filemgr/filemgr-app/upload [post]
 func (e FilemgrApp) Upload(c *gin.Context) {
 	s := service.FilemgrApp{}
 	err := e.MakeContext(c).
@@ -150,6 +206,17 @@ func (e FilemgrApp) Upload(c *gin.Context) {
 }
 
 // Update  plugins-更新APP管理
+// @Summary 更新APP管理
+// @Description 更新APP管理
+// @Tags 文件管理-APP管理
+// @Accept json
+// @Produce json
+// @Param id path int true "App编号"
+// @Param body body dto.FilemgrAppUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/filemgr/filemgr-app/{id} [put]
 func (e FilemgrApp) Update(c *gin.Context) {
 	req := dto.FilemgrAppUpdateReq{}
 	s := service.FilemgrApp{}
@@ -182,6 +249,17 @@ func (e FilemgrApp) Update(c *gin.Context) {
 }
 
 // Export  plugins-导出APP管理
+// @Summary 导出APP管理
+// @Description 导出APP管理
+// @Tags 文件管理-APP管理
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Param version query string false "版本号"
+// @Param platform query string false "平台 (1-安卓 2-苹果)"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/filemgr/filemgr-app/export [get]
 func (e FilemgrApp) Export(c *gin.Context) {
 	req := dto.FilemgrAppQueryReq{}
 	s := service.FilemgrApp{}

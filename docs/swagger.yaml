@@ -1,0 +1,5291 @@
+basePath: /admin-api/v1
+definitions:
+  dto.ContentAnnouncementDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.ContentAnnouncementInsertReq:
+    properties:
+      content:
+        type: string
+      num:
+        type: integer
+      remark:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.ContentAnnouncementUpdateReq:
+    properties:
+      content:
+        type: string
+      num:
+        type: integer
+      remark:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.ContentArticleDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.ContentArticleInsertReq:
+    properties:
+      cateId:
+        type: integer
+      content:
+        type: string
+      name:
+        type: string
+      remark:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.ContentArticleUpdateReq:
+    properties:
+      cateId:
+        type: integer
+      content:
+        type: string
+      name:
+        type: string
+      remark:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.ContentCategoryDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.ContentCategoryInsertReq:
+    properties:
+      name:
+        type: string
+      remark:
+        type: string
+    type: object
+  dto.ContentCategoryUpdateReq:
+    properties:
+      name:
+        type: string
+    type: object
+  dto.FilemgrAppDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.FilemgrAppInsertReq:
+    properties:
+      appType:
+        type: string
+      downloadType:
+        type: string
+      downloadUrl:
+        type: string
+      localAddress:
+        type: string
+      localRootUrl:
+        type: string
+      platform:
+        type: string
+      remark:
+        type: string
+      version:
+        type: string
+    type: object
+  dto.FilemgrAppUpdateReq:
+    properties:
+      status:
+        type: string
+    type: object
+  dto.LoginReq:
+    properties:
+      code:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+      uuid:
+        type: string
+    type: object
+  dto.ResetSysUserPwdReq:
+    properties:
+      password:
+        type: string
+      userId:
+        description: 用户ID
+        type: integer
+    required:
+    - password
+    - userId
+    type: object
+  dto.RoleDataScopeReq:
+    properties:
+      dataScope:
+        type: string
+      deptIds:
+        items:
+          type: integer
+        type: array
+      id:
+        type: integer
+    type: object
+  dto.SysApiDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysApiUpdateReq:
+    properties:
+      apiType:
+        description: Path       string `json:"path" comment:"地址"`
+        type: string
+      description:
+        type: string
+      remark:
+        type: string
+    type: object
+  dto.SysConfigDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysConfigInsertReq:
+    properties:
+      configKey:
+        type: string
+      configName:
+        type: string
+      configType:
+        type: string
+      configValue:
+        type: string
+      isFrontend:
+        type: string
+      remark:
+        type: string
+    type: object
+  dto.SysConfigUpdateReq:
+    properties:
+      configKey:
+        type: string
+      configName:
+        type: string
+      configType:
+        type: string
+      configValue:
+        type: string
+      id:
+        description: 编码
+        type: integer
+      isFrontend:
+        type: string
+      remark:
+        type: string
+    type: object
+  dto.SysDeptDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysDeptInsertReq:
+    properties:
+      deptName:
+        description: 部门名称
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      leader:
+        description: 负责人
+        type: string
+      parentId:
+        description: 上级部门
+        type: number
+      phone:
+        description: 手机
+        type: string
+      sort:
+        description: 排序
+        type: integer
+    type: object
+  dto.SysDeptUpdateReq:
+    properties:
+      deptName:
+        description: 部门名称
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      leader:
+        description: 负责人
+        type: string
+      parentId:
+        type: integer
+      phone:
+        description: 手机
+        type: string
+      sort:
+        description: 排序
+        type: integer
+    type: object
+  dto.SysDictDataDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysDictDataInsertReq:
+    properties:
+      dictLabel:
+        type: string
+      dictSort:
+        type: integer
+      dictType:
+        type: string
+      dictValue:
+        type: string
+      remark:
+        type: string
+    type: object
+  dto.SysDictDataUpdateReq:
+    properties:
+      dictLabel:
+        type: string
+      dictSort:
+        type: number
+      dictType:
+        type: string
+      dictValue:
+        type: string
+      remark:
+        type: string
+    type: object
+  dto.SysDictTypeInsertReq:
+    properties:
+      dictName:
+        type: string
+      dictType:
+        type: string
+      remark:
+        type: string
+    type: object
+  dto.SysDictTypeUpdateReq:
+    properties:
+      dictName:
+        type: string
+      dictType:
+        type: string
+      remark:
+        type: string
+    type: object
+  dto.SysDictrDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysGenColumnUpdateReq:
+    properties:
+      columnComment:
+        type: string
+      columnName:
+        type: string
+      dictType:
+        type: string
+      goField:
+        type: string
+      goType:
+        type: string
+      htmlType:
+        type: string
+      id:
+        description: 主键编码
+        type: integer
+      isList:
+        type: string
+      isQuery:
+        type: string
+      isRequired:
+        type: string
+      jsonField:
+        type: string
+      queryType:
+        type: string
+    type: object
+  dto.SysGenTableDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysGenTableInsertReq:
+    properties:
+      dbTableNames:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.SysGenTableUpdateReq:
+    properties:
+      businessName:
+        type: string
+      className:
+        type: string
+      functionAuthor:
+        type: string
+      functionName:
+        type: string
+      moduleName:
+        type: string
+      packageName:
+        type: string
+      remark:
+        type: string
+      sysGenColumns:
+        items:
+          $ref: '#/definitions/dto.SysGenColumnUpdateReq'
+        type: array
+      tableComment:
+        description: 表备注
+        type: string
+    type: object
+  dto.SysLoginLogDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysMenuDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysMenuInsertReq:
+    properties:
+      apis:
+        items:
+          type: integer
+        type: array
+      element:
+        description: 组件
+        type: string
+      icon:
+        description: 图标
+        type: string
+      isAffix:
+        description: 是否固定
+        type: string
+      isFrame:
+        description: 是否frame
+        type: string
+      isHidden:
+        description: 是否显示
+        type: string
+      isKeepAlive:
+        description: 是否缓存
+        type: string
+      menuType:
+        description: 菜单类型
+        type: string
+      parentId:
+        description: 上级菜单
+        type: integer
+      path:
+        description: 路径
+        type: string
+      permission:
+        description: 权限编码
+        type: string
+      redirect:
+        description: 针对目录跳转，比如搜索出菜单
+        type: string
+      sort:
+        type: integer
+      sysApi:
+        items:
+          $ref: '#/definitions/models.SysApi'
+        type: array
+      title:
+        description: 显示名称
+        type: string
+    type: object
+  dto.SysMenuUpdateReq:
+    properties:
+      apis:
+        items:
+          type: integer
+        type: array
+      element:
+        description: 组件
+        type: string
+      icon:
+        description: 图标
+        type: string
+      isAffix:
+        description: 是否固定
+        type: string
+      isFrame:
+        description: 是否frame
+        type: string
+      isHidden:
+        description: 是否显示
+        type: string
+      isKeepAlive:
+        description: 是否缓存
+        type: string
+      menuType:
+        description: 菜单类型
+        type: string
+      parentId:
+        description: 上级菜单
+        type: integer
+      path:
+        description: 路径
+        type: string
+      permission:
+        description: 权限编码
+        type: string
+      redirect:
+        description: 针对目录跳转，比如搜索出菜单
+        type: string
+      sort:
+        description: 排序
+        type: integer
+      sysApi:
+        items:
+          $ref: '#/definitions/models.SysApi'
+        type: array
+      title:
+        description: 显示名称
+        type: string
+    type: object
+  dto.SysOperLogDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysPostDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysPostInsertReq:
+    properties:
+      postCode:
+        type: string
+      postName:
+        type: string
+      remark:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: string
+    type: object
+  dto.SysPostUpdateReq:
+    properties:
+      '-':
+        type: integer
+      postCode:
+        type: string
+      postName:
+        type: string
+      remark:
+        type: string
+      sort:
+        type: integer
+      status:
+        type: string
+    type: object
+  dto.SysRoleDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysRoleInsertReq:
+    properties:
+      dataScope:
+        type: string
+      deptIds:
+        items:
+          type: integer
+        type: array
+      menuIds:
+        items:
+          type: integer
+        type: array
+      remark:
+        description: 备注
+        type: string
+      roleKey:
+        description: 角色代码
+        type: string
+      roleName:
+        description: 角色名称
+        type: string
+      roleSort:
+        description: 角色排序
+        type: integer
+      status:
+        description: 状态
+        type: string
+      sysDept:
+        items:
+          $ref: '#/definitions/models.SysDept'
+        type: array
+      sysMenu:
+        items:
+          $ref: '#/definitions/models.SysMenu'
+        type: array
+    type: object
+  dto.SysRoleUpdateReq:
+    properties:
+      menuIds:
+        items:
+          type: integer
+        type: array
+      remark:
+        description: 备注
+        type: string
+      roleKey:
+        description: 角色代码
+        type: string
+      roleName:
+        description: 角色名称
+        type: string
+      roleSort:
+        description: 角色排序
+        type: integer
+      status:
+        description: 状态
+        type: string
+    type: object
+  dto.SysUserDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysUserInsertReq:
+    properties:
+      avatar:
+        type: string
+      deptId:
+        type: integer
+      email:
+        type: string
+      nickName:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      postId:
+        type: integer
+      remark:
+        type: string
+      roleId:
+        type: integer
+      sex:
+        type: string
+      status:
+        type: string
+      userId:
+        description: 用户ID
+        type: integer
+      username:
+        type: string
+    type: object
+  dto.SysUserStatusUpdateReq:
+    properties:
+      status:
+        type: string
+      userId:
+        description: 用户ID
+        type: integer
+    type: object
+  dto.SysUserUpdateReq:
+    properties:
+      avatar:
+        type: string
+      deptId:
+        type: integer
+      email:
+        type: string
+      nickName:
+        type: string
+      phone:
+        type: string
+      postId:
+        type: integer
+      remark:
+        type: string
+      roleId:
+        type: integer
+      sex:
+        type: string
+      status:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.UpdateStatusReq:
+    properties:
+      roleId:
+        description: 角色编码
+        type: integer
+      status:
+        description: 状态
+        type: string
+    type: object
+  dto.UpdateSysUserPwdReq:
+    properties:
+      newPassword:
+        type: string
+      oldPassword:
+        type: string
+    type: object
+  dto.UserConfUpdateReq:
+    properties:
+      canLogin:
+        type: string
+      userId:
+        type: integer
+    type: object
+  dto.UserCountryCodeDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.UserCountryCodeInsertReq:
+    properties:
+      code:
+        type: string
+      country:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.UserCountryCodeUpdateReq:
+    properties:
+      code:
+        type: string
+      country:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.UserInsertReq:
+    properties:
+      email:
+        type: string
+      emails:
+        type: string
+      levelId:
+        type: integer
+      mobile:
+        type: string
+      mobileTitle:
+        type: string
+      mobiles:
+        type: string
+      money:
+        type: number
+      refCode:
+        type: string
+      trueName:
+        type: string
+      userName:
+        type: string
+    type: object
+  dto.UserLevelDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.UserLevelInsertReq:
+    properties:
+      level:
+        type: integer
+      levelType:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.UserLevelUpdateReq:
+    properties:
+      level:
+        type: integer
+      levelType:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.UserUpdateReq:
+    properties:
+      email:
+        type: string
+      levelId:
+        type: integer
+      mobile:
+        type: string
+      mobileTitle:
+        type: string
+      money:
+        type: number
+      trueName:
+        type: string
+      userName:
+        type: string
+    type: object
+  models.SysApi:
+    properties:
+      apiType:
+        type: string
+      createBy:
+        type: integer
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      method:
+        type: string
+      path:
+        type: string
+      remark:
+        type: string
+      sysMenu:
+        items:
+          $ref: '#/definitions/models.SysMenu'
+        type: array
+      updateBy:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  models.SysDept:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/models.SysDept'
+        type: array
+      createBy:
+        type: integer
+      createdAt:
+        type: string
+      dataScope:
+        type: string
+      deptName:
+        description: 部门名称
+        type: string
+      email:
+        description: 邮箱
+        type: string
+      id:
+        description: 部门编码
+        type: integer
+      leader:
+        description: 负责人
+        type: string
+      params:
+        type: string
+      parentId:
+        description: 上级部门
+        type: integer
+      parentIds:
+        type: string
+      phone:
+        description: 手机
+        type: string
+      sort:
+        description: 排序
+        type: integer
+      status:
+        description: 状态
+        type: string
+      updateBy:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  models.SysMenu:
+    properties:
+      apis:
+        items:
+          type: integer
+        type: array
+      children:
+        items:
+          $ref: '#/definitions/models.SysMenu'
+        type: array
+      createBy:
+        type: integer
+      createdAt:
+        type: string
+      element:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      isAffix:
+        type: string
+      isFrame:
+        type: string
+      isHidden:
+        type: string
+      isKeepAlive:
+        type: string
+      menuType:
+        type: string
+      parentId:
+        type: integer
+      parentIds:
+        type: string
+      path:
+        type: string
+      permission:
+        type: string
+      redirect:
+        description: 针对目录跳转，比如搜索出菜单
+        type: string
+      sort:
+        type: integer
+      sysApi:
+        items:
+          $ref: '#/definitions/models.SysApi'
+        type: array
+      sysRole:
+        items:
+          $ref: '#/definitions/models.SysRole'
+        type: array
+      title:
+        type: string
+      updateBy:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  models.SysRole:
+    properties:
+      createBy:
+        type: integer
+      createdAt:
+        type: string
+      dataScope:
+        type: string
+      deptIds:
+        items:
+          type: integer
+        type: array
+      id:
+        description: 角色编码
+        type: integer
+      menuIds:
+        items:
+          type: integer
+        type: array
+      remark:
+        description: 备注
+        type: string
+      roleKey:
+        description: 角色代码
+        type: string
+      roleName:
+        description: 角色名称
+        type: string
+      roleSort:
+        description: 角色排序
+        type: integer
+      status:
+        type: string
+      sysDept:
+        items:
+          $ref: '#/definitions/models.SysDept'
+        type: array
+      sysMenu:
+        items:
+          $ref: '#/definitions/models.SysMenu'
+        type: array
+      updateBy:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  response.Response:
+    properties:
+      code:
+        type: integer
+      msg:
+        type: string
+      requestId:
+        description: 数据集
+        type: string
+    type: object
+host: localhost:8888
+info:
+  contact: {}
+  description: 基于Gin的后台管理系统接口文档
+  title: Go-admin 后台管理系统
+  version: 2.0.0
+paths:
+  /admin/sys/sys-api:
+    delete:
+      consumes:
+      - application/json
+      description: 删除接口管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysApiDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除接口管理
+      tags:
+      - 系统接口管理
+    get:
+      consumes:
+      - application/json
+      description: 获取接口管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 功能描述
+        in: query
+        name: description
+        type: string
+      - description: 地址
+        in: query
+        name: path
+        type: string
+      - description: 请求方法
+        in: query
+        name: method
+        type: string
+      - description: 接口类型
+        in: query
+        name: apiType
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取接口管理分页列表
+      tags:
+      - 系统接口管理
+  /admin/sys/sys-api/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取接口管理详情
+      parameters:
+      - description: 接口编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取接口管理详情
+      tags:
+      - 系统接口管理
+    put:
+      consumes:
+      - application/json
+      description: 更新接口管理
+      parameters:
+      - description: 接口编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysApiUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新接口管理
+      tags:
+      - 系统接口管理
+  /admin/sys/sys-api/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出接口管理
+      parameters:
+      - description: 功能描述
+        in: query
+        name: description
+        type: string
+      - description: 接口类型
+        in: query
+        name: apiType
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出接口管理
+      tags:
+      - 系统接口管理
+  /admin/sys/sys-api/list:
+    get:
+      consumes:
+      - application/json
+      description: 获取接口管理全部列表
+      parameters:
+      - description: 功能描述
+        in: query
+        name: description
+        type: string
+      - description: 地址
+        in: query
+        name: path
+        type: string
+      - description: 请求方法
+        in: query
+        name: method
+        type: string
+      - description: 接口类型
+        in: query
+        name: apiType
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取接口管理全部列表
+      tags:
+      - 系统接口管理
+  /admin/sys/sys-api/sync:
+    get:
+      consumes:
+      - application/json
+      description: 将当前程序中的所有接口录入数据库
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 同步接口数据
+      tags:
+      - 系统接口管理
+  /admin/sys/sys-config:
+    delete:
+      consumes:
+      - application/json
+      description: 删除配置管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysConfigDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除配置管理
+      tags:
+      - 系统配置管理
+    get:
+      consumes:
+      - application/json
+      description: 获取配置管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 参数名称
+        in: query
+        name: configName
+        type: string
+      - description: 参数键名
+        in: query
+        name: configKey
+        type: string
+      - description: 参数类型
+        in: query
+        name: configType
+        type: string
+      - description: 是否前台
+        in: query
+        name: isFrontend
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取配置管理分页列表
+      tags:
+      - 系统配置管理
+    post:
+      consumes:
+      - application/json
+      description: 新增配置管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysConfigInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增配置管理
+      tags:
+      - 系统配置管理
+  /admin/sys/sys-config/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取配置管理详情
+      parameters:
+      - description: 配置编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取配置管理详情
+      tags:
+      - 系统配置管理
+    put:
+      consumes:
+      - application/json
+      description: 更新配置管理
+      parameters:
+      - description: 配置编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysConfigUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新配置管理
+      tags:
+      - 系统配置管理
+  /admin/sys/sys-config/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出配置管理
+      parameters:
+      - description: 参数名称
+        in: query
+        name: configName
+        type: string
+      - description: 参数键名
+        in: query
+        name: configKey
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出配置管理
+      tags:
+      - 系统配置管理
+  /admin/sys/sys-config/key/{configKey}:
+    get:
+      consumes:
+      - application/json
+      description: 根据Key获取配置值
+      parameters:
+      - description: 参数键名
+        in: path
+        name: configKey
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 根据Key获取配置值
+      tags:
+      - 系统配置管理
+  /admin/sys/sys-dept:
+    delete:
+      consumes:
+      - application/json
+      description: 删除部门管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysDeptDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除部门管理
+      tags:
+      - 系统部门管理
+    post:
+      consumes:
+      - application/json
+      description: 新增部门管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysDeptInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增部门管理
+      tags:
+      - 系统部门管理
+  /admin/sys/sys-dept/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取部门管理详情
+      parameters:
+      - description: 部门编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取部门管理详情
+      tags:
+      - 系统部门管理
+    put:
+      consumes:
+      - application/json
+      description: 更新部门管理
+      parameters:
+      - description: 部门编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysDeptUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新部门管理
+      tags:
+      - 系统部门管理
+  /admin/sys/sys-dept/dept-tree:
+    get:
+      consumes:
+      - application/json
+      description: 获取部门管理树
+      parameters:
+      - description: 部门名称
+        in: query
+        name: deptName
+        type: string
+      - description: 负责人
+        in: query
+        name: leader
+        type: string
+      - description: 手机
+        in: query
+        name: phone
+        type: string
+      - description: 邮箱
+        in: query
+        name: email
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取部门管理树
+      tags:
+      - 系统部门管理
+  /admin/sys/sys-dept/role-dept-tree-select/{roleId}:
+    get:
+      consumes:
+      - application/json
+      description: 根据角色获取部门
+      parameters:
+      - description: 角色编号
+        in: path
+        name: roleId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 根据角色获取部门
+      tags:
+      - 系统部门管理
+  /admin/sys/sys-dict/data:
+    delete:
+      consumes:
+      - application/json
+      description: 删除字典数据
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysDictDataDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除字典数据
+      tags:
+      - 系统字典管理
+    get:
+      consumes:
+      - application/json
+      description: 获取字典数据分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 字典标签
+        in: query
+        name: dictLabel
+        type: string
+      - description: 字典键值
+        in: query
+        name: dictValue
+        type: string
+      - description: 字典类型
+        in: query
+        name: dictType
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取字典数据分页列表
+      tags:
+      - 系统字典管理
+    post:
+      consumes:
+      - application/json
+      description: 新增字典数据
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysDictDataInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增字典数据
+      tags:
+      - 系统字典管理
+  /admin/sys/sys-dict/data/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取字典数据详情
+      parameters:
+      - description: 字典数据编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取字典数据详情
+      tags:
+      - 系统字典管理
+    put:
+      consumes:
+      - application/json
+      description: 更新字典数据
+      parameters:
+      - description: 字典数据编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysDictDataUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新字典数据
+      tags:
+      - 系统字典管理
+  /admin/sys/sys-dict/data/select:
+    get:
+      consumes:
+      - application/json
+      description: 获取字典数据全部列表
+      parameters:
+      - description: 字典标签
+        in: query
+        name: dictLabel
+        type: string
+      - description: 字典键值
+        in: query
+        name: dictValue
+        type: string
+      - description: 字典类型
+        in: query
+        name: dictType
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取字典数据全部列表
+      tags:
+      - 系统字典管理
+  /admin/sys/sys-dict/type:
+    delete:
+      consumes:
+      - application/json
+      description: 删除字典类型
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysDictrDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除字典类型
+      tags:
+      - 系统字典管理
+    get:
+      consumes:
+      - application/json
+      description: 获取字典类型分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 字典名称
+        in: query
+        name: dictName
+        type: string
+      - description: 字典类型
+        in: query
+        name: dictType
+        type: string
+      - description: 创建开始时间
+        in: query
+        name: beginCreatedAt
+        type: string
+      - description: 创建结束时间
+        in: query
+        name: endCreatedAt
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取字典类型分页列表
+      tags:
+      - 系统字典管理
+    post:
+      consumes:
+      - application/json
+      description: 新增字典类型
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysDictTypeInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增字典类型
+      tags:
+      - 系统字典管理
+  /admin/sys/sys-dict/type/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取字典类型详情
+      parameters:
+      - description: 字典类型编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取字典类型详情
+      tags:
+      - 系统字典管理
+    put:
+      consumes:
+      - application/json
+      description: 更新字典类型
+      parameters:
+      - description: 字典类型编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysDictTypeUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新字典类型
+      tags:
+      - 系统字典管理
+  /admin/sys/sys-dict/type/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出字典类型
+      parameters:
+      - description: 字典名称
+        in: query
+        name: dictName
+        type: string
+      - description: 字典类型
+        in: query
+        name: dictType
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出字典类型
+      tags:
+      - 系统字典管理
+  /admin/sys/sys-dict/type/option-select:
+    get:
+      consumes:
+      - application/json
+      description: 获取字典类型全部列表
+      parameters:
+      - description: 字典名称
+        in: query
+        name: dictName
+        type: string
+      - description: 字典类型
+        in: query
+        name: dictType
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取字典类型全部列表
+      tags:
+      - 系统字典管理
+  /admin/sys/sys-login-log:
+    delete:
+      consumes:
+      - application/json
+      description: 删除登录日志
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysLoginLogDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除登录日志
+      tags:
+      - 系统日志管理
+    get:
+      consumes:
+      - application/json
+      description: 获取登录日志分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 用户编号
+        in: query
+        name: userId
+        type: string
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      - description: ip地址
+        in: query
+        name: ipaddr
+        type: string
+      - description: 归属地
+        in: query
+        name: loginLocation
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取登录日志分页列表
+      tags:
+      - 系统日志管理
+  /admin/sys/sys-login-log/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取登录日志详情
+      parameters:
+      - description: 日志编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取登录日志详情
+      tags:
+      - 系统日志管理
+  /admin/sys/sys-login-log/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出登录日志
+      parameters:
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出登录日志
+      tags:
+      - 系统日志管理
+  /admin/sys/sys-menu:
+    delete:
+      consumes:
+      - application/json
+      description: 删除菜单管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysMenuDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除菜单管理
+      tags:
+      - 系统菜单管理
+    get:
+      consumes:
+      - application/json
+      description: 获取菜单管理树
+      parameters:
+      - description: 菜单编号
+        in: query
+        name: id
+        type: string
+      - description: 菜单名称
+        in: query
+        name: title
+        type: string
+      - description: 路由地址
+        in: query
+        name: path
+        type: string
+      - description: 显示状态 1-隐藏 2-显示
+        in: query
+        name: isHidden
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取菜单管理树
+      tags:
+      - 系统菜单管理
+    post:
+      consumes:
+      - application/json
+      description: 新增菜单管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysMenuInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增菜单管理
+      tags:
+      - 系统菜单管理
+  /admin/sys/sys-menu/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取菜单管理详情
+      parameters:
+      - description: 菜单编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取菜单管理详情
+      tags:
+      - 系统菜单管理
+    put:
+      consumes:
+      - application/json
+      description: 更新菜单管理
+      parameters:
+      - description: 菜单编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysMenuUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新菜单管理
+      tags:
+      - 系统菜单管理
+  /admin/sys/sys-menu/menu-role:
+    get:
+      consumes:
+      - application/json
+      description: 根据角色获取菜单
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 根据角色获取菜单
+      tags:
+      - 系统菜单管理
+  /admin/sys/sys-menu/role-menu-tree-select/{roleId}:
+    get:
+      consumes:
+      - application/json
+      description: 获取全部菜单以及选中的菜单编号
+      parameters:
+      - description: 角色编号
+        in: path
+        name: roleId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取全部菜单以及选中的菜单编号
+      tags:
+      - 系统菜单管理
+  /admin/sys/sys-monitor:
+    get:
+      consumes:
+      - application/json
+      description: 获取服务器信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取服务器信息
+      tags:
+      - 系统监控管理
+  /admin/sys/sys-monitor/ping:
+    get:
+      consumes:
+      - application/json
+      description: ping测试
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: ping测试
+      tags:
+      - 系统监控管理
+  /admin/sys/sys-oper-log:
+    delete:
+      consumes:
+      - application/json
+      description: 删除操作日志
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysOperLogDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除操作日志
+      tags:
+      - 系统日志管理
+    get:
+      consumes:
+      - application/json
+      description: 获取操作日志分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 操作模块
+        in: query
+        name: title
+        type: string
+      - description: 函数
+        in: query
+        name: method
+        type: string
+      - description: 请求方式
+        in: query
+        name: requestMethod
+        type: string
+      - description: 访问地址
+        in: query
+        name: operUrl
+        type: string
+      - description: 客户端ip
+        in: query
+        name: operIp
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取操作日志分页列表
+      tags:
+      - 系统日志管理
+  /admin/sys/sys-oper-log/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取操作日志详情
+      parameters:
+      - description: 日志编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取操作日志详情
+      tags:
+      - 系统日志管理
+  /admin/sys/sys-oper-log/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出操作日志
+      parameters:
+      - description: 操作模块
+        in: query
+        name: title
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出操作日志
+      tags:
+      - 系统日志管理
+  /admin/sys/sys-post:
+    delete:
+      consumes:
+      - application/json
+      description: 删除岗位管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysPostDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除岗位管理
+      tags:
+      - 系统岗位管理
+    get:
+      consumes:
+      - application/json
+      description: 获取岗位管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: id
+        in: query
+        name: id
+        type: integer
+      - description: 名称
+        in: query
+        name: postName
+        type: string
+      - description: 编码
+        in: query
+        name: postCode
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      - description: 创建开始时间
+        in: query
+        name: beginCreatedAt
+        type: string
+      - description: 创建结束时间
+        in: query
+        name: endCreatedAt
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取岗位管理分页列表
+      tags:
+      - 系统岗位管理
+    post:
+      consumes:
+      - application/json
+      description: 新增岗位管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysPostInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增岗位管理
+      tags:
+      - 系统岗位管理
+  /admin/sys/sys-post/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取岗位管理详情
+      parameters:
+      - description: 岗位编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取岗位管理详情
+      tags:
+      - 系统岗位管理
+    put:
+      consumes:
+      - application/json
+      description: 更新岗位管理
+      parameters:
+      - description: 岗位编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysPostUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新岗位管理
+      tags:
+      - 系统岗位管理
+  /admin/sys/sys-post/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出岗位管理
+      parameters:
+      - description: 名称
+        in: query
+        name: postName
+        type: string
+      - description: 编码
+        in: query
+        name: postCode
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出岗位管理
+      tags:
+      - 系统岗位管理
+  /admin/sys/sys-post/list:
+    get:
+      consumes:
+      - application/json
+      description: 获取岗位管理全部列表
+      parameters:
+      - description: id
+        in: query
+        name: id
+        type: integer
+      - description: 名称
+        in: query
+        name: postName
+        type: string
+      - description: 编码
+        in: query
+        name: postCode
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取岗位管理全部列表
+      tags:
+      - 系统岗位管理
+  /admin/sys/sys-role:
+    delete:
+      consumes:
+      - application/json
+      description: 删除角色管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysRoleDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除角色管理
+      tags:
+      - 系统角色管理
+    get:
+      consumes:
+      - application/json
+      description: 获取角色管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 角色编码
+        in: query
+        name: id
+        type: integer
+      - description: 角色名称
+        in: query
+        name: roleName
+        type: string
+      - description: 状态 1-正常 2-停用
+        in: query
+        name: status
+        type: string
+      - description: 角色代码
+        in: query
+        name: roleKey
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取角色管理分页列表
+      tags:
+      - 系统角色管理
+    post:
+      consumes:
+      - application/json
+      description: 新增角色管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysRoleInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增角色管理
+      tags:
+      - 系统角色管理
+  /admin/sys/sys-role/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取角色管理详情
+      parameters:
+      - description: 角色编码
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取角色管理详情
+      tags:
+      - 系统角色管理
+    put:
+      consumes:
+      - application/json
+      description: 更新角色管理
+      parameters:
+      - description: 角色编码
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysRoleUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新角色管理
+      tags:
+      - 系统角色管理
+  /admin/sys/sys-role/list:
+    get:
+      consumes:
+      - application/json
+      description: 获取角色管理全部列表
+      parameters:
+      - description: 角色编码
+        in: query
+        name: id
+        type: integer
+      - description: 角色名称
+        in: query
+        name: roleName
+        type: string
+      - description: 状态 1-正常 2-停用
+        in: query
+        name: status
+        type: string
+      - description: 角色代码
+        in: query
+        name: roleKey
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取角色管理全部列表
+      tags:
+      - 系统角色管理
+  /admin/sys/sys-role/role-data-scope:
+    put:
+      consumes:
+      - application/json
+      description: 更新角色管理数据权限
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RoleDataScopeReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新角色管理数据权限
+      tags:
+      - 系统角色管理
+  /admin/sys/sys-role/role-status:
+    put:
+      consumes:
+      - application/json
+      description: 更新角色管理状态
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateStatusReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新角色管理状态
+      tags:
+      - 系统角色管理
+  /admin/sys/sys-table:
+    delete:
+      consumes:
+      - application/json
+      description: 删除表管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysGenTableDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除表管理
+      tags:
+      - 系统代码生成
+    get:
+      consumes:
+      - application/json
+      description: 获取表管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 表名
+        in: query
+        name: tableName
+        type: string
+      - description: 表别名
+        in: query
+        name: tableComment
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取表管理分页列表
+      tags:
+      - 系统代码生成
+    post:
+      consumes:
+      - application/json
+      description: 新增表管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysGenTableInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增表管理
+      tags:
+      - 系统代码生成
+  /admin/sys/sys-table/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取表管理详情
+      parameters:
+      - description: 表编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取表管理详情
+      tags:
+      - 系统代码生成
+    put:
+      consumes:
+      - application/json
+      description: 更新表管理
+      parameters:
+      - description: 表编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysGenTableUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新表管理
+      tags:
+      - 系统代码生成
+  /admin/sys/sys-table/db-tables:
+    get:
+      consumes:
+      - application/json
+      description: 获取表管理的DB表分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 表名
+        in: query
+        name: tableName
+        type: string
+      - description: 表别名
+        in: query
+        name: tableComment
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取表管理的DB表分页列表
+      tags:
+      - 系统代码生成
+  /admin/sys/sys-table/gen/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 生成表管理的代码
+      parameters:
+      - description: 表编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 生成表管理的代码
+      tags:
+      - 系统代码生成
+  /admin/sys/sys-table/gen/db/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 表管理中生成菜单数据
+      parameters:
+      - description: 表编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 表管理中生成菜单数据
+      tags:
+      - 系统代码生成
+  /admin/sys/sys-table/gen/download/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 表管理下载代码
+      parameters:
+      - description: 表编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/zip
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 表管理下载代码
+      tags:
+      - 系统代码生成
+  /admin/sys/sys-table/preview/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 预览表管理的代码页面
+      parameters:
+      - description: 表编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 预览表管理的代码页面
+      tags:
+      - 系统代码生成
+  /admin/sys/sys-user:
+    delete:
+      consumes:
+      - application/json
+      description: 删除系统用户管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysUserDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除系统用户管理
+      tags:
+      - 系统用户管理
+    get:
+      consumes:
+      - application/json
+      description: 获取系统用户管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 用户ID
+        in: query
+        name: userId
+        type: integer
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: 手机号
+        in: query
+        name: phone
+        type: string
+      - description: 邮箱
+        in: query
+        name: email
+        type: string
+      - description: 岗位
+        in: query
+        name: postId
+        type: integer
+      - description: 部门
+        in: query
+        name: deptId
+        type: integer
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取系统用户管理分页列表
+      tags:
+      - 系统用户管理
+    post:
+      consumes:
+      - application/json
+      description: 新增系统用户管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysUserInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增系统用户管理
+      tags:
+      - 系统用户管理
+  /admin/sys/sys-user/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统用户管理详情
+      parameters:
+      - description: 用户编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取系统用户管理详情
+      tags:
+      - 系统用户管理
+    put:
+      consumes:
+      - application/json
+      description: 更新系统用户管理
+      parameters:
+      - description: 用户编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysUserUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新系统用户管理
+      tags:
+      - 系统用户管理
+  /admin/sys/sys-user/logout:
+    get:
+      consumes:
+      - application/json
+      description: 退出系统
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 退出系统
+      tags:
+      - 系统登录
+  /admin/sys/sys-user/profile:
+    get:
+      consumes:
+      - application/json
+      description: 获取系统登录用户信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取系统登录用户信息
+      tags:
+      - 系统用户管理
+    put:
+      consumes:
+      - application/json
+      description: 更新系统登录用户信息
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysUserUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新系统登录用户信息
+      tags:
+      - 系统用户管理
+  /admin/sys/sys-user/profile/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 更新系统登录用户头像
+      parameters:
+      - description: 头像文件
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新系统登录用户头像
+      tags:
+      - 系统用户管理
+  /admin/sys/sys-user/profile/pwd:
+    put:
+      consumes:
+      - application/json
+      description: 更新系统登录用户密码
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSysUserPwdReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新系统登录用户密码
+      tags:
+      - 系统用户管理
+  /admin/sys/sys-user/pwd-reset:
+    put:
+      consumes:
+      - application/json
+      description: 重置系统用户密码
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetSysUserPwdReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 重置系统用户密码
+      tags:
+      - 系统用户管理
+  /admin/sys/sys-user/refresh-token:
+    get:
+      consumes:
+      - application/json
+      description: 刷新token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 刷新token
+      tags:
+      - 系统登录
+  /admin/sys/sys-user/update-status:
+    put:
+      consumes:
+      - application/json
+      description: 更新系统用户状态
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysUserStatusUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新系统用户状态
+      tags:
+      - 系统用户管理
+  /app/user/user:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 用户等级编号
+        in: query
+        name: levelId
+        type: integer
+      - description: 用户昵称
+        in: query
+        name: userName
+        type: string
+      - description: 真实姓名
+        in: query
+        name: trueName
+        type: string
+      - description: 电子邮箱
+        in: query
+        name: email
+        type: string
+      - description: 国家区号
+        in: query
+        name: mobileTitle
+        type: string
+      - description: 手机号码
+        in: query
+        name: mobile
+        type: string
+      - description: 父级编号
+        in: query
+        name: parentId
+        type: integer
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户管理分页列表
+      tags:
+      - 用户管理
+    post:
+      consumes:
+      - application/json
+      description: 新增用户管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增用户管理
+      tags:
+      - 用户管理
+  /app/user/user-account-log:
+    get:
+      consumes:
+      - application/json
+      description: 获取账变记录分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取账变记录分页列表
+      tags:
+      - 账变记录管理
+  /app/user/user-account-log/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取账变记录详情
+      parameters:
+      - description: 记录编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取账变记录详情
+      tags:
+      - 账变记录管理
+  /app/user/user-account-log/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出账变记录
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出账变记录
+      tags:
+      - 账变记录管理
+  /app/user/user-conf:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户配置管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户配置管理分页列表
+      tags:
+      - 用户配置管理
+  /app/user/user-conf/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户配置管理详情
+      parameters:
+      - description: 配置编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户配置管理详情
+      tags:
+      - 用户配置管理
+    put:
+      consumes:
+      - application/json
+      description: 更新用户配置管理
+      parameters:
+      - description: 配置编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserConfUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新用户配置管理
+      tags:
+      - 用户配置管理
+  /app/user/user-country-code:
+    delete:
+      consumes:
+      - application/json
+      description: 删除国家区号管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserCountryCodeDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除国家区号管理
+      tags:
+      - 国家区号管理
+    get:
+      consumes:
+      - application/json
+      description: 获取国家区号管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 国家地区
+        in: query
+        name: country
+        type: string
+      - description: 区号
+        in: query
+        name: code
+        type: string
+      - description: 状态(1-可用 2-停用)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取国家区号管理分页列表
+      tags:
+      - 国家区号管理
+    post:
+      consumes:
+      - application/json
+      description: 新增国家区号管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserCountryCodeInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增国家区号管理
+      tags:
+      - 国家区号管理
+  /app/user/user-country-code/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取国家区号管理详情
+      parameters:
+      - description: 区号编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取国家区号管理详情
+      tags:
+      - 国家区号管理
+    put:
+      consumes:
+      - application/json
+      description: 更新国家区号管理
+      parameters:
+      - description: 区号编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserCountryCodeUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新国家区号管理
+      tags:
+      - 国家区号管理
+  /app/user/user-country-code/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出国家区号管理
+      parameters:
+      - description: 国家地区
+        in: query
+        name: country
+        type: string
+      - description: 状态(1-可用 2-停用)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出国家区号管理
+      tags:
+      - 国家区号管理
+  /app/user/user-level:
+    delete:
+      consumes:
+      - application/json
+      description: 删除用户等级管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserLevelDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除用户等级管理
+      tags:
+      - 用户等级管理
+    get:
+      consumes:
+      - application/json
+      description: 获取用户等级管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 等级名称
+        in: query
+        name: name
+        type: string
+      - description: 等级类型
+        in: query
+        name: levelType
+        type: string
+      - description: 等级
+        in: query
+        name: level
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户等级管理分页列表
+      tags:
+      - 用户等级管理
+    post:
+      consumes:
+      - application/json
+      description: 新增用户等级管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserLevelInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增用户等级管理
+      tags:
+      - 用户等级管理
+  /app/user/user-level/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户等级管理详情
+      parameters:
+      - description: 等级编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户等级管理详情
+      tags:
+      - 用户等级管理
+    put:
+      consumes:
+      - application/json
+      description: 更新用户等级管理
+      parameters:
+      - description: 等级编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserLevelUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新用户等级管理
+      tags:
+      - 用户等级管理
+  /app/user/user-level/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出用户等级管理
+      parameters:
+      - description: 等级名称
+        in: query
+        name: name
+        type: string
+      - description: 等级类型
+        in: query
+        name: levelType
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出用户等级管理
+      tags:
+      - 用户等级管理
+  /app/user/user-oper-log:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户操作日志分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户操作日志分页列表
+      tags:
+      - 用户操作日志
+  /app/user/user-oper-log/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户操作日志详情
+      parameters:
+      - description: 日志编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户操作日志详情
+      tags:
+      - 用户操作日志
+  /app/user/user-oper-log/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出用户操作日志
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出用户操作日志
+      tags:
+      - 用户操作日志
+  /app/user/user/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户管理详情
+      parameters:
+      - description: 用户编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户管理详情
+      tags:
+      - 用户管理
+    put:
+      consumes:
+      - application/json
+      description: 更新用户管理
+      parameters:
+      - description: 用户编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新用户管理
+      tags:
+      - 用户管理
+  /app/user/user/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出用户管理
+      parameters:
+      - description: 用户等级编号
+        in: query
+        name: levelId
+        type: integer
+      - description: 用户昵称
+        in: query
+        name: userName
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出用户管理
+      tags:
+      - 用户管理
+  /captcha:
+    get:
+      consumes:
+      - application/json
+      description: 获取图形验证码
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取图形验证码
+      tags:
+      - 系统登录
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: 登录系统
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 登录系统
+      tags:
+      - 系统登录
+  /plugins/content/content-announcement:
+    delete:
+      consumes:
+      - application/json
+      description: 删除公告管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ContentAnnouncementDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除公告管理
+      tags:
+      - 内容管理-公告管理
+    get:
+      consumes:
+      - application/json
+      description: 获取公告管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取公告管理分页列表
+      tags:
+      - 内容管理-公告管理
+    post:
+      consumes:
+      - application/json
+      description: 新增公告管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ContentAnnouncementInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增公告管理
+      tags:
+      - 内容管理-公告管理
+  /plugins/content/content-announcement/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取公告管理详情
+      parameters:
+      - description: 公告编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取公告管理详情
+      tags:
+      - 内容管理-公告管理
+    put:
+      consumes:
+      - application/json
+      description: 更新公告管理
+      parameters:
+      - description: 公告编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ContentAnnouncementUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新公告管理
+      tags:
+      - 内容管理-公告管理
+  /plugins/content/content-announcement/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出公告管理
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出公告管理
+      tags:
+      - 内容管理-公告管理
+  /plugins/content/content-article:
+    delete:
+      consumes:
+      - application/json
+      description: 删除文章管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ContentArticleDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除文章管理
+      tags:
+      - 内容管理-文章管理
+    get:
+      consumes:
+      - application/json
+      description: 获取文章管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取文章管理分页列表
+      tags:
+      - 内容管理-文章管理
+    post:
+      consumes:
+      - application/json
+      description: 新增文章管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ContentArticleInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增文章管理
+      tags:
+      - 内容管理-文章管理
+  /plugins/content/content-article/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取文章管理详情
+      parameters:
+      - description: 文章编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取文章管理详情
+      tags:
+      - 内容管理-文章管理
+    put:
+      consumes:
+      - application/json
+      description: 更新文章管理
+      parameters:
+      - description: 文章编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ContentArticleUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新文章管理
+      tags:
+      - 内容管理-文章管理
+  /plugins/content/content-article/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出文章管理
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出文章管理
+      tags:
+      - 内容管理-文章管理
+  /plugins/content/content-category:
+    delete:
+      consumes:
+      - application/json
+      description: 删除内容分类管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ContentCategoryDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除内容分类管理
+      tags:
+      - 内容管理-内容分类
+    get:
+      consumes:
+      - application/json
+      description: 获取内容分类管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取内容分类管理分页列表
+      tags:
+      - 内容管理-内容分类
+    post:
+      consumes:
+      - application/json
+      description: 新增内容分类管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ContentCategoryInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增内容分类管理
+      tags:
+      - 内容管理-内容分类
+  /plugins/content/content-category/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取内容分类管理详情
+      parameters:
+      - description: 分类编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取内容分类管理详情
+      tags:
+      - 内容管理-内容分类
+    put:
+      consumes:
+      - application/json
+      description: 更新内容分类管理
+      parameters:
+      - description: 分类编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ContentCategoryUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新内容分类管理
+      tags:
+      - 内容管理-内容分类
+  /plugins/content/content-category/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出内容分类管理
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出内容分类管理
+      tags:
+      - 内容管理-内容分类
+  /plugins/filemgr/filemgr-app:
+    delete:
+      consumes:
+      - application/json
+      description: 删除APP管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FilemgrAppDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除APP管理
+      tags:
+      - 文件管理-APP管理
+    get:
+      consumes:
+      - application/json
+      description: 获取APP管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 版本号
+        in: query
+        name: version
+        type: string
+      - description: 平台 (1-安卓 2-苹果)
+        in: query
+        name: platform
+        type: string
+      - description: 版本(1-默认)
+        in: query
+        name: appType
+        type: string
+      - description: 下载类型(1-本地 2-外链 3-oss )
+        in: query
+        name: downloadType
+        type: string
+      - description: 状态（1-已发布 2-待发布）
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取APP管理分页列表
+      tags:
+      - 文件管理-APP管理
+    post:
+      consumes:
+      - application/json
+      description: 新增APP管理
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FilemgrAppInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增APP管理
+      tags:
+      - 文件管理-APP管理
+  /plugins/filemgr/filemgr-app/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取APP管理详情
+      parameters:
+      - description: App编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取APP管理详情
+      tags:
+      - 文件管理-APP管理
+    put:
+      consumes:
+      - application/json
+      description: 更新APP管理
+      parameters:
+      - description: App编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.FilemgrAppUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新APP管理
+      tags:
+      - 文件管理-APP管理
+  /plugins/filemgr/filemgr-app/export:
+    get:
+      consumes:
+      - application/json
+      description: 导出APP管理
+      parameters:
+      - description: 版本号
+        in: query
+        name: version
+        type: string
+      - description: 平台 (1-安卓 2-苹果)
+        in: query
+        name: platform
+        type: string
+      produces:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 导出APP管理
+      tags:
+      - 文件管理-APP管理
+  /plugins/filemgr/filemgr-app/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传APP
+      parameters:
+      - description: APP安装包文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 上传APP
+      tags:
+      - 文件管理-APP管理
+  /plugins/msg/msg-code:
+    get:
+      consumes:
+      - application/json
+      description: 获取验证码管理分页列表
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取验证码管理分页列表
+      tags:
+      - 消息管理-验证码管理
+  /plugins/msg/msg-code/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取验证码管理详情
+      parameters:
+      - description: 验证码编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取验证码管理详情
+      tags:
+      - 消息管理-验证码管理
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

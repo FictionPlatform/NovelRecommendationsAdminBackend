@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"go-admin/core/config"
 	"go-admin/core/runtime"
 	"go-admin/core/utils/log"
 
@@ -41,6 +42,11 @@ func InitMiddleware(r *gin.Engine) {
 
 	// 2. 应用 WAF 中间件
 	r.Use(brandy.Waf(waf, ""))
+	// IP 黑名单
+	LoadBlacklist(config.RateLimiterConfig.Blacklist)
+	r.Use(IPBlacklist())
+	// IP 访问速率限制
+	r.Use(RateLimiter())
 	// 链路追踪
 	r.Use(Trace())
 	runtime.RuntimeConfig.SetMiddleware(JwtTokenCheck, (*jwt.GinJWTMiddleware).MiddlewareFunc)

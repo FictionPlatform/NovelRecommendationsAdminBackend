@@ -12,6 +12,10 @@ import (
 
 // @title Go-admin 后台管理系统
 // @version 2.0.0
+// @description 基于Gin的后台管理系统接口文档
+// @host localhost:8888
+// @BasePath /admin-api/v1
+// @securityDefinitions.apikey Bearer
 // @in header
 // @name Authorization
 func main() {

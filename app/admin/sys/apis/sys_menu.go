@@ -18,6 +18,19 @@ type SysMenu struct {
 }
 
 // GetTreeList admin-获取菜单管理树
+// @Summary 获取菜单管理树
+// @Description 获取菜单管理树
+// @Tags 系统菜单管理
+// @Accept json
+// @Produce json
+// @Param id query string false "菜单编号"
+// @Param title query string false "菜单名称"
+// @Param path query string false "路由地址"
+// @Param isHidden query string false "显示状态 1-隐藏 2-显示"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-menu [get]
 func (e SysMenu) GetTreeList(c *gin.Context) {
 	s := service.SysMenu{}
 	req := dto.SysMenuQueryReq{}
@@ -39,6 +52,16 @@ func (e SysMenu) GetTreeList(c *gin.Context) {
 }
 
 // Get admin-获取菜单管理详情
+// @Summary 获取菜单管理详情
+// @Description 获取菜单管理详情
+// @Tags 系统菜单管理
+// @Accept json
+// @Produce json
+// @Param id path int true "菜单编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-menu/{id} [get]
 func (e SysMenu) Get(c *gin.Context) {
 	req := dto.SysMenuGetReq{}
 	s := new(service.SysMenu)
@@ -61,6 +84,16 @@ func (e SysMenu) Get(c *gin.Context) {
 }
 
 // Insert admin-新增菜单管理
+// @Summary 新增菜单管理
+// @Description 新增菜单管理
+// @Tags 系统菜单管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysMenuInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-menu [post]
 func (e SysMenu) Insert(c *gin.Context) {
 	req := dto.SysMenuInsertReq{}
 	s := new(service.SysMenu)
@@ -88,6 +121,17 @@ func (e SysMenu) Insert(c *gin.Context) {
 }
 
 // Update admin-更新菜单管理
+// @Summary 更新菜单管理
+// @Description 更新菜单管理
+// @Tags 系统菜单管理
+// @Accept json
+// @Produce json
+// @Param id path int true "菜单编号"
+// @Param body body dto.SysMenuUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-menu/{id} [put]
 func (e SysMenu) Update(c *gin.Context) {
 	req := dto.SysMenuUpdateReq{}
 	s := new(service.SysMenu)
@@ -122,6 +166,16 @@ func (e SysMenu) Update(c *gin.Context) {
 }
 
 // Delete admin-删除菜单管理
+// @Summary 删除菜单管理
+// @Description 删除菜单管理
+// @Tags 系统菜单管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysMenuDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-menu [delete]
 func (e SysMenu) Delete(c *gin.Context) {
 	req := dto.SysMenuDeleteReq{}
 	s := service.SysMenu{}
@@ -145,6 +199,15 @@ func (e SysMenu) Delete(c *gin.Context) {
 }
 
 // GetMenuRole admin-根据角色获取菜单
+// @Summary 根据角色获取菜单
+// @Description 根据角色获取菜单
+// @Tags 系统菜单管理
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-menu/menu-role [get]
 func (e SysMenu) GetMenuRole(c *gin.Context) {
 	s := new(service.SysMenu)
 	err := e.MakeContext(c).
@@ -170,6 +233,16 @@ func (e SysMenu) GetMenuRole(c *gin.Context) {
 }
 
 // GetMenuTreeSelect admin-获取全部菜单以及选中的菜单编号
+// @Summary 获取全部菜单以及选中的菜单编号
+// @Description 获取全部菜单以及选中的菜单编号
+// @Tags 系统菜单管理
+// @Accept json
+// @Produce json
+// @Param roleId path int true "角色编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-menu/role-menu-tree-select/{roleId} [get]
 func (e SysMenu) GetMenuTreeSelect(c *gin.Context) {
 	m := service.SysMenu{}
 	r := service.SysRole{}

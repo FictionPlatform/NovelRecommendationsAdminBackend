@@ -20,6 +20,17 @@ type ContentArticle struct {
 }
 
 // GetPage plugins-获取文章管理分页列表
+// @Summary 获取文章管理分页列表
+// @Description 获取文章管理分页列表
+// @Tags 内容管理-文章管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-article [get]
 func (e ContentArticle) GetPage(c *gin.Context) {
 	req := dto.ContentArticleQueryReq{}
 	s := service.ContentArticle{}
@@ -42,6 +53,16 @@ func (e ContentArticle) GetPage(c *gin.Context) {
 }
 
 // Get plugins-获取文章管理详情
+// @Summary 获取文章管理详情
+// @Description 获取文章管理详情
+// @Tags 内容管理-文章管理
+// @Accept json
+// @Produce json
+// @Param id path int true "文章编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-article/{id} [get]
 func (e ContentArticle) Get(c *gin.Context) {
 	req := dto.ContentArticleGetReq{}
 	s := service.ContentArticle{}
@@ -64,6 +85,16 @@ func (e ContentArticle) Get(c *gin.Context) {
 }
 
 // Insert plugins-新增文章管理
+// @Summary 新增文章管理
+// @Description 新增文章管理
+// @Tags 内容管理-文章管理
+// @Accept json
+// @Produce json
+// @Param body body dto.ContentArticleInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-article [post]
 func (e ContentArticle) Insert(c *gin.Context) {
 	req := dto.ContentArticleInsertReq{}
 	s := service.ContentArticle{}
@@ -91,6 +122,17 @@ func (e ContentArticle) Insert(c *gin.Context) {
 }
 
 // Update plugins-更新文章管理
+// @Summary 更新文章管理
+// @Description 更新文章管理
+// @Tags 内容管理-文章管理
+// @Accept json
+// @Produce json
+// @Param id path int true "文章编号"
+// @Param body body dto.ContentArticleUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-article/{id} [put]
 func (e ContentArticle) Update(c *gin.Context) {
 	req := dto.ContentArticleUpdateReq{}
 	s := service.ContentArticle{}
@@ -123,6 +165,16 @@ func (e ContentArticle) Update(c *gin.Context) {
 }
 
 // Delete plugins-删除文章管理
+// @Summary 删除文章管理
+// @Description 删除文章管理
+// @Tags 内容管理-文章管理
+// @Accept json
+// @Produce json
+// @Param body body dto.ContentArticleDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-article [delete]
 func (e ContentArticle) Delete(c *gin.Context) {
 	s := service.ContentArticle{}
 	req := dto.ContentArticleDeleteReq{}
@@ -146,6 +198,15 @@ func (e ContentArticle) Delete(c *gin.Context) {
 }
 
 // Export plugins-导出文章管理
+// @Summary 导出文章管理
+// @Description 导出文章管理
+// @Tags 内容管理-文章管理
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/content/content-article/export [get]
 func (e ContentArticle) Export(c *gin.Context) {
 	req := dto.ContentArticleQueryReq{}
 	s := service.ContentArticle{}

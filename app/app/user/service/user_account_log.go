@@ -37,13 +37,13 @@ func (e *UserAccountLog) GetPage(c *dto.UserAccountLogQueryReq, p *middleware.Da
 	var count int64
 	var err error
 	if c.Mobile != "" {
-		c.Mobile, err = encrypt.AesEncrypt(c.Mobile, []byte(config.AuthConfig.Secret))
+		c.Mobile, err = encrypt.AesEncrypt(c.Mobile, []byte(config.AuthConfig.SecretAes))
 		if err != nil {
 			c.Mobile = ""
 		}
 	}
 	if c.Email != "" {
-		c.Email, err = encrypt.AesEncrypt(c.Email, []byte(config.AuthConfig.Secret))
+		c.Email, err = encrypt.AesEncrypt(c.Email, []byte(config.AuthConfig.SecretAes))
 		if err != nil {
 			c.Email = ""
 		}
@@ -66,7 +66,7 @@ func (e *UserAccountLog) GetPage(c *dto.UserAccountLogQueryReq, p *middleware.Da
 		}
 		cacheUsers[u.User.Id] = u.User
 		if u.User.Mobile != "" {
-			mobile, err := encrypt.AesDecrypt(u.User.Mobile, []byte(config.AuthConfig.Secret))
+			mobile, err := encrypt.AesDecrypt(u.User.Mobile, []byte(config.AuthConfig.SecretAes))
 			if err == nil {
 				if c.ShowInfo {
 					cacheUsers[u.User.Id].Mobile = mobile
@@ -77,7 +77,7 @@ func (e *UserAccountLog) GetPage(c *dto.UserAccountLogQueryReq, p *middleware.Da
 		}
 
 		if u.User.Email != "" {
-			email, err := encrypt.AesDecrypt(u.User.Email, []byte(config.AuthConfig.Secret))
+			email, err := encrypt.AesDecrypt(u.User.Email, []byte(config.AuthConfig.SecretAes))
 			if err == nil {
 				if c.ShowInfo {
 					cacheUsers[u.User.Id].Email = email

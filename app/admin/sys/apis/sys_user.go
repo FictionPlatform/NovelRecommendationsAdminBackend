@@ -25,6 +25,24 @@ type SysUser struct {
 }
 
 // GetPage admin-获取系统用户管理分页列表
+// @Summary 获取系统用户管理分页列表
+// @Description 获取系统用户管理分页列表
+// @Tags 系统用户管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Param userId query int false "用户ID"
+// @Param username query string false "用户名"
+// @Param phone query string false "手机号"
+// @Param email query string false "邮箱"
+// @Param postId query int false "岗位"
+// @Param deptId query int false "部门"
+// @Param status query string false "状态"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user [get]
 func (e SysUser) GetPage(c *gin.Context) {
 	s := service.SysUser{}
 	req := dto.SysUserQueryReq{}
@@ -47,6 +65,16 @@ func (e SysUser) GetPage(c *gin.Context) {
 }
 
 // Get admin-获取系统用户管理详情
+// @Summary 获取系统用户管理详情
+// @Description 获取系统用户管理详情
+// @Tags 系统用户管理
+// @Accept json
+// @Produce json
+// @Param id path int true "用户编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user/{id} [get]
 func (e SysUser) Get(c *gin.Context) {
 	s := service.SysUser{}
 	req := dto.SysUserGetReq{}
@@ -69,6 +97,16 @@ func (e SysUser) Get(c *gin.Context) {
 }
 
 // Insert admin-新增系统用户管理
+// @Summary 新增系统用户管理
+// @Description 新增系统用户管理
+// @Tags 系统用户管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysUserInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user [post]
 func (e SysUser) Insert(c *gin.Context) {
 	s := service.SysUser{}
 	req := dto.SysUserInsertReq{}
@@ -96,6 +134,17 @@ func (e SysUser) Insert(c *gin.Context) {
 }
 
 // Update admin-更新系统用户管理
+// @Summary 更新系统用户管理
+// @Description 更新系统用户管理
+// @Tags 系统用户管理
+// @Accept json
+// @Produce json
+// @Param id path int true "用户编号"
+// @Param body body dto.SysUserUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user/{id} [put]
 func (e SysUser) Update(c *gin.Context) {
 	s := service.SysUser{}
 	req := dto.SysUserUpdateReq{}
@@ -128,6 +177,16 @@ func (e SysUser) Update(c *gin.Context) {
 }
 
 // Delete admin-删除系统用户管理
+// @Summary 删除系统用户管理
+// @Description 删除系统用户管理
+// @Tags 系统用户管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysUserDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user [delete]
 func (e SysUser) Delete(c *gin.Context) {
 	s := service.SysUser{}
 	req := dto.SysUserDeleteReq{}
@@ -151,6 +210,16 @@ func (e SysUser) Delete(c *gin.Context) {
 }
 
 // UpdateStatus admin-更新系统用户状态
+// @Summary 更新系统用户状态
+// @Description 更新系统用户状态
+// @Tags 系统用户管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysUserStatusUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user/update-status [put]
 func (e SysUser) UpdateStatus(c *gin.Context) {
 	s := service.SysUser{}
 	req := dto.SysUserStatusUpdateReq{}
@@ -187,6 +256,16 @@ func (e SysUser) UpdateStatus(c *gin.Context) {
 }
 
 // ResetPwd admin-重置系统用户密码
+// @Summary 重置系统用户密码
+// @Description 重置系统用户密码
+// @Tags 系统用户管理
+// @Accept json
+// @Produce json
+// @Param body body dto.ResetSysUserPwdReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user/pwd-reset [put]
 func (e SysUser) ResetPwd(c *gin.Context) {
 	s := service.SysUser{}
 	req := dto.ResetSysUserPwdReq{}
@@ -223,6 +302,16 @@ func (e SysUser) ResetPwd(c *gin.Context) {
 }
 
 // UpdateProfileAvatar admin-更新系统登录用户头像
+// @Summary 更新系统登录用户头像
+// @Description 更新系统登录用户头像
+// @Tags 系统用户管理
+// @Accept multipart/form-data
+// @Produce json
+// @Param avatar formData file true "头像文件"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user/profile/avatar [post]
 func (e SysUser) UpdateProfileAvatar(c *gin.Context) {
 	s := service.SysUser{}
 	req := dto.SysUserAvatarUpdateReq{}
@@ -281,6 +370,16 @@ func (e SysUser) UpdateProfileAvatar(c *gin.Context) {
 }
 
 // UpdateProfilePwd admin-更新系统登录用户密码
+// @Summary 更新系统登录用户密码
+// @Description 更新系统登录用户密码
+// @Tags 系统用户管理
+// @Accept json
+// @Produce json
+// @Param body body dto.UpdateSysUserPwdReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user/profile/pwd [put]
 func (e SysUser) UpdateProfilePwd(c *gin.Context) {
 	s := service.SysUser{}
 	req := dto.UpdateSysUserPwdReq{}
@@ -315,6 +414,15 @@ func (e SysUser) UpdateProfilePwd(c *gin.Context) {
 }
 
 // GetProfile admin-获取系统登录用户信息
+// @Summary 获取系统登录用户信息
+// @Description 获取系统登录用户信息
+// @Tags 系统用户管理
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user/profile [get]
 func (e SysUser) GetProfile(c *gin.Context) {
 	s := service.SysUser{}
 	err := e.MakeContext(c).
@@ -343,6 +451,16 @@ func (e SysUser) GetProfile(c *gin.Context) {
 // UpdateProfile admin-更新系统登录用户信息
 // 当前登录用户才能更新自己的信息
 // 受限的子账户登录时，为了数据安全，不能让用户通过Update方法/接口来修改自己账户
+// @Summary 更新系统登录用户信息
+// @Description 更新系统登录用户信息
+// @Tags 系统用户管理
+// @Accept json
+// @Produce json
+// @Param body body dto.SysUserUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user/profile [put]
 func (e SysUser) UpdateProfile(c *gin.Context) {
 	s := service.SysUser{}
 	req := dto.SysUserUpdateReq{}
@@ -375,6 +493,15 @@ func (e SysUser) UpdateProfile(c *gin.Context) {
 }
 
 // Login admin-登录系统
+// @Summary 登录系统
+// @Description 登录系统
+// @Tags 系统登录
+// @Accept json
+// @Produce json
+// @Param body body dto.LoginReq true "请求参数"
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /login [post]
 func (e SysUser) Login(c *gin.Context) {
 	req := dto.LoginReq{}
 	s := service.SysUser{}
@@ -414,6 +541,15 @@ func (e SysUser) Login(c *gin.Context) {
 }
 
 // LogOut admin-退出系统
+// @Summary 退出系统
+// @Description 退出系统
+// @Tags 系统登录
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user/logout [get]
 func (e SysUser) LogOut(c *gin.Context) {
 	s := new(service.SysUser)
 	err := e.MakeContext(c).
@@ -434,11 +570,28 @@ func (e SysUser) LogOut(c *gin.Context) {
 }
 
 // RefreshToken admin-刷新token
+// @Summary 刷新token
+// @Description 刷新token
+// @Tags 系统登录
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-user/refresh-token [get]
 func (e SysUser) RefreshToken(c *gin.Context) {
 	auth.Auth.RefreshToken(c)
 }
 
 // GenCaptcha admin-获取图形验证码
+// @Summary 获取图形验证码
+// @Description 获取图形验证码
+// @Tags 系统登录
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /captcha [get]
 func (e SysUser) GenCaptcha(c *gin.Context) {
 	err := e.MakeContext(c).Errors
 	if err != nil {

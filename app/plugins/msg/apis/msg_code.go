@@ -16,6 +16,17 @@ type MsgCode struct {
 }
 
 // GetPage plugins-获取验证码管理分页列表
+// @Summary 获取验证码管理分页列表
+// @Description 获取验证码管理分页列表
+// @Tags 消息管理-验证码管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/msg/msg-code [get]
 func (e MsgCode) GetPage(c *gin.Context) {
 	req := dto.MsgCodeQueryReq{}
 	s := service.MsgCode{}
@@ -38,6 +49,16 @@ func (e MsgCode) GetPage(c *gin.Context) {
 }
 
 // Get plugins-获取验证码管理详情
+// @Summary 获取验证码管理详情
+// @Description 获取验证码管理详情
+// @Tags 消息管理-验证码管理
+// @Accept json
+// @Produce json
+// @Param id path int true "验证码编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /plugins/msg/msg-code/{id} [get]
 func (e MsgCode) Get(c *gin.Context) {
 	req := dto.MsgCodeGetReq{}
 	s := service.MsgCode{}

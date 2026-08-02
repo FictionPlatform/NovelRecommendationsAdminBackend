@@ -20,6 +20,20 @@ type UserLevel struct {
 }
 
 // GetPage app-获取用户等级管理分页列表
+// @Summary 获取用户等级管理分页列表
+// @Description 获取用户等级管理分页列表
+// @Tags 用户等级管理
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Param name query string false "等级名称"
+// @Param levelType query string false "等级类型"
+// @Param level query int false "等级"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-level [get]
 func (e UserLevel) GetPage(c *gin.Context) {
 	req := dto.UserLevelQueryReq{}
 	s := service.UserLevel{}
@@ -42,6 +56,16 @@ func (e UserLevel) GetPage(c *gin.Context) {
 }
 
 // Get app-获取用户等级管理详情
+// @Summary 获取用户等级管理详情
+// @Description 获取用户等级管理详情
+// @Tags 用户等级管理
+// @Accept json
+// @Produce json
+// @Param id path int true "等级编号"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-level/{id} [get]
 func (e UserLevel) Get(c *gin.Context) {
 	req := dto.UserLevelGetReq{}
 	s := service.UserLevel{}
@@ -64,6 +88,16 @@ func (e UserLevel) Get(c *gin.Context) {
 }
 
 // Insert app-新增用户等级管理
+// @Summary 新增用户等级管理
+// @Description 新增用户等级管理
+// @Tags 用户等级管理
+// @Accept json
+// @Produce json
+// @Param body body dto.UserLevelInsertReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-level [post]
 func (e UserLevel) Insert(c *gin.Context) {
 	req := dto.UserLevelInsertReq{}
 	s := service.UserLevel{}
@@ -91,6 +125,17 @@ func (e UserLevel) Insert(c *gin.Context) {
 }
 
 // Update app-更新用户等级管理
+// @Summary 更新用户等级管理
+// @Description 更新用户等级管理
+// @Tags 用户等级管理
+// @Accept json
+// @Produce json
+// @Param id path int true "等级编号"
+// @Param body body dto.UserLevelUpdateReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-level/{id} [put]
 func (e UserLevel) Update(c *gin.Context) {
 	req := dto.UserLevelUpdateReq{}
 	s := service.UserLevel{}
@@ -123,6 +168,16 @@ func (e UserLevel) Update(c *gin.Context) {
 }
 
 // Delete app-删除用户等级管理
+// @Summary 删除用户等级管理
+// @Description 删除用户等级管理
+// @Tags 用户等级管理
+// @Accept json
+// @Produce json
+// @Param body body dto.UserLevelDeleteReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-level [delete]
 func (e UserLevel) Delete(c *gin.Context) {
 	s := service.UserLevel{}
 	req := dto.UserLevelDeleteReq{}
@@ -146,6 +201,17 @@ func (e UserLevel) Delete(c *gin.Context) {
 }
 
 // Export app-导出用户等级管理
+// @Summary 导出用户等级管理
+// @Description 导出用户等级管理
+// @Tags 用户等级管理
+// @Accept json
+// @Produce application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+// @Param name query string false "等级名称"
+// @Param levelType query string false "等级类型"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/user/user-level/export [get]
 func (e UserLevel) Export(c *gin.Context) {
 	req := dto.UserLevelQueryReq{}
 	s := service.UserLevel{}
