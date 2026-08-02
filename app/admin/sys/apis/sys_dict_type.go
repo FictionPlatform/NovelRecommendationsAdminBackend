@@ -6,6 +6,7 @@ import (
 	"go-admin/app/admin/sys/service"
 	adminService "go-admin/app/admin/sys/service"
 	"go-admin/app/admin/sys/service/dto"
+	"go-admin/config/base/constant"
 	baseLang "go-admin/config/base/lang"
 	"go-admin/core/dto/api"
 	_ "go-admin/core/dto/response"
@@ -261,13 +262,18 @@ func (e SysDictType) Export(c *gin.Context) {
 
 	sysConfService := adminService.NewSysConfigService(&s.Service)
 	maxSize, respCode, err := sysConfService.GetWithKeyInt("admin_sys_max_export_size")
-	if err != nil {
-		e.Error(respCode, err.Error())
+	if err != nil || maxSize <= 0 {
+		//配置缺失/非法时使用兜底值，避免导出数据量异常
+		maxSize = constant.DefaultExportMaxSize
+	}
+	if maxSize > constant.ExportMaxSizeLimit {
+		maxSize = constant.ExportMaxSizeLimit
 	}
 
 	p := middleware.GetPermissionFromContext(c)
 	req.PageIndex = 1
 	req.PageSize = maxSize
+	req.PageSizeLimit = maxSize
 	list, _, respCode, err := s.GetPage(&req, p)
 	if err != nil {
 		e.Error(respCode, err.Error())

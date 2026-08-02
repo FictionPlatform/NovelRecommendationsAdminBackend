@@ -108,6 +108,104 @@ func (e *SysUser) Count(c *dto.SysUserQueryReq) (int64, int, error) {
 	return count, baseLang.SuccessCode, nil
 }
 
+// checkRoleAssignable 校验角色可分配性：角色必须存在且未停用；admin 角色仅限 admin 操作者分配（防垂直越权提权）
+func (e *SysUser) checkRoleAssignable(targetRoleId, opUserId int64) (int, error) {
+	if targetRoleId <= 0 || opUserId <= 0 {
+		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+	}
+	var role models.SysRole
+	err := e.Orm.First(&role, targetRoleId).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return baseLang.ForbitErr, lang.MsgErr(baseLang.ForbitErr, e.Lang)
+		}
+		return baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+	if role.Status != global.SysStatusOk {
+		return baseLang.ForbitErr, lang.MsgErr(baseLang.ForbitErr, e.Lang)
+	}
+	if role.RoleKey == constant.RoleKeyAdmin {
+		opRoleKey, respCode, err := e.getRoleKeyByUserId(opUserId)
+		if err != nil {
+			return respCode, err
+		}
+		if opRoleKey != constant.RoleKeyAdmin {
+			return baseLang.ForbitErr, lang.MsgErr(baseLang.ForbitErr, e.Lang)
+		}
+	}
+	return baseLang.SuccessCode, nil
+}
+
+// getRoleKeyByUserId 获取用户的角色标识
+func (e *SysUser) getRoleKeyByUserId(userId int64) (string, int, error) {
+	var roleKey string
+	err := e.Orm.Table("admin_sys_user").
+		Select("admin_sys_role.role_key").
+		Joins("left join admin_sys_role on admin_sys_role.id = admin_sys_user.role_id").
+		Where("admin_sys_user.id = ?", userId).
+		Scan(&roleKey).Error
+	if err != nil {
+		return "", baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+	return roleKey, baseLang.SuccessCode, nil
+}
+
+// checkDeptAssignable 校验目标部门在操作者数据权限范围内（防越权跨部门授权）
+func (e *SysUser) checkDeptAssignable(deptId, opUserId int64) (int, error) {
+	if deptId <= 0 || opUserId <= 0 {
+		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+	}
+	var op struct {
+		RoleKey   string
+		DataScope string
+		DeptId    int64
+		RoleId    int64
+	}
+	err := e.Orm.Table("admin_sys_user").
+		Select("admin_sys_role.role_key", "admin_sys_role.data_scope", "admin_sys_user.dept_id", "admin_sys_user.role_id").
+		Joins("left join admin_sys_role on admin_sys_role.id = admin_sys_user.role_id").
+		Where("admin_sys_user.id = ?", opUserId).
+		Scan(&op).Error
+	if err != nil {
+		return baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+	// admin 或全部数据权限：不做部门限制
+	if op.RoleKey == constant.RoleKeyAdmin || op.DataScope == "" || op.DataScope == constant.DataScope1 {
+		return baseLang.SuccessCode, nil
+	}
+	switch op.DataScope {
+	case constant.DataScope2:
+		// 自定义数据权限：目标部门须在角色部门授权内
+		var cnt int64
+		if err := e.Orm.Table("admin_sys_role_dept").Where("role_id = ? AND dept_id = ?", op.RoleId, deptId).Count(&cnt).Error; err != nil {
+			return baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+		}
+		if cnt == 0 {
+			return baseLang.ForbitErr, lang.MsgErr(baseLang.ForbitErr, e.Lang)
+		}
+	case constant.DataScope3:
+		// 本部门：目标部门必须与操作者部门一致
+		if op.DeptId != deptId {
+			return baseLang.ForbitErr, lang.MsgErr(baseLang.ForbitErr, e.Lang)
+		}
+	case constant.DataScope4:
+		// 本部门及以下：目标部门必须在操作者部门子树内（parent_ids 含操作者部门）
+		var cnt int64
+		if err := e.Orm.Table("admin_sys_dept").
+			Where("id = ? AND (parent_ids LIKE ? OR id = ?)", deptId, "%,"+strconv.FormatInt(op.DeptId, 10)+",%", op.DeptId).
+			Count(&cnt).Error; err != nil {
+			return baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+		}
+		if cnt == 0 {
+			return baseLang.ForbitErr, lang.MsgErr(baseLang.ForbitErr, e.Lang)
+		}
+	case constant.DataScope5:
+		// 仅本人：不允许创建用户或为他人分配部门
+		return baseLang.ForbitErr, lang.MsgErr(baseLang.ForbitErr, e.Lang)
+	}
+	return baseLang.SuccessCode, nil
+}
+
 // Insert admin-新增系统用户管理
 func (e *SysUser) Insert(c *dto.SysUserInsertReq) (int64, int, error) {
 	if c.CurrUserId <= 0 {
@@ -130,6 +228,16 @@ func (e *SysUser) Insert(c *dto.SysUserInsertReq) (int64, int, error) {
 	}
 	if c.Password == "" {
 		return 0, baseLang.SysUserPwdEmptyCode, lang.MsgErr(baseLang.SysUserPwdEmptyCode, e.Lang)
+	}
+
+	// 防垂直越权：校验角色可分配性与部门数据权限范围
+	if c.RoleId > 0 {
+		if respCode, err := e.checkRoleAssignable(c.RoleId, c.CurrUserId); err != nil {
+			return 0, respCode, err
+		}
+	}
+	if respCode, err := e.checkDeptAssignable(c.DeptId, c.CurrUserId); err != nil {
+		return 0, respCode, err
 	}
 
 	if c.Username != "" {
@@ -278,6 +386,10 @@ func (e *SysUser) Update(c *dto.SysUserUpdateReq, p *middleware.DataPermission) 
 		updates["phone"] = c.Phone
 	}
 	if c.RoleId > 0 && data.RoleId != c.RoleId {
+		// 防垂直越权：角色变更须可分配（存在/未停用，admin 角色仅限 admin 操作者分配）
+		if respCode, err := e.checkRoleAssignable(c.RoleId, c.CurrUserId); err != nil {
+			return false, respCode, err
+		}
 		updates["role_id"] = c.RoleId
 		authChange = true //角色切换，需要重新登录
 	}
@@ -303,6 +415,10 @@ func (e *SysUser) Update(c *dto.SysUserUpdateReq, p *middleware.DataPermission) 
 		updates["email"] = c.Email
 	}
 	if c.DeptId > 0 && data.DeptId != c.DeptId {
+		// 防越权：部门变更须在操作者数据权限范围内
+		if respCode, err := e.checkDeptAssignable(c.DeptId, c.CurrUserId); err != nil {
+			return false, respCode, err
+		}
 		updates["dept_id"] = c.DeptId
 	}
 	if c.PostId > 0 && data.PostId != c.PostId {
@@ -323,18 +439,8 @@ func (e *SysUser) Update(c *dto.SysUserUpdateReq, p *middleware.DataPermission) 
 		}
 
 		if authChange {
-			sysRoleService := NewSysRoleService(&e.Service)
-			role, _, _ := sysRoleService.Get(c.RoleId, nil)
-			if role != nil {
-				//设置变更的角色到内存，后续该用户操作时，会强制该用户退出
-				runtime.RuntimeConfig.GetCacheAdapter().Set(
-					jwtauth.JwtRolePrefix,
-					strconv.FormatInt(c.Id, 10),
-					role.RoleKey,
-					config.AuthConfig.MaxRefresh,
-				)
-			}
-
+			// 角色变更：强制该用户重新登录，旧 token 立即失效
+			jwtauth.MarkPwdChanged(c.Id)
 		}
 		return true, baseLang.SuccessCode, nil
 	}
@@ -394,6 +500,8 @@ func (e *SysUser) ResetPwd(c *dto.ResetSysUserPwdReq, p *middleware.DataPermissi
 		if err != nil {
 			return false, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
 		}
+		// 密码变更后，该用户所有旧 token 立即失效
+		jwtauth.MarkPwdChanged(c.UserId)
 		return true, baseLang.SuccessCode, nil
 	}
 	return false, baseLang.SuccessCode, nil
@@ -544,19 +652,21 @@ func (e *SysUser) UpdateProfile(c *dto.SysUserUpdateReq) (bool, int, error) {
 // LoginVerify admin-登录验证
 func (e *SysUser) LoginVerify(login *dto.LoginReq) (*models.SysUser, int, error) {
 	user := &models.SysUser{}
-	status := []string{global.SysStatusOk}
-	if login.Username == constant.RoleKeyAdmin {
-		status = []string{global.SysStatusOk, global.SysStatusNotOk}
-	}
-	err := e.Orm.Preload("Dept").Preload("Post").Preload("Role").Where("username = ? and status in (?)", login.Username, status).First(user).Error
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
-	}
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, baseLang.SysUserNoExistCode, lang.MsgErr(baseLang.SysUserNoExistCode, e.Lang)
+	// 所有账号（含 admin）统一校验 status=正常：被禁用的 admin 账号同样禁止登录
+	err := e.Orm.Preload("Dept").Preload("Post").Preload("Role").Where("username = ? and status = ?", login.Username, global.SysStatusOk).First(user).Error
+	if err != nil {
+		// 记录真实原因用于排查，但对外统一返回“用户名或密码错误”，避免用户名枚举
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			e.Log.Errorf("LoginVerify query user error:%s", err.Error())
+		}
+		return nil, baseLang.SysUserPwdErrCode, lang.MsgErr(baseLang.SysUserPwdErrCode, e.Lang)
 	}
 	if !strutils.CompareHashAndPassword(user.Password, login.Password) {
 		return nil, baseLang.SysUserPwdErrCode, lang.MsgErr(baseLang.SysUserPwdErrCode, e.Lang)
+	}
+	// 角色被删/未分配时 Preload 得到 nil，下游 userResp.Role.RoleKey 会 panic，此处直接拦截
+	if user.Role == nil || user.Role.RoleKey == "" {
+		return nil, baseLang.SysUserNoRoleErrCode, lang.MsgErr(baseLang.SysUserNoRoleErrCode, e.Lang)
 	}
 	return user, baseLang.SuccessCode, nil
 }
@@ -620,6 +730,8 @@ func (e *SysUser) UpdateProfilePwd(c dto.UpdateSysUserPwdReq, p *middleware.Data
 		if err != nil {
 			return false, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
 		}
+		// 密码变更后，该用户所有旧 token 立即失效（含其他设备）
+		jwtauth.MarkPwdChanged(c.CurrUserId)
 		return true, baseLang.SuccessCode, nil
 	}
 	return false, baseLang.SuccessCode, nil

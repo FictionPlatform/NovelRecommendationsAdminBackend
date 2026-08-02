@@ -346,3 +346,64 @@
 ---
 
 *报告生成方式: 静态代码审查（Gin 中间件链、casbin 权限流、数据权限、队列、缓存、配置加载、SQL 脚本等交叉验证），部分行号可能随代码变动略有偏移。*
+
+
+# 补充
+
+部署提醒: 如果你在 nginx 后面部署,请:
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+并配置 trustedProxies: [nginx的IP]。若 nginx 不覆盖 XFF 头,客户端仍可注入伪造值,所以 nginx 必须使用 $proxy_add_x_forwarded_for(它会追加客户端真实 IP,并丢弃客户端伪造部分)。
+默认行为变化: 不配置 trustedProxies 时,直连访问的 ClientIP() = TCP 对端 IP,不可伪造;登录日志的 IP 定位(GetLocation)与之前一致,只是 IP 来源更可靠。
+
+# 修复进度
+
+## Critical
+- C1 ✅ 密钥硬编码：JWT/AES 密钥启动校验（拒绝占位符/旧默认值/共用），配置随机化；`config/` 已停止 git 追踪；DSN 密码环境变量注入 `${DB_PASSWORD}` + 弱口令/空密码启动拒绝 + 日志脱敏
+- C2 ✅ app 用户密码：`pwd`/`pay_pwd` 改 bcrypt 哈希（`app/app/user/models/user.go` BeforeCreate/BeforeUpdate + CheckPwd 兼容），字段 `json:"-"`（commit 42784cc）
+- C3 ✅ 代码生成任意写：`sys-table` 路由挂 `AdminOnly()`；gen 路径字段白名单正则校验
+- C4 ⚠️ 部分：新增 `middleware.AdminOnly()`（仅 admin 角色）并挂载到敏感路由；数据权限 `PermissionAction()` 全量挂载待 create_by 语义统一后启用（enableDP 仍为 false）
+- C5 ✅ 日志中间件：删除 bufio（原未 Flush 导致小 body 接口失效），`io.LimitReader` 1MB 上限
+- C6 ✅ 上传链路：filemgr_app 扩展名白名单 + 200MB 上限；头像 2MB + 魔数校验 + nil 检查；静态目录自实现路由（禁目录列举、防路径穿越、危险类型强制下载）
+- C7 ✅ IP 伪造：显式 `SetTrustedProxies`（未配置不信任任何代理），`GetClientIP` 直接用 `c.ClientIP()`，删除手工拼接 XFF
+- C8 ✅ 内存队列：消费失败本地重试 3 次后丢弃（消除向自身 channel 回投的自死锁/忙等）；Append 有界等待入队（100ms 超时丢弃，防 goroutine 堆积）
+- C9 ✅ redis 队列：`Run()` 启动 goroutine 消费 `consumer.Errors` 并记日志（防无缓冲通道阻塞停摆）
+- C10 ✅ 操作日志脱敏：JSON 递归 + 正则兜底过滤 password/token/captcha 等敏感字段后入库
+- C11 ✅ 旧 JWT：`MarkPwdChanged(uid)` 统一失效机制（禁用/删除/重置密码/改密后全部旧 token 立即失效）；`checkUserStatus` 实时查库校验用户存在/状态/角色一致性
+- C12 ✅ WS 管理器：Send 系列加锁快照再发送；`safeSend`（client 级互斥 + closed 标志）杜绝 send on closed channel / map 竞态
+- C13 ✅ DSN 日志脱敏 + 弱口令校验（见 C1）
+- C14 ✅ 优雅关闭：监听 SIGTERM + SIGINT；关闭流程执行队列 `Shutdown()`
+
+## High
+- H1 ✅ 删除 API/菜单时回收 casbin 策略（受影响角色重建 + 全局 enforcer 重载）
+- H2 ✅ 菜单更新 casbin 循环内 return 修复（全部角色更新后才返回）
+- H3 ✅ 创建/更新用户角色校验（`checkRoleAssignable`）+ 部门范围校验（`checkDeptAssignable`）
+- H4 ✅ `dept_path` → `parent_ids`（Permission 中间件 + 用户查询 + DTO 标签）
+- H5 ✅ UpdateDataScope：admin 角色保护 + 数据范围不得放宽校验 + 变更后 `MarkPwdChanged`
+- H6 ✅ role_key 禁止重命名；admin 角色禁止停用；每请求实时校验角色启用状态
+- H7 ✅ 角色降权即时生效：删除 JwtRolePrefix 过期缓存，改实时 DB join 比对
+- H8 ✅ 设备列表写入加锁（`addDevice` 原子读改写）
+- H9 ✅ 头像上传：大小限制 + nil 检查 + 魔数校验
+- H10 ✅ 导出公式注入：`excelutils.SafeRow` 统一清洗（`=+-@` 前缀转义）
+- H11 ✅ 导出/列表 pageSize：`GetPageSize` 钳制 + `PageSizeLimit` 服务端字段（客户端不可传）；15 个导出接口配置缺失兜底 1000、上限 10000、错误后 return
+- H12 ✅ 内存缓存：Increase/Decrease/Expire/HashDel 写锁 + copy-on-write；后台协程 30s 清理过期条目
+- H13 ✅ httpclient：删除 InsecureSkipVerify；类型断言加 ok 检查
+- H14 ✅ OSS：os.Open 错误检查；分片失败/完成失败 `AbortMultipartUpload`；ACL 改 Private（配合签名 URL）
+- H15 ✅ 登录：用户不存在/密码错误统一返回"用户名或密码错误"（防枚举）；admin 账号同受 status 校验（被禁用不可登录）
+- H16 ✅ 索引：`admin_sys_user(username)` UNIQUE；`app_user(parent_id/mobile/email/ref_code)`、`app_user_account_log(user_id)`、`admin_sys_login_log(user_id, created_at)`、`admin_sys_oper_log(user_id, created_at)`、`admin_sys_dict_data(dict_type)` 索引（mysql+pgsql 同步）
+
+## Medium（未处理）
+M3-M4、M6-M19 未处理（验证码强度、随机数、Swagger 暴露、热更新、M19 同表双 JOIN 报错等）
+
+## Medium
+- M1 ✅ 全局 `gin.CustomRecovery` 兜底所有 panic（记录堆栈 + 统一 500 JSON）；`CustomError` 默认分支不再重抛，改日志 + 500 响应
+- M2 ✅ `LoginVerify` 增加角色判空（`Role == nil || RoleKey == ""` 返回"该账户尚未分配角色"），消除登录接口 Role nil 指针 panic
+- M5 ✅ CORS 改配置白名单 `corsOrigins`（请求 Origin 不在白名单不返回 ACAO，`Vary: Origin`；响应包 Download 的 ACAO `*` 一并移除）；启用 `X-Frame-Options: DENY`；`TokenLookup` 移除 query 传参（仅 header/cookie）
+- M6 ✅ Swagger 仅 `mode: dev` 注册（其他环境 404）；`/static` 目录弃用 `gin.Static`（http.FileServer 可列目录），改与上传目录同款 `serveFileNoList`（禁目录列举、防路径穿越、危险类型强制下载）
+- M8 ✅ Runtime 容器 map 返回副本：`GetDb`/`GetCasbin`/`GetMiddleware`/`GetHandler` 深拷贝 map（切片一并拷贝）、`GetHandlerPrefix`/`GetRouter` 返回切片副本；`GetDbByKey`/`GetCasbinKey`/`GetMiddlewareKey` 改用 RLock
+
+## 待办
+- C4 数据权限全量挂载（依赖 create_by 语义统一）
+- M 级全部
+- 存量库执行新增索引的 ALTER 语句（新装库直接跑 app_mysql.sql / app_pgsql.sql 即可）
+- 清理 git 历史中的旧密钥（git filter-repo）并轮换线上密钥
+- settings.yml.back 中硬编码了本地库口令（nVZypeJxyuXZ4J4J），仅限本地开发，勿用于生产

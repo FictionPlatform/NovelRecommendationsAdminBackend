@@ -2,8 +2,13 @@ package middleware
 
 import (
 	"go-admin/core/config"
+	"go-admin/core/dto/response"
+	baseLang "go-admin/config/base/lang"
+	"go-admin/core/lang"
 	"go-admin/core/runtime"
 	"go-admin/core/utils/log"
+	"net/http"
+	"runtime/debug"
 
 	jwt "github.com/appleboy/gin-jwt/v3"
 	"github.com/gin-gonic/gin"
@@ -17,6 +22,11 @@ const (
 )
 
 func InitMiddleware(r *gin.Engine) {
+	// 兜底所有未捕获 panic：记录堆栈并返回 500，避免连接被静默断开
+	r.Use(gin.CustomRecovery(func(c *gin.Context, err interface{}) {
+		log.Errorf("panic recovered: %v\n%s", err, string(debug.Stack()))
+		response.ErrorByHttpCode(c, http.StatusInternalServerError, baseLang.ServerErr, lang.MsgByCode(baseLang.ServerErr, ""))
+	}))
 	// 数据库链接
 	r.Use(WithContextDb)
 	// 日志处理

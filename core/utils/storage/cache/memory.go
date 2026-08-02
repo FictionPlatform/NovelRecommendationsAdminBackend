@@ -17,8 +17,29 @@ type item struct {
 
 // NewMemory memory模式
 func NewMemory() *Memory {
-	return &Memory{
+	m := &Memory{
 		items: new(sync.Map),
+	}
+	go m.cleanupLoop()
+	return m
+}
+
+// cleanupInterval 过期条目后台清理间隔
+const cleanupInterval = 30 * time.Second
+
+// cleanupLoop 定期主动清理过期条目：惰性删除只能清理被访问过的 key，
+// 验证码等随机 key 必须由后台协程回收，否则内存无限增长
+func (m *Memory) cleanupLoop() {
+	ticker := time.NewTicker(cleanupInterval)
+	defer ticker.Stop()
+	for range ticker.C {
+		now := time.Now()
+		m.items.Range(func(k, v interface{}) bool {
+			if it, ok := v.(*item); ok && it.Expired != nil && it.Expired.Before(now) {
+				m.items.Delete(k)
+			}
+			return true
+		})
 	}
 }
 
@@ -142,12 +163,24 @@ func (m *Memory) HashGet(prefix, key, field string) (string, error) {
 
 func (m *Memory) HashDel(prefix, key, field string) error {
 	key = prefix + runtime.IntervalTenant + key
-	item, err := m.getItem(key)
-	if err != nil || item == nil {
+	it, err := m.getItem(key)
+	if err != nil || it == nil {
 		return err
 	}
-	delete((item.Value).(map[string]interface{}), field)
-	return m.setItem(key, item)
+	// copy-on-write：不修改共享 map，避免与其他读方并发访问共享 *item 引发竞态
+	oldMap, ok := (it.Value).(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("value of %s type error", key)
+	}
+	newMap := make(map[string]interface{}, len(oldMap))
+	for k, v := range oldMap {
+		newMap[k] = v
+	}
+	delete(newMap, field)
+	return m.setItem(key, &item{
+		Value:   newMap,
+		Expired: it.Expired,
+	})
 }
 
 func (m *Memory) Increase(prefix, key string) error {
@@ -160,44 +193,51 @@ func (m *Memory) Decrease(prefix, key string) error {
 	return m.calculate(key, -1)
 }
 
+// calculate 读改写必须使用写锁，RLock 会导致并发 Increase/Decrease 丢失更新；
+// 采用 copy-on-write 替换整条记录，避免并发读写共享 *item 指针造成数据竞态
 func (m *Memory) calculate(key string, num int) error {
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-	item, err := m.getItem(key)
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	it, err := m.getItem(key)
 	if err != nil {
 		return err
 	}
 
-	if item == nil {
+	if it == nil {
 		err = fmt.Errorf("%s not exist", key)
 		return err
 	}
 	var n int
-	n, err = cast.ToIntE(item.Value)
+	n, err = cast.ToIntE(it.Value)
 	if err != nil {
 		return err
 	}
 	n += num
-	item.Value = strconv.Itoa(n)
-	return m.setItem(key, item)
+	return m.setItem(key, &item{
+		Value:   strconv.Itoa(n),
+		Expired: it.Expired,
+	})
 }
 
 func (m *Memory) Expire(prefix, key string, expire int) error {
 	key = prefix + runtime.IntervalTenant + key
-	m.mutex.RLock()
-	defer m.mutex.RUnlock()
-	item, err := m.getItem(key)
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	it, err := m.getItem(key)
 	if err != nil {
 		return err
 	}
-	if item == nil {
+	if it == nil {
 		err = fmt.Errorf("%s not exist", key)
 		return err
 	}
 
 	exp := time.Now().Add(time.Duration(expire) * time.Second)
-	item.Expired = &exp
-	return m.setItem(key, item)
+	// copy-on-write 替换整条记录，不修改共享 *item
+	return m.setItem(key, &item{
+		Value:   it.Value,
+		Expired: &exp,
+	})
 }
 
 func (m *Memory) getItem(key string) (*item, error) {

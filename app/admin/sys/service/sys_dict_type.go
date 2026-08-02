@@ -14,6 +14,7 @@ import (
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
 	"go-admin/core/utils/dateutils"
+	"go-admin/core/utils/excelutils"
 	"gorm.io/gorm"
 	"time"
 )
@@ -272,9 +273,9 @@ func (e *SysDictType) Export(list []models.SysDictType) ([]byte, error) {
 	for i, item := range list {
 		axis := fmt.Sprintf("A%d", i+2)
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, item.DictName, item.DictType, item.Remark, dateutils.ConvertToStrByPrt(item.CreatedAt, -1),
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()

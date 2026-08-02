@@ -18,6 +18,7 @@ import (
 	"go-admin/app/admin/sys/models"
 	"go-admin/app/admin/sys/service/dto"
 	cDto "go-admin/core/dto"
+	"go-admin/core/utils/excelutils"
 )
 
 type SysConfig struct {
@@ -269,9 +270,9 @@ func (e *SysConfig) Export(list []models.SysConfig) ([]byte, error) {
 		configType := dictService.GetLabel("admin_sys_config_type", item.ConfigType)
 		isFrontend := dictService.GetLabel("admin_sys_config_is_frontend", item.IsFrontend)
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, item.ConfigName, item.ConfigKey, item.ConfigValue, item.Remark, configType, isFrontend, dateutils.ConvertToStrByPrt(item.CreatedAt, -1),
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()

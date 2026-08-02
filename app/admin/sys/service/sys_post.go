@@ -16,6 +16,7 @@ import (
 	"go-admin/app/admin/sys/models"
 	"go-admin/app/admin/sys/service/dto"
 	cDto "go-admin/core/dto"
+	"go-admin/core/utils/excelutils"
 )
 
 type SysPost struct {
@@ -274,9 +275,9 @@ func (e *SysPost) Export(list []models.SysPost) ([]byte, error) {
 		axis := fmt.Sprintf("A%d", i+2)
 		postStatus := dictService.GetLabel("admin_sys_status", item.Status)
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, item.PostName, item.PostCode, item.Sort, postStatus, dateutils.ConvertToStrByPrt(item.CreatedAt, -1),
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()

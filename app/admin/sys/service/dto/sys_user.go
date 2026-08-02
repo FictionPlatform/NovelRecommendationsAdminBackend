@@ -29,7 +29,7 @@ type SysUserOrder struct {
 }
 
 type DeptJoin struct {
-	Id string `search:"type:contains;column:dept_path;table:admin_sys_dept" form:"id"`
+	Id string `search:"type:contains;column:parent_ids;table:admin_sys_dept" form:"id"`
 }
 
 func (m *SysUserQueryReq) GetNeedSearch() interface{} {

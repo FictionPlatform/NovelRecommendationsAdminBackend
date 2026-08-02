@@ -7,7 +7,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"strings"
 )
 
 // GetLocation 获取外网ip地址
@@ -60,21 +59,10 @@ func GetLocaHost() string {
 	return ""
 }
 
+// GetClientIP 获取客户端真实 IP。
+// 依赖 gin 的可信代理配置（SetTrustedProxies）：
+// - 未配置可信代理时返回直连对端 IP（RemoteAddr），客户端伪造的 X-Forwarded-For 无效；
+// - 配置了可信代理（如 nginx）时，返回代理链中最左侧的真实客户端 IP。
 func GetClientIP(c *gin.Context) string {
-	ClientIP := c.ClientIP()
-	RemoteIP := c.RemoteIP()
-	ip := c.Request.Header.Get("X-Forwarded-For")
-	if strings.Contains(ip, "127.0.0.1") || ip == "" {
-		ip = c.Request.Header.Get("X-real-ip")
-	}
-	if ip == "" {
-		ip = "127.0.0.1"
-	}
-	if RemoteIP != "127.0.0.1" {
-		ip = RemoteIP
-	}
-	if ClientIP != "127.0.0.1" {
-		ip = ClientIP
-	}
-	return ip
+	return c.ClientIP()
 }

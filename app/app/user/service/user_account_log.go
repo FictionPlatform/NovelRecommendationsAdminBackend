@@ -14,6 +14,7 @@ import (
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
 	"go-admin/core/utils/encrypt"
+	"go-admin/core/utils/excelutils"
 	"go-admin/core/utils/strutils"
 	"gorm.io/gorm"
 )
@@ -163,9 +164,9 @@ func (e *UserAccountLog) Export(list []models.UserAccountLog) ([]byte, error) {
 		status := dictService.GetLabel("admin_sys_status", item.Status)
 
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, status,
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()

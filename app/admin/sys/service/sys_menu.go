@@ -5,6 +5,7 @@ import (
 	"github.com/casbin/casbin/v2"
 	"go-admin/config/base/constant"
 	baseLang "go-admin/config/base/lang"
+	mycasbin "go-admin/core/casbin"
 	"go-admin/core/dto/service"
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
@@ -372,9 +373,9 @@ func (e *SysMenu) updateCasbinByMenu(menuId int64, tx *gorm.DB, cb *casbin.Synce
 		return baseLang.SuccessCode, nil
 	}
 
+	roleService := NewSysRoleService(&e.Service)
 	for _, role := range data.SysRole {
 		//根据角色获取到对应的菜单
-		roleService := NewSysRoleService(&e.Service)
 		menuIds, respCode, err := roleService.GetMenuIdsByRole(role.Id)
 		if err != nil {
 			return respCode, err
@@ -385,7 +386,9 @@ func (e *SysMenu) updateCasbinByMenu(menuId int64, tx *gorm.DB, cb *casbin.Synce
 		if err = tx.Preload("SysApi").Where("id in ?", menuIds).Find(&mlist).Error; err != nil {
 			return baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
 		}
-		return roleService.UpdateCasbin(mlist, role.RoleKey, tx, cb)
+		if respCode, err := roleService.UpdateCasbin(mlist, role.RoleKey, tx, cb); err != nil {
+			return respCode, err
+		}
 	}
 	return baseLang.SuccessCode, nil
 
@@ -403,6 +406,7 @@ func (e *SysMenu) Delete(ids []int64, p *middleware.DataPermission) (int, error)
 			tx.Rollback()
 		} else {
 			tx.Commit()
+			e.DeleteCasbinByMenu()
 		}
 	}()
 
@@ -415,6 +419,15 @@ func (e *SysMenu) Delete(ids []int64, p *middleware.DataPermission) (int, error)
 	}
 	if count > 0 {
 		return baseLang.SysMenuHasChildCode, lang.MsgErr(baseLang.SysMenuHasChildCode, e.Lang)
+	}
+
+	// 收集受影响的角色（删除前），删除菜单后需重建其 casbin 策略
+	var affectedRoleIds []int64
+	if err = tx.Table("admin_sys_role_menu").
+		Where("menu_id in (?)", ids).
+		Distinct("role_id").
+		Pluck("role_id", &affectedRoleIds).Error; err != nil {
+		return baseLang.DataDeleteLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataDeleteCode, baseLang.DataDeleteLogCode, err)
 	}
 
 	//删除关联的api
@@ -431,6 +444,11 @@ func (e *SysMenu) Delete(ids []int64, p *middleware.DataPermission) (int, error)
 		}
 	}
 
+	//清理菜单-角色关联，避免残留（否则重建策略时仍读到已删菜单）
+	if err = tx.Table("admin_sys_role_menu").Where("menu_id in (?)", ids).Delete(nil).Error; err != nil {
+		return baseLang.DataDeleteLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataDeleteCode, baseLang.DataDeleteLogCode, err)
+	}
+
 	//删除列表
 	var data models.SysMenu
 	err = tx.Scopes(
@@ -439,7 +457,21 @@ func (e *SysMenu) Delete(ids []int64, p *middleware.DataPermission) (int, error)
 	if err != nil {
 		return baseLang.DataDeleteLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataDeleteCode, baseLang.DataDeleteLogCode, err)
 	}
+
+	// 重建受影响角色的 casbin 策略（回收已删菜单对应的权限残留）
+	cb := mycasbin.GetGlobalEnforcer()
+	roleService := NewSysRoleService(&e.Service)
+	if respCode, err := roleService.RebuildCasbinByRoles(affectedRoleIds, tx, cb); err != nil {
+		return respCode, err
+	}
 	return baseLang.SuccessCode, nil
+}
+
+// DeleteCasbinByMenu 删除菜单后刷新全局 casbin 内存策略（事务提交后调用）
+func (e *SysMenu) DeleteCasbinByMenu() {
+	if cb := mycasbin.GetGlobalEnforcer(); cb != nil {
+		_ = cb.LoadPolicy()
+	}
 }
 
 // GetList admin-获取菜单管理全部列表

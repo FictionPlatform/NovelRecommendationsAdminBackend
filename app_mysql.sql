@@ -307,6 +307,9 @@ CREATE TABLE `admin_sys_dict_data` (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='字典数据管理';
 
+-- 字典数据按 dict_type 查询是主路径
+ALTER TABLE `admin_sys_dict_data` ADD INDEX `idx_admin_sys_dict_data_dict_type` (`dict_type`);
+
 -- ----------------------------
 -- Records of admin_sys_dict_data
 -- ----------------------------
@@ -853,6 +856,9 @@ CREATE TABLE `admin_sys_login_log` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='登录日志';
 
+-- 登录日志按用户查询/统计主路径
+ALTER TABLE `admin_sys_login_log` ADD INDEX `idx_admin_sys_login_log_user_id_created_at` (`user_id`, `created_at`);
+
 -- ----------------------------
 -- Records of admin_sys_login_log
 -- ----------------------------
@@ -1207,6 +1213,9 @@ CREATE TABLE `admin_sys_oper_log` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='操作日志';
 
+-- 操作日志按用户查询/统计主路径
+ALTER TABLE `admin_sys_oper_log` ADD INDEX `idx_admin_sys_oper_log_user_id_created_at` (`user_id`, `created_at`);
+
 -- ----------------------------
 -- Records of admin_sys_oper_log
 -- ----------------------------
@@ -1346,7 +1355,8 @@ CREATE TABLE `admin_sys_user` (
   `update_by` int DEFAULT NULL COMMENT '更新者',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '最后更新时间',
-  PRIMARY KEY (`id`) USING BTREE
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uniq_admin_sys_user_username` (`username`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='系统用户管理';
 
 -- ----------------------------
@@ -1389,6 +1399,12 @@ CREATE TABLE `app_user` (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='用户管理';
 
+-- 高频查询索引：推荐关系、登录/注册按 mobile/email/ref_code 精确查询
+ALTER TABLE `app_user` ADD INDEX `idx_app_user_parent_id` (`parent_id`);
+ALTER TABLE `app_user` ADD INDEX `idx_app_user_mobile` (`mobile`);
+ALTER TABLE `app_user` ADD INDEX `idx_app_user_email` (`email`);
+ALTER TABLE `app_user` ADD INDEX `idx_app_user_ref_code` (`ref_code`);
+
 -- ----------------------------
 -- Records of app_user
 -- ----------------------------
@@ -1419,6 +1435,9 @@ CREATE TABLE `app_user_account_log` (
   PRIMARY KEY (`id`),
   KEY `idx_qyc_user_status` (`status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin COMMENT='账变记录';
+
+-- 账变记录按用户查询是主路径，user_id 必须建索引
+ALTER TABLE `app_user_account_log` ADD INDEX `idx_app_user_account_log_user_id` (`user_id`);
 
 -- ----------------------------
 -- Records of app_user_account_log

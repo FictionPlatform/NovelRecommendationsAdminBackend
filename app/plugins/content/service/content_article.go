@@ -15,6 +15,7 @@ import (
 	"go-admin/core/middleware"
 	"go-admin/core/utils/dateutils"
 
+	"go-admin/core/utils/excelutils"
 	"gorm.io/gorm"
 	"time"
 )
@@ -234,9 +235,9 @@ func (e *ContentArticle) Export(list []models.ContentArticle) ([]byte, error) {
 		axis := fmt.Sprintf("A%d", i+2)
 
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, item.ContentCategory.Name, item.Name, item.Content, item.Remark, dateutils.ConvertToStrByPrt(item.CreatedAt, -1),
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()

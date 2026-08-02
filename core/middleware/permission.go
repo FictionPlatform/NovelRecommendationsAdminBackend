@@ -80,7 +80,7 @@ func Permission(tableName string, p *DataPermission) func(db *gorm.DB) *gorm.DB 
 			return db.Where(tableName+".create_by in (SELECT id from admin_sys_user where dept_id = ? )", p.DeptId)
 		case constant.DataScope4:
 			//本部门及以下数据权限
-			return db.Where(tableName+".create_by in (SELECT id from admin_sys_user where admin_sys_user.dept_id in(select dept_id from admin_sys_dept where dept_path like ? ))", "%/"+strutils.Int64ToString(p.DeptId)+"/%")
+			return db.Where(tableName+".create_by in (SELECT id from admin_sys_user where admin_sys_user.dept_id in(select id from admin_sys_dept where parent_ids like ? or id = ?))", "%,"+strutils.Int64ToString(p.DeptId)+",%", p.DeptId)
 		case constant.DataScope5:
 			//仅本人数据权限
 			return db.Where(tableName+".create_by = ?", p.UserId)

@@ -364,6 +364,8 @@ COMMENT ON COLUMN "public"."admin_sys_dict_data"."update_by" IS '更新者';
 COMMENT ON COLUMN "public"."admin_sys_dict_data"."created_at" IS '创建时间';
 COMMENT ON COLUMN "public"."admin_sys_dict_data"."updated_at" IS '最后更新时间';
 COMMENT ON TABLE "public"."admin_sys_dict_data" IS '字典数据管理';
+-- 字典数据按 dict_type 查询是主路径
+CREATE INDEX "idx_admin_sys_dict_data_dict_type" ON "public"."admin_sys_dict_data" USING btree ("dict_type");
 
 -- ----------------------------
 -- Records of admin_sys_dict_data
@@ -977,6 +979,8 @@ COMMENT ON COLUMN "public"."admin_sys_login_log"."updated_at" IS '最后更新�
 COMMENT ON COLUMN "public"."admin_sys_login_log"."create_by" IS '创建者';
 COMMENT ON COLUMN "public"."admin_sys_login_log"."update_by" IS '更新者';
 COMMENT ON TABLE "public"."admin_sys_login_log" IS '登录日志';
+-- 登录日志按用户查询/统计主路径
+CREATE INDEX "idx_admin_sys_login_log_user_id_created_at" ON "public"."admin_sys_login_log" USING btree ("user_id", "created_at");
 
 -- ----------------------------
 -- Records of admin_sys_login_log
@@ -1376,6 +1380,8 @@ COMMENT ON COLUMN "public"."admin_sys_oper_log"."updated_at" IS '最后更新时
 COMMENT ON COLUMN "public"."admin_sys_oper_log"."create_by" IS '创建者';
 COMMENT ON COLUMN "public"."admin_sys_oper_log"."update_by" IS '更新者';
 COMMENT ON TABLE "public"."admin_sys_oper_log" IS '操作日志';
+-- 操作日志按用户查询/统计主路径
+CREATE INDEX "idx_admin_sys_oper_log_user_id_created_at" ON "public"."admin_sys_oper_log" USING btree ("user_id", "created_at");
 
 -- ----------------------------
 -- Records of admin_sys_oper_log
@@ -1579,6 +1585,8 @@ COMMENT ON COLUMN "public"."admin_sys_user"."update_by" IS '更新者';
 COMMENT ON COLUMN "public"."admin_sys_user"."created_at" IS '创建时间';
 COMMENT ON COLUMN "public"."admin_sys_user"."updated_at" IS '最后更新时间';
 COMMENT ON TABLE "public"."admin_sys_user" IS '系统用户管理';
+-- 用户名唯一，避免重复导致登录 First() 行为不确定
+CREATE UNIQUE INDEX "uniq_admin_sys_user_username" ON "public"."admin_sys_user" USING btree ("username");
 
 -- ----------------------------
 -- Records of admin_sys_user
@@ -1650,6 +1658,11 @@ COMMENT ON COLUMN "public"."app_user"."update_by" IS '更新者';
 COMMENT ON COLUMN "public"."app_user"."created_at" IS '创建时间';
 COMMENT ON COLUMN "public"."app_user"."updated_at" IS '更新时间';
 COMMENT ON TABLE "public"."app_user" IS '用户管理';
+-- 高频查询索引：推荐关系、登录/注册按 mobile/email/ref_code 精确查询
+CREATE INDEX "idx_app_user_parent_id" ON "public"."app_user" USING btree ("parent_id");
+CREATE INDEX "idx_app_user_mobile" ON "public"."app_user" USING btree ("mobile");
+CREATE INDEX "idx_app_user_email" ON "public"."app_user" USING btree ("email");
+CREATE INDEX "idx_app_user_ref_code" ON "public"."app_user" USING btree ("ref_code");
 
 -- ----------------------------
 -- Records of app_user
@@ -1700,6 +1713,8 @@ COMMENT ON COLUMN "public"."app_user_account_log"."update_by" IS '更新者';
 COMMENT ON COLUMN "public"."app_user_account_log"."updated_at" IS '更新时间';
 COMMENT ON COLUMN "public"."app_user_account_log"."remarks" IS '备注信息';
 COMMENT ON TABLE "public"."app_user_account_log" IS '账变记录';
+-- 账变记录按用户查询是主路径，user_id 必须建索引
+CREATE INDEX "idx_app_user_account_log_user_id" ON "public"."app_user_account_log" USING btree ("user_id");
 
 -- ----------------------------
 -- Records of app_user_account_log

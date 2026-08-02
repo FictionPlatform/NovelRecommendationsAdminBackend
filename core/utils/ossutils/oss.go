@@ -78,6 +78,9 @@ func (e *ALiYunOSS) UploadWithSpace(objectKey, localPath string) error {
 		return err
 	}
 	fd, err := os.Open(localPath)
+	if err != nil {
+		return errors.New(fmt.Sprintf("open local file err：%s", err.Error()))
+	}
 	defer fd.Close()
 
 	// 指定过期时间。
@@ -99,6 +102,9 @@ func (e *ALiYunOSS) UploadWithSpace(objectKey, localPath string) error {
 	}
 	// 步骤1：初始化一个分片上传事件，并指定存储类型为标准存储。
 	imur, err := e.Bucket.InitiateMultipartUpload(objectKey, options...)
+	if err != nil {
+		return errors.New(fmt.Sprintf("init multipart upload err：%s", err.Error()))
+	}
 	// 步骤2：上传分片。
 	var parts []oss.UploadPart
 	for _, chunk := range chunks {
@@ -106,14 +112,18 @@ func (e *ALiYunOSS) UploadWithSpace(objectKey, localPath string) error {
 		// 调用UploadPart方法上传每个分片。
 		part, err := e.Bucket.UploadPart(imur, fd, chunk.Size, chunk.Number)
 		if err != nil {
-			return err
+			// 任一分片失败即中止分片上传，避免孤儿分片长期占用存储
+			_ = e.Bucket.AbortMultipartUpload(imur)
+			return errors.New(fmt.Sprintf("upload part err：%s", err.Error()))
 		}
 		parts = append(parts, part)
 	}
-	objectAcl := oss.ObjectACL(oss.ACLPublicRead)
+	// 私有读写，配合签名下载链接（GeneratePresignedUrl）使用，避免公开读
+	objectAcl := oss.ObjectACL(oss.ACLPrivate)
 	_, err = e.Bucket.CompleteMultipartUpload(imur, parts, objectAcl)
 	if err != nil {
-		return err
+		_ = e.Bucket.AbortMultipartUpload(imur)
+		return errors.New(fmt.Sprintf("complete multipart upload err：%s", err.Error()))
 	}
 	return nil
 }

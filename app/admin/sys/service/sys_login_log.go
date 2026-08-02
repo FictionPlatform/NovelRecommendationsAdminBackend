@@ -12,6 +12,7 @@ import (
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
 	"go-admin/core/utils/dateutils"
+	"go-admin/core/utils/excelutils"
 	"gorm.io/gorm"
 )
 
@@ -96,10 +97,10 @@ func (e *SysLoginLog) Export(list []models.SysLoginLog) ([]byte, error) {
 		axis := fmt.Sprintf("A%d", i+2)
 		loginLogStatus := dictService.GetLabel("admin_sys_loginlog_status", item.Status) //平台
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, item.UserId, loginLogStatus, item.Ipaddr, item.LoginLocation, item.Agent,
 			item.Browser, item.Os, item.Platform, dateutils.ConvertToStrByPrt(item.LoginTime, -1), item.Remark,
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()

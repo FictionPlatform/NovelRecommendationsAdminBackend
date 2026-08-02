@@ -16,11 +16,13 @@ import (
 	queueSetup "go-admin/core/storage/queue"
 	"go-admin/core/utils/iputils"
 	"go-admin/core/utils/log"
+	"go-admin/core/utils/storage"
 	"go-admin/core/utils/strutils"
 	"go-admin/core/utils/textutils"
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/bitxx/load-config/source/file"
@@ -40,6 +42,8 @@ import (
 var (
 	configPath string
 	StartCmd   *cobra.Command
+	// appQueue 全局消息队列实例，优雅关闭时统一释放
+	appQueue storage.AdapterQueue
 )
 
 var AppRouters = make([]func(), 0)
@@ -91,6 +95,7 @@ func setup() {
 
 	// 3. 注册监听函数
 	queue := runtime.RuntimeConfig.GetMemoryQueue("")
+	appQueue = queue
 	queue.Register(global.LoginLog, models.SaveLoginLog)
 	queue.Register(global.OperateLog, models.SaveOperLog)
 	go queue.Run()
@@ -130,9 +135,10 @@ func run() error {
 	log.Infof("-  Network: http://%s:%d/ \r", iputils.GetLocaHost(), config.ApplicationConfig.Port)
 	log.Infof("%s Enter Control + C Shutdown Server \r", strutils.GetCurrentTimeStr())
 
-	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
+	// 等待中断/终止信号以优雅地关闭服务器（设置 5 秒的超时时间）
+	// 同时监听 SIGTERM（docker stop / k8s 默认发送），避免容器停止时悬挂
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	select {
 	case <-quit:
 		// 正常关闭流程
@@ -146,6 +152,11 @@ func run() error {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Errorf("Server shutdown error: %v", err)
 		return err // 返回错误给 RunE
+	}
+
+	// 关闭消息队列，避免 goroutine 泄漏
+	if appQueue != nil {
+		appQueue.Shutdown()
 	}
 	log.Info("Server exiting")
 
@@ -167,11 +178,21 @@ func initRouter() {
 	if !ok {
 		panic("not support other engine")
 	}
+	// 显式设置可信代理：未配置时不信任任何代理，拒绝伪造的 X-Forwarded-For（防 IP 伪造绕过限流/黑名单）
+	if len(config.ApplicationConfig.TrustedProxies) > 0 {
+		if err := r.SetTrustedProxies(config.ApplicationConfig.TrustedProxies); err != nil {
+			panic("SetTrustedProxies error: " + err.Error())
+		}
+	} else {
+		r.SetTrustedProxies(nil)
+	}
 	//r.Use(middleware.Metrics())
 	r.Use(middleware.RequestId()).Use(log.SetRequestLogger)
 
-	//swagger文档
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// swagger 文档仅开发模式（settings.yml mode: dev）开放，避免生产暴露接口文档
+	if config.ApplicationConfig.Mode == global.ModeDev {
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 
 	middleware.InitMiddleware(r)
 }

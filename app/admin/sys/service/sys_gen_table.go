@@ -19,10 +19,21 @@ import (
 	"go-admin/core/utils/fileutils"
 	"gorm.io/gorm"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"text/template"
 	"time"
 )
+
+var genPathFieldPattern = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
+
+// validGenPathField 校验代码生成路径字段，仅允许字母数字下划线连字符，拒绝路径穿越
+func validGenPathField(s string) bool {
+	if s == "" {
+		return true
+	}
+	return genPathFieldPattern.MatchString(s)
+}
 
 type SysGenTable struct {
 	service.Service
@@ -140,6 +151,11 @@ func (e *SysGenTable) Update(c *dto.SysGenTableUpdateReq, p *middleware.DataPerm
 	data, respCode, err := e.Get(c.Id, p)
 	if err != nil {
 		return false, respCode, err
+	}
+
+	// 路径字段白名单校验，防止路径穿越写任意文件
+	if !validGenPathField(c.PackageName) || !validGenPathField(c.BusinessName) || !validGenPathField(c.ModuleName) || !validGenPathField(c.ClassName) {
+		return false, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
 
 	e.Orm = e.Orm.Begin()

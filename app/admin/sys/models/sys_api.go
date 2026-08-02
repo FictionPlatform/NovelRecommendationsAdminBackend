@@ -110,6 +110,18 @@ func SaveSysApi(db *gorm.DB, routers []runtime.Router) (err error) {
 		}
 	}
 	if len(delIds) > 0 {
+		// 查出失效接口的 path/method，同步清理对应的 casbin 策略（路由已不存在，角色不应再拥有该权限）
+		var delApis []SysApi
+		if err = tx.Where("id in (?)", delIds).Find(&delApis).Error; err != nil {
+			return
+		}
+		for _, api := range delApis {
+			if err = tx.Table("admin_sys_casbin_rule").
+				Where("ptype = ? AND v1 = ? AND v2 = ?", "p", api.Path, api.Method).
+				Delete(nil).Error; err != nil {
+				return
+			}
+		}
 		if err = tx.Table("admin_sys_menu_api_rule").Where("admin_sys_api_id in (?)", delIds).Delete(nil).Error; err != nil {
 			return
 		}

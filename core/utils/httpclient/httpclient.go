@@ -1,7 +1,6 @@
 package httpclient
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -100,7 +99,10 @@ func (h *HttpSend) send(method string) ([]byte, error) {
 			}
 			sendData = string(sendBody)
 		} else {
-			formBody := h.Body.(map[string]string)
+			formBody, ok := h.Body.(map[string]string)
+			if !ok {
+				return nil, errors.New("httpclient: Body must be map[string]string when SendType is form")
+			}
 			sendBody := http.Request{}
 			sendBody.ParseForm()
 			for k, v := range formBody {
@@ -169,7 +171,10 @@ func (h *HttpSend) sendWithProxy(method, scheme, host string) ([]byte, error) {
 			}
 			sendData = string(sendBody)
 		} else {
-			formBody := h.Body.(map[string]string)
+			formBody, ok := h.Body.(map[string]string)
+			if !ok {
+				return nil, errors.New("httpclient: Body must be map[string]string when SendType is form")
+			}
 			sendBody := http.Request{}
 			sendBody.ParseForm()
 			for k, v := range formBody {
@@ -180,7 +185,7 @@ func (h *HttpSend) sendWithProxy(method, scheme, host string) ([]byte, error) {
 	}
 
 	client.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		// 校验 TLS 证书，禁止 InsecureSkipVerify（防中间人）
 		Proxy: func(req *http.Request) (*url.URL, error) {
 			return &url.URL{
 				Scheme: scheme,

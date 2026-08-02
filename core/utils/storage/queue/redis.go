@@ -2,6 +2,7 @@ package queue
 
 import (
 	"github.com/redis/go-redis/v9"
+	"go-admin/core/utils/log"
 	"go-admin/core/utils/storage"
 	redisqueue2 "go-admin/core/utils/storage/queue/redisqueue"
 )
@@ -69,6 +70,12 @@ func (r *Redis) Register(name string, f storage.ConsumerFunc) {
 }
 
 func (r *Redis) Run() {
+	// 启动 Errors 通道消费者并记录日志，避免消费者出错时阻塞在无缓冲通道导致队列停摆
+	go func() {
+		for err := range r.consumer.Errors {
+			log.Errorf("redis queue consumer error: %s", err.Error())
+		}
+	}()
 	r.consumer.Run()
 }
 

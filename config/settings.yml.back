@@ -58,7 +58,8 @@ settings:
     # mysql 数据库连接dns
     # source: 账号:密码@tcp(ip:端口号)/数据库名?charset=utf8&parseTime=True&loc=Local&timeout=1000ms
     # postgres 数据库连接dns
-    source: host=127.0.0.1 port=5432 user=postgres dbname=public password=123456 sslmode=disable TimeZone=Asia/Shanghai default_query_exec_mode=simple_protocol
+    # 密码支持环境变量注入：password=${DB_PASSWORD}；禁止空密码与弱口令，否则启动拒绝；生产环境请使用 sslmode=require
+    source: host=127.0.0.1 port=5432 user=postgres dbname=public password=nVZypeJxyuXZ4J4J sslmode=disable TimeZone=Asia/Shanghai default_query_exec_mode=simple_protocol
   #  多db服务，下方配置未完善，待定，先占位
   #  databases:
   #    'locaohost:8888':

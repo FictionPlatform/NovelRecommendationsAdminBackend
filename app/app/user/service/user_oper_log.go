@@ -17,6 +17,7 @@ import (
 	"go-admin/core/middleware"
 	"go-admin/core/utils/dateutils"
 	"go-admin/core/utils/encrypt"
+	"go-admin/core/utils/excelutils"
 	"go-admin/core/utils/strutils"
 	"gorm.io/gorm"
 	"time"
@@ -207,9 +208,9 @@ func (e *UserOperLog) Export(list []models.UserOperLog) ([]byte, error) {
 		}
 
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, email, mobile, userName, actionType, byType, item.UpdateBy, dateutils.ConvertToStr(*item.UpdatedAt, -1),
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()

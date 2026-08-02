@@ -40,17 +40,21 @@ func (e *Application) SetDb(key string, db *gorm.DB) {
 	e.dbs[key] = db
 }
 
-// GetDb 获取所有map里的db数据
+// GetDb 获取所有map里的db数据（返回副本，避免调用方锁外迭代与 SetDb 并发竞态）
 func (e *Application) GetDb() map[string]*gorm.DB {
-	e.mux.Lock()
-	defer e.mux.Unlock()
-	return e.dbs
+	e.mux.RLock()
+	defer e.mux.RUnlock()
+	cp := make(map[string]*gorm.DB, len(e.dbs))
+	for k, v := range e.dbs {
+		cp[k] = v
+	}
+	return cp
 }
 
 // GetDbByKey 根据key获取db
 func (e *Application) GetDbByKey(key string) *gorm.DB {
-	e.mux.Lock()
-	defer e.mux.Unlock()
+	e.mux.RLock()
+	defer e.mux.RUnlock()
 	if db, ok := e.dbs["*"]; ok {
 		return db
 	}
@@ -63,14 +67,21 @@ func (e *Application) SetCasbin(key string, enforcer *casbin.SyncedEnforcer) {
 	e.casbins[key] = enforcer
 }
 
+// GetCasbin 获取所有casbin（返回副本）
 func (e *Application) GetCasbin() map[string]*casbin.SyncedEnforcer {
-	return e.casbins
+	e.mux.RLock()
+	defer e.mux.RUnlock()
+	cp := make(map[string]*casbin.SyncedEnforcer, len(e.casbins))
+	for k, v := range e.casbins {
+		cp[k] = v
+	}
+	return cp
 }
 
 // GetCasbinKey 根据key获取casbin
 func (e *Application) GetCasbinKey(key string) *casbin.SyncedEnforcer {
-	e.mux.Lock()
-	defer e.mux.Unlock()
+	e.mux.RLock()
+	defer e.mux.RUnlock()
 	if e, ok := e.casbins["*"]; ok {
 		return e
 	}
@@ -92,8 +103,10 @@ func (e *Application) GetRouter() []Router {
 	return e.setRouter()
 }
 
-// setRouter 设置路由表
+// setRouter 设置路由表（返回副本）
 func (e *Application) setRouter() []Router {
+	e.mux.Lock()
+	defer e.mux.Unlock()
 	switch e.engine.(type) {
 	case *gin.Engine:
 		routers := e.engine.(*gin.Engine).Routes()
@@ -101,7 +114,7 @@ func (e *Application) setRouter() []Router {
 			e.routers = append(e.routers, Router{RelativePath: router.Path, Handler: router.Handler, HttpMethod: router.Method})
 		}
 	}
-	return e.routers
+	return append([]Router(nil), e.routers...)
 }
 
 // NewConfig 默认值
@@ -123,15 +136,21 @@ func (e *Application) SetMiddleware(key string, middleware interface{}) {
 	e.middlewares[key] = middleware
 }
 
-// GetMiddleware 获取所有中间件
+// GetMiddleware 获取所有中间件（返回副本）
 func (e *Application) GetMiddleware() map[string]interface{} {
-	return e.middlewares
+	e.mux.RLock()
+	defer e.mux.RUnlock()
+	cp := make(map[string]interface{}, len(e.middlewares))
+	for k, v := range e.middlewares {
+		cp[k] = v
+	}
+	return cp
 }
 
 // GetMiddlewareKey 获取对应key的中间件
 func (e *Application) GetMiddlewareKey(key string) interface{} {
-	e.mux.Lock()
-	defer e.mux.Unlock()
+	e.mux.RLock()
+	defer e.mux.RUnlock()
 	return e.middlewares[key]
 }
 
@@ -180,16 +199,22 @@ func (e *Application) SetHandler(key string, routerGroup func(r *gin.RouterGroup
 	e.handler[key] = append(e.handler[key], routerGroup)
 }
 
+// GetHandler 获取所有 handler（返回副本，切片一并拷贝）
 func (e *Application) GetHandler() map[string][]func(r *gin.RouterGroup, hand ...*gin.HandlerFunc) {
-	e.mux.Lock()
-	defer e.mux.Unlock()
-	return e.handler
+	e.mux.RLock()
+	defer e.mux.RUnlock()
+	cp := make(map[string][]func(r *gin.RouterGroup, hand ...*gin.HandlerFunc), len(e.handler))
+	for k, v := range e.handler {
+		cp[k] = append([]func(r *gin.RouterGroup, hand ...*gin.HandlerFunc){}, v...)
+	}
+	return cp
 }
 
+// GetHandlerPrefix 获取对应key的 handler（返回切片副本）
 func (e *Application) GetHandlerPrefix(key string) []func(r *gin.RouterGroup, hand ...*gin.HandlerFunc) {
-	e.mux.Lock()
-	defer e.mux.Unlock()
-	return e.handler[key]
+	e.mux.RLock()
+	defer e.mux.RUnlock()
+	return append([]func(r *gin.RouterGroup, hand ...*gin.HandlerFunc){}, e.handler[key]...)
 }
 
 // GetStreamMessage 获取队列需要用的message

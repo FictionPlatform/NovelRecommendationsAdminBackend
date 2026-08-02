@@ -42,6 +42,13 @@ func MakeCondition(q interface{}) func(db *gorm.DB) *gorm.DB {
 
 func Paginate(pageSize, pageIndex int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
+		//防御性下限/上限：防止非法参数导致全表查询（正常路径已由 GetPageSize 限制）
+		if pageSize <= 0 {
+			pageSize = DefaultPageSize
+		}
+		if pageSize > MaxPageSizeLimit {
+			pageSize = MaxPageSizeLimit
+		}
 		offset := (pageIndex - 1) * pageSize
 		if offset < 0 {
 			offset = 0

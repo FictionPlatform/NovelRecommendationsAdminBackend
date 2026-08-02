@@ -13,6 +13,7 @@ import (
 	"go-admin/core/global"
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
+	"go-admin/core/utils/excelutils"
 	"gorm.io/gorm"
 	"time"
 )
@@ -228,9 +229,9 @@ func (e *UserLevel) Export(list []models.UserLevel) ([]byte, error) {
 		status := dictService.GetLabel("admin_sys_status", item.Status)
 
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, status,
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()

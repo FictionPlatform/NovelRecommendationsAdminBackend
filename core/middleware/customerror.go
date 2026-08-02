@@ -1,13 +1,18 @@
 package middleware
 
 import (
+	"go-admin/core/dto/response"
+	baseLang "go-admin/config/base/lang"
+	"go-admin/core/lang"
+	"runtime/debug"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"go-admin/core/utils/iputils"
 	"go-admin/core/utils/log"
 	"net/http"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func CustomError(c *gin.Context) {
@@ -40,10 +45,12 @@ func CustomError(c *gin.Context) {
 						"code": statusCode,
 						"msg":  p[2],
 					})
+					return
 				}
-			default:
-				panic(err)
 			}
+			// 未知 panic：记录堆栈并返回 500，不再重抛（避免连接被静默断开、无日志）
+			log.Errorf("panic recovered: %v\n%s", err, string(debug.Stack()))
+			response.ErrorByHttpCode(c, http.StatusInternalServerError, baseLang.ServerErr, lang.MsgByCode(baseLang.ServerErr, ""))
 		}
 	}()
 	c.Next()

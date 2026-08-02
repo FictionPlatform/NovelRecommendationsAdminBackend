@@ -48,9 +48,8 @@ func OK(c *gin.Context, data interface{}, code int, msg string) {
 }
 
 func Download(c *gin.Context, data []byte, filename, contentType string) {
-	c.Header("Access-Control-Allow-Origin", "*")
 	c.Header("Content-Disposition", "attachment;filename="+filename)
-	c.Header("Access-Control-Expose-Headers", "Content-Disposition") //允许获取懂啊指定header
+	c.Header("Access-Control-Expose-Headers", "Content-Disposition") //允许获取懂到指定header
 	c.Header("Content-AppType", contentType)
 	c.Data(http.StatusOK, contentType, data)
 }

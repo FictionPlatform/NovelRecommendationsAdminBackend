@@ -12,6 +12,7 @@ import (
 	baseLang "go-admin/config/base/lang"
 	"go-admin/core/config"
 	"go-admin/core/dto/response"
+	"go-admin/core/global"
 	"go-admin/core/lang"
 	"go-admin/core/middleware/auth/authdto"
 	"go-admin/core/middleware/auth/casbin"
@@ -27,11 +28,11 @@ import (
 )
 
 const (
-	JWTLoginPrefix     = "admin:jwt:login"
-	JWTBlacklistPrefix = "admin:jwt:blacklist"
-	JWTDevicesPrefix   = "admin:jwt:devices"
-	JWTActivityPrefix  = "admin:jwt:activity"
-	JwtRolePrefix      = "admin:jwt:role"
+	JWTLoginPrefix      = "admin:jwt:login"
+	JWTBlacklistPrefix  = "admin:jwt:blacklist"
+	JWTDevicesPrefix    = "admin:jwt:devices"
+	JWTActivityPrefix   = "admin:jwt:activity"
+	JWTPwdChangedPrefix = "admin:jwt:pwdchanged"
 )
 
 // 设备锁管理器，防止竞态条件
@@ -135,7 +136,8 @@ func NewJwtAuth() (*JwtAuth, error) {
 		RefreshResponse: jwtAuth.RefreshResponse,
 		Unauthorized:    jwtAuth.Unauthorized,
 
-		TokenLookup:   "header: Authorization, query: token, cookie: jwt",
+		// 仅从 Authorization 头/cookie 取 token；不支持 query 传参（会泄露到日志/Referer/历史记录）
+		TokenLookup:   "header: Authorization, cookie: jwt",
 		TokenHeadName: "Bearer",
 		SendCookie:    false,
 		TimeFunc:      time.Now,
@@ -162,6 +164,13 @@ func (j *JwtAuth) AuthCheckRoleMiddlewareFunc() gin.HandlerFunc {
 		// 管理员直接通过
 		if roleKey == constant.RoleKeyAdmin {
 			c.Next()
+			return
+		}
+		// 角色不存在或已停用：禁止访问（禁用角色即时生效）
+		if !j.checkRoleEnabled(c, roleKey) {
+			rLog.Warnf("role %s not exists or disabled", roleKey)
+			response.Error(c, baseLang.ForbitErr, lang.MsgByCode(baseLang.ForbitErr, lang.GetAcceptLanguage(c)))
+			c.Abort()
 			return
 		}
 		for _, i := range casbin.CasbinExclude {
@@ -248,6 +257,16 @@ func (j *JwtAuth) LoginResponse(c *gin.Context, token *core.Token) {
 
 	// 缓存记录用户最新登录状态
 	j.updateLastActivity(userIDStr)
+
+	// 无密码变更记录时，写入本次登录时间作为基准（不覆盖已有记录，避免多设备互踢）
+	if cached, _ := runtime.RuntimeConfig.GetCacheAdapter().Get(JWTPwdChangedPrefix, userIDStr); cached == "" {
+		_ = runtime.RuntimeConfig.GetCacheAdapter().Set(
+			JWTPwdChangedPrefix,
+			userIDStr,
+			strconv.FormatInt(time.Now().Unix(), 10),
+			config.AuthConfig.MaxRefresh,
+		)
+	}
 
 	response.OK(c, gin.H{
 		"token":    token.AccessToken,
@@ -488,6 +507,36 @@ func (j *JwtAuth) recordDevice(userIDStr string, deviceFP string) {
 	)
 }
 
+// addDevice 校验并追加设备：加锁后读改写（原子化，避免并发丢失更新/突破上限）。
+// 设备已存在返回 true；设备数已达上限返回 false（拒绝访问）；否则追加并写回。
+// 说明：单实例内存缓存下 per-user 互斥锁即保证原子性；多实例 Redis 部署需改用 Lua 脚本保证跨进程原子
+func (j *JwtAuth) addDevice(userIDStr string, deviceFP string) bool {
+	lock := j.deviceLocks.getLock(userIDStr)
+	lock.Lock()
+	defer lock.Unlock()
+
+	deviceList := j.GetUserDevices(userIDStr)
+
+	for _, d := range deviceList {
+		if d == deviceFP {
+			return true
+		}
+	}
+
+	if len(deviceList) >= j.maxDevices {
+		return false
+	}
+
+	deviceList = append(deviceList, deviceFP)
+	_ = runtime.RuntimeConfig.GetCacheAdapter().Set(
+		JWTDevicesPrefix,
+		userIDStr,
+		strings.Join(deviceList, ","),
+		config.AuthConfig.MaxRefresh,
+	)
+	return true
+}
+
 // extractDeviceFingerprint 提取设备指纹
 func (j *JwtAuth) extractDeviceFingerprint(c *gin.Context) string {
 	userAgent := c.Request.UserAgent()
@@ -543,14 +592,19 @@ func (j *JwtAuth) authCheck(c *gin.Context) bool {
 		rLog.Error(err.Error())
 		return false
 	}
+	userID := c.GetInt64(authdto.LoginUserId)
 
-	roleKeyMem, _ := runtime.RuntimeConfig.GetCacheAdapter().Get(
-		JwtRolePrefix,
-		userIDStr,
-	)
-	roleKeyToken, ok := claims[authdto.RoleKey].(string)
-	if ok && roleKeyMem != "" && roleKeyMem != roleKeyToken {
-		rLog.Error("role key not match")
+	roleKeyToken, _ := claims[authdto.RoleKey].(string)
+
+	// 校验用户状态与角色一致性：用户已删除/已停用，或角色已变更（当前 role_key 与 token 声明不一致）时旧 token 立即失效
+	if !j.checkUserStatus(c, userID, roleKeyToken) {
+		rLog.Error("user not exists, disabled or role changed")
+		return false
+	}
+
+	// 校验密码变更：token 签发时间（iat）早于最近一次密码变更时间则失效
+	if !j.checkPwdChanged(claims, userIDStr) {
+		rLog.Error("token issued before password change")
 		return false
 	}
 
@@ -591,39 +645,11 @@ func (j *JwtAuth) authCheck(c *gin.Context) bool {
 			return false
 		}
 
-		// 获取设备列表
-		deviceList := j.GetUserDevices(userIDStr)
-
-		// 1). 检查当前设备是否在允许的设备列表中
-		deviceExists := false
-		for _, d := range deviceList {
-			if d == currentDeviceFP {
-				deviceExists = true
-				break
-			}
-		}
-
-		// 2). 允许多设备登录，但设备列表中不存在当前设备，则判断是否增加设备
-		if !deviceExists {
-			// 检查设备数量
-			if len(deviceList) <= 0 {
-				// 无设备，直接添加
-				deviceList = []string{currentDeviceFP}
-			} else {
-				// 有设备，则判断数量
-				if len(deviceList) >= j.maxDevices {
-					rLog.Error(errors.New("too many devices login"))
-					return false
-				}
-				// 添加新设备到列表
-				deviceList = append(deviceList, currentDeviceFP)
-			}
-			runtime.RuntimeConfig.GetCacheAdapter().Set(
-				JWTDevicesPrefix,
-				userIDStr,
-				strings.Join(deviceList, ","),
-				config.AuthConfig.MaxRefresh,
-			)
+		// 设备追加统一走加锁的 addDevice（读改写原子化），
+		// 避免并发请求互相覆盖设备列表或突破 maxDeviceCount 上限
+		if !j.addDevice(userIDStr, currentDeviceFP) {
+			rLog.Error(errors.New("too many devices login"))
+			return false
 		}
 		// 设备已在列表中，允许访问
 	}
@@ -631,6 +657,69 @@ func (j *JwtAuth) authCheck(c *gin.Context) bool {
 	// 4. 更新最后活动时间
 	j.updateLastActivity(userIDStr)
 	return true
+}
+
+// MarkPwdChanged 记录密码变更时间，使该用户所有已签发 token 立即失效（需重新登录）
+func MarkPwdChanged(userID int64) {
+	_ = runtime.RuntimeConfig.GetCacheAdapter().Set(
+		JWTPwdChangedPrefix,
+		strconv.FormatInt(userID, 10),
+		strconv.FormatInt(time.Now().Unix(), 10),
+		config.AuthConfig.MaxRefresh,
+	)
+}
+
+// checkUserStatus 校验用户与角色状态：用户已删除（记录不存在）/已停用（status != 正常），
+// 或角色已变更（当前 role_key 与 token 声明不一致，即角色被重新分配/降权）时拒绝访问。
+// 实时查库比对替代可过期的 JwtRolePrefix 缓存，避免缓存过期后旧角色声明恢复生效
+func (j *JwtAuth) checkUserStatus(c *gin.Context, userID int64, tokenRoleKey string) bool {
+	db := runtime.RuntimeConfig.GetDbByKey(c.Request.Host)
+	if db == nil {
+		return false
+	}
+	var user struct {
+		RoleKey string
+	}
+	if err := db.Table("admin_sys_user").
+		Select("admin_sys_role.role_key").
+		Joins("left join admin_sys_role on admin_sys_role.id = admin_sys_user.role_id").
+		Where("admin_sys_user.id = ? AND admin_sys_user.status = ?", userID, global.SysStatusOk).
+		Scan(&user).Error; err != nil {
+		return false
+	}
+	return user.RoleKey == tokenRoleKey
+}
+
+// checkRoleEnabled 校验角色状态：角色存在且未停用（status != 正常）时拒绝访问
+func (j *JwtAuth) checkRoleEnabled(c *gin.Context, roleKey string) bool {
+	db := runtime.RuntimeConfig.GetDbByKey(c.Request.Host)
+	if db == nil {
+		return false
+	}
+	var count int64
+	if err := db.Table("admin_sys_role").
+		Where("role_key = ? AND status = ?", roleKey, global.SysStatusOk).
+		Count(&count).Error; err != nil {
+		return false
+	}
+	return count > 0
+}
+
+// checkPwdChanged 校验密码变更时间：token 签发时间（iat）早于最近一次密码变更时间则失效
+func (j *JwtAuth) checkPwdChanged(claims jwtIn.MapClaims, userIDStr string) bool {
+	changedAt, _ := runtime.RuntimeConfig.GetCacheAdapter().Get(JWTPwdChangedPrefix, userIDStr)
+	if changedAt == "" {
+		return true
+	}
+	ts, err := strconv.ParseInt(changedAt, 10, 64)
+	if err != nil {
+		return true
+	}
+	iat, ok := claims["iat"].(float64)
+	if !ok {
+		return false
+	}
+	return int64(iat) >= ts
 }
 
 // updateLastActivity 更新最后活动时间

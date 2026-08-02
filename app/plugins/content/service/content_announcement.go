@@ -13,6 +13,7 @@ import (
 	"go-admin/core/dto/service"
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
+	"go-admin/core/utils/excelutils"
 	"gorm.io/gorm"
 	"time"
 )
@@ -216,9 +217,9 @@ func (e *ContentAnnouncement) Export(list []models.ContentAnnouncement) ([]byte,
 	for i, item := range list {
 		axis := fmt.Sprintf("A%d", i+2)
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, item.Title, item.Content, item.Num, item.Remark,
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()

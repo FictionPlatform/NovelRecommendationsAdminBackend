@@ -12,7 +12,7 @@ func init() {
 
 func registerSysTableRouter(v1 *gin.RouterGroup) {
 	api := apis.SysTables{}
-	r := v1.Group("/admin/sys/sys-table").Use(middleware.Auth())
+	r := v1.Group("/admin/sys/sys-table").Use(middleware.Auth(), middleware.AdminOnly())
 	{
 		r.GET("", api.GetPage)
 		r.POST("", api.Insert)

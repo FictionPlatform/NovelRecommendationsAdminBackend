@@ -1,6 +1,11 @@
 package router
 
 import (
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"go-admin/core/config"
 	"go-admin/core/global"
@@ -76,7 +81,45 @@ func sysStaticFileRouter(r *gin.RouterGroup) {
 	if err != nil {
 		return
 	}
-	//静态路由
-	r.Static(global.RouteRootPath+"/"+config.ApplicationConfig.FileRootPath, config.ApplicationConfig.FileRootPath)
-	r.Static("/static", "./static")
+	// 上传文件静态服务：禁止目录列举、防路径穿越、危险类型强制下载
+	r.GET(global.RouteRootPath+"/"+config.ApplicationConfig.FileRootPath+"/*filepath", func(c *gin.Context) {
+		serveFileNoList(c, config.ApplicationConfig.FileRootPath)
+	})
+	// static 静态目录：同样禁止目录列举（gin.Static 基于 http.FileServer 可列目录）
+	r.GET("/static/*filepath", func(c *gin.Context) {
+		serveFileNoList(c, "./static")
+	})
+}
+
+// dangerousExt 可作为脚本执行的危险扩展名，强制以附件形式下载
+var dangerousExt = map[string]bool{
+	".html": true, ".htm": true, ".svg": true, ".xhtml": true, ".mhtml": true,
+	".xml": true, ".js": true, ".css": true, ".json": true, ".txt": true,
+}
+
+// serveFileNoList 目录静态服务：禁止目录列举、防路径穿越、危险类型强制下载
+func serveFileNoList(c *gin.Context, root string) {
+	cleanRoot := filepath.Clean(root)
+	filePath := c.Param("filepath")
+	// 禁止目录列举
+	if filePath == "" || filePath == "/" || strings.HasSuffix(filePath, "/") {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	fullPath := filepath.Join(cleanRoot, filepath.FromSlash(filePath))
+	// 防路径穿越
+	if fullPath != cleanRoot && !strings.HasPrefix(fullPath, cleanRoot+string(filepath.Separator)) {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	info, err := os.Stat(fullPath)
+	if err != nil || info.IsDir() {
+		c.Status(http.StatusNotFound)
+		return
+	}
+	// 危险类型强制以附件下载，不在浏览器中执行
+	if dangerousExt[strings.ToLower(filepath.Ext(fullPath))] {
+		c.Header("Content-Disposition", "attachment")
+	}
+	c.File(fullPath)
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/xuri/excelize/v2"
 
 	baseLang "go-admin/config/base/lang"
+	mycasbin "go-admin/core/casbin"
 	"go-admin/core/dto/service"
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
@@ -17,6 +18,7 @@ import (
 	"go-admin/app/admin/sys/models"
 	"go-admin/app/admin/sys/service/dto"
 	cDto "go-admin/core/dto"
+	"go-admin/core/utils/excelutils"
 )
 
 type SysApi struct {
@@ -142,6 +144,16 @@ func (e *SysApi) Delete(ids []int64, p *middleware.DataPermission) (int, error) 
 	var data models.SysApi
 
 	err = e.Orm.Transaction(func(tx *gorm.DB) error {
+		// 收集受影响的角色（删除前），删除 API 后需重建其 casbin 策略
+		var affectedRoleIds []int64
+		if err := tx.Table("admin_sys_role_menu").
+			Joins("JOIN admin_sys_menu_api_rule ON admin_sys_menu_api_rule.admin_sys_menu_menu_id = admin_sys_role_menu.menu_id").
+			Where("admin_sys_menu_api_rule.admin_sys_api_id in (?)", ids).
+			Distinct("admin_sys_role_menu.role_id").
+			Pluck("admin_sys_role_menu.role_id", &affectedRoleIds).Error; err != nil {
+			return err
+		}
+
 		// 删除子表数据
 		if err := tx.Table("admin_sys_menu_api_rule").Where("admin_sys_api_id in (?)", ids).Delete(nil).Error; err != nil {
 			return err
@@ -152,10 +164,20 @@ func (e *SysApi) Delete(ids []int64, p *middleware.DataPermission) (int, error) 
 		if err != nil {
 			return err
 		}
+
+		// 重建受影响角色的 casbin 策略（回收已删接口对应的权限残留）
+		roleService := NewSysRoleService(&e.Service)
+		if respCode, err := roleService.RebuildCasbinByRoles(affectedRoleIds, tx, mycasbin.GetGlobalEnforcer()); err != nil {
+			return errors.New(fmt.Sprintf("rebuild casbin error: code=%d err=%s", respCode, err.Error()))
+		}
 		return nil
 	})
 	if err != nil {
 		return baseLang.DataDeleteLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataDeleteCode, baseLang.DataDeleteLogCode, err)
+	}
+	// 刷新全局 casbin 内存策略
+	if cb := mycasbin.GetGlobalEnforcer(); cb != nil {
+		_ = cb.LoadPolicy()
 	}
 	return baseLang.SuccessCode, nil
 }
@@ -178,9 +200,9 @@ func (e *SysApi) Export(list []models.SysApi) ([]byte, error) {
 		method := dictService.GetLabel("admin_sys_api_method", item.Method)
 		apiType := dictService.GetLabel("admin_sys_config_type", item.ApiType)
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, item.Description, item.Path, method, apiType, dateutils.ConvertToStrByPrt(item.CreatedAt, -1),
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()
@@ -194,6 +216,10 @@ func (e *SysApi) Sync() (int, error) {
 	err := models.SaveSysApi(e.Orm, routers)
 	if err != nil {
 		return baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
+	}
+	// 同步可能删除了失效接口，刷新全局 casbin 内存策略
+	if cb := mycasbin.GetGlobalEnforcer(); cb != nil {
+		_ = cb.LoadPolicy()
 	}
 	return baseLang.SuccessCode, nil
 }

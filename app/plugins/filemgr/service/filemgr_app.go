@@ -19,7 +19,9 @@ import (
 	"go-admin/core/utils/ossutils"
 	"mime/multipart"
 	"path"
+	"strings"
 
+	"go-admin/core/utils/excelutils"
 	"gorm.io/gorm"
 	"time"
 )
@@ -27,6 +29,12 @@ import (
 type FilemgrApp struct {
 	service.Service
 }
+
+// maxAppUploadSize APP 安装包上传大小上限 200MB
+const maxAppUploadSize = 200 << 20
+
+// allowedAppExt 允许上传的 APP 安装包扩展名白名单
+var allowedAppExt = map[string]bool{".apk": true, ".ipa": true, ".zip": true}
 
 // NewFilemgrAppService plugins-实例化APP管理
 func NewFilemgrAppService(s *service.Service) *FilemgrApp {
@@ -267,7 +275,16 @@ func (e *FilemgrApp) GetSingleUploadFileInfo(form *multipart.Form, file *multipa
 			return baseLang.AppSelectOneFileUploadCode, lang.MsgErr(baseLang.AppSelectOneFileUploadCode, e.Lang)
 		}
 		for _, item := range files {
-			*dst = config.ApplicationConfig.FileRootPath + "app/" + idgen.UUID() + path.Ext(item.Filename)
+			// 扩展名白名单校验
+			ext := strings.ToLower(path.Ext(item.Filename))
+			if !allowedAppExt[ext] {
+				return baseLang.AppUploadCode, lang.MsgErr(baseLang.AppUploadCode, e.Lang)
+			}
+			// 文件大小校验
+			if item.Size <= 0 || item.Size > maxAppUploadSize {
+				return baseLang.AppUploadCode, lang.MsgErr(baseLang.AppUploadCode, e.Lang)
+			}
+			*dst = config.ApplicationConfig.FileRootPath + "app/" + idgen.UUID() + ext
 			*file = *item
 			return baseLang.SuccessCode, nil
 		}
@@ -292,9 +309,9 @@ func (e *FilemgrApp) Export(list []models.FilemgrApp) ([]byte, error) {
 		downloadType := dictService.GetLabel("plugin_filemgr_app_download_type", item.DownloadType) //下载类型
 		publishStatus := dictService.GetLabel("plugin_filemgr_publish_status", item.Status)         //下载类型
 		//按标签对应输入数据
-		_ = xlsx.SetSheetRow(sheetName, axis, &[]interface{}{
+		_ = xlsx.SetSheetRow(sheetName, axis, excelutils.SafeRow(
 			item.Id, item.Version, platform, appType, downloadType, publishStatus, item.DownloadUrl, item.Remark, dateutils.ConvertToStrByPrt(item.CreatedAt, -1),
-		})
+		))
 	}
 	xlsx.SetActiveSheet(no)
 	data, _ := xlsx.WriteToBuffer()

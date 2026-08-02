@@ -18,7 +18,13 @@ import (
 	"go-admin/core/utils/captchautils"
 	"go-admin/core/utils/fileutils"
 	"go-admin/core/utils/idgen"
+	"io"
+	"net/http"
+	"strings"
 )
+
+// maxAvatarUploadSize 头像上传大小上限 2MB
+const maxAvatarUploadSize = 2 << 20
 
 type SysUser struct {
 	api.Api
@@ -324,27 +330,48 @@ func (e SysUser) UpdateProfileAvatar(c *gin.Context) {
 		return
 	}
 
-	form, _ := c.MultipartForm()
+	form, err := c.MultipartForm()
+	if err != nil || form == nil {
+		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
+		return
+	}
 	files := form.File["avatar"]
+	if len(files) == 0 {
+		e.Error(baseLang.SysUseAvatarUploadErrCode, lang.MsgByCode(baseLang.SysUseAvatarUploadErrCode, e.Lang))
+		return
+	}
+	file := files[0]
+	// 头像大小限制 2MB
+	if file.Size <= 0 || file.Size > maxAvatarUploadSize {
+		e.Error(baseLang.SysUseAvatarUploadErrCode, lang.MsgByCode(baseLang.SysUseAvatarUploadErrCode, e.Lang))
+		return
+	}
+	// 校验图片魔数，防止上传 html/脚本等非图片内容
+	src, err := file.Open()
+	if err != nil {
+		e.Error(baseLang.SysUseAvatarUploadErrCode, lang.MsgByCode(baseLang.SysUseAvatarUploadErrCode, e.Lang))
+		return
+	}
+	defer src.Close()
+	head := make([]byte, 512)
+	n, _ := io.ReadFull(src, head)
+	if !strings.HasPrefix(http.DetectContentType(head[:n]), "image/") {
+		e.Error(baseLang.SysUseAvatarUploadErrCode, lang.MsgByCode(baseLang.SysUseAvatarUploadErrCode, e.Lang))
+		return
+	}
 	guid := idgen.UUID()
 	reqPath := config.ApplicationConfig.FileRootPath + "admin/avatar/"
 	err = fileutils.IsNotExistMkDir(reqPath)
 	if err != nil {
 		e.Error(baseLang.SysUseAvatarUploadErrLogCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.SysUseAvatarUploadErrCode, baseLang.SysUseAvatarUploadErrLogCode, err).Error())
-		/*err = fileutil.CreateDirAll(reqPath)
-		if err != nil {
-			e.Error(baseLang.SysUseAvatarUploadErrLogCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.SysUseAvatarUploadErrCode, baseLang.SysUseAvatarUploadErrLogCode, err).Error())
-			return
-		}*/
+		return
 	}
 	filPath := reqPath + guid + ".jpg"
-	for _, file := range files {
-		// 上传文件至指定目录
-		err = c.SaveUploadedFile(file, filPath)
-		if err != nil {
-			e.Error(baseLang.SysUseAvatarUploadErrLogCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.SysUseAvatarUploadErrCode, baseLang.SysUseAvatarUploadErrLogCode, err).Error())
-			return
-		}
+	// 上传文件至指定目录
+	err = c.SaveUploadedFile(file, filPath)
+	if err != nil {
+		e.Error(baseLang.SysUseAvatarUploadErrLogCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.SysUseAvatarUploadErrCode, baseLang.SysUseAvatarUploadErrLogCode, err).Error())
+		return
 	}
 	// 数据权限检查
 	req.Avatar = global.RouteRootPath + "/" + filPath

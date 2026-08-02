@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"go-admin/core/config"
@@ -11,13 +10,18 @@ import (
 	"go-admin/core/utils/log"
 	"io"
 	"net/http"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"go-admin/core/global"
 )
+
+// maxBodyLogSize 请求体记录上限，超过则不缓存请求体（防止内存耗尽，且不影响大文件上传）
+const maxBodyLogSize = 1 << 20
 
 // LoggerToFile 日志记录到文件
 func LoggerToFile() gin.HandlerFunc {
@@ -29,14 +33,16 @@ func LoggerToFile() gin.HandlerFunc {
 		var body string
 		switch c.Request.Method {
 		case http.MethodPost, http.MethodPut, http.MethodGet, http.MethodDelete:
+			// 请求体过大时跳过记录，保留原始 body 给业务处理（如文件上传）
+			if c.Request.ContentLength > maxBodyLogSize {
+				break
+			}
 			bf := bytes.NewBuffer(nil)
-			wt := bufio.NewWriter(bf)
-			_, err := io.Copy(wt, c.Request.Body)
+			_, err := io.Copy(bf, io.LimitReader(c.Request.Body, maxBodyLogSize))
 			if err != nil {
 				rLog.Warnf("copy body error, %s", err.Error())
-				err = nil
 			}
-			rb, _ := io.ReadAll(bf)
+			rb := bf.Bytes()
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(rb))
 			body = string(rb)
 		}
@@ -86,9 +92,65 @@ func LoggerToFile() gin.HandlerFunc {
 		rLog.WithFields(logData).Info()
 
 		if c.Request.Method != "OPTIONS" && config.LoggerConfig.EnabledDB && statusCode != 404 {
-			SetDBOperLog(c, clientIP, statusCode, reqUri, reqMethod, latencyTime, body, result, statusBus)
+			// 敏感字段脱敏后再入库，防止密码/token 明文落库
+			SetDBOperLog(c, clientIP, statusCode, reqUri, reqMethod, latencyTime, maskSensitiveFields(body), maskSensitiveFields(result), statusBus)
 		}
 	}
+}
+
+// isSensitiveKey 判断是否敏感字段
+func isSensitiveKey(key string) bool {
+	switch strings.ToLower(strings.ReplaceAll(key, "-", "")) {
+	case "password", "pwd", "paypwd", "pay_pwd", "oldpassword", "newpassword", "confirmpassword",
+		"token", "accesstoken", "refreshtoken", "access_token", "refresh_token", "authorization",
+		"secret", "secretkey", "appsecret", "captcha", "verifycode", "verificationcode", "validatecode":
+		return true
+	}
+	return false
+}
+
+// maskJSON 递归脱敏 JSON 中的敏感字段值
+func maskJSON(obj interface{}) interface{} {
+	switch v := obj.(type) {
+	case map[string]interface{}:
+		for k, val := range v {
+			if isSensitiveKey(k) {
+				v[k] = "***"
+			} else {
+				v[k] = maskJSON(val)
+			}
+		}
+		return v
+	case []interface{}:
+		for i, item := range v {
+			v[i] = maskJSON(item)
+		}
+		return v
+	default:
+		return obj
+	}
+}
+
+// maskSensitiveFields 对请求体/响应体脱敏：优先 JSON 结构脱敏，非 JSON 用正则兜底
+func maskSensitiveFields(data string) string {
+	if data == "" {
+		return data
+	}
+	var obj interface{}
+	if err := json.Unmarshal([]byte(data), &obj); err != nil {
+		return maskSensitiveFieldsRegex(data)
+	}
+	if b, err := json.Marshal(maskJSON(obj)); err == nil {
+		return string(b)
+	}
+	return data
+}
+
+// maskSensitiveFieldsRegex 正则兜底：匹配 "key": "value" 形式
+var sensitiveFieldsRegex = regexp.MustCompile(`(?i)("(?:password|pwd|payPwd|pay_pwd|oldPassword|newPassword|confirmPassword|token|accessToken|refreshToken|access_token|refresh_token|authorization|secret|secretKey|appSecret|captcha|verifyCode|verificationCode|validateCode)"\s*:\s*")[^"]*(")`)
+
+func maskSensitiveFieldsRegex(data string) string {
+	return sensitiveFieldsRegex.ReplaceAllString(data, `${1}***${2}`)
 }
 
 // SetDBOperLog 写入操作日志表 fixme 该方法后续即将弃用

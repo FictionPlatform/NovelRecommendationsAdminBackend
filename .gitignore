@@ -8,6 +8,7 @@ tmp/
 tmp/app
 !tmp
 #vendor
+config/settings.yml
 config/settings.dev.yml
 common/middleware/demo.go
 config/settings.dev.*.yml

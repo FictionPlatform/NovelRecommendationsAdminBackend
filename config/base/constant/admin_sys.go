@@ -20,6 +20,10 @@ const (
 	DataScope4 = "4" //本部门及以下数据权限
 	DataScope5 = "5" //仅本人数据权限
 
+	//导出条数限制
+	DefaultExportMaxSize = 1000  //配置缺失/非法时单次导出条数兜底值
+	ExportMaxSizeLimit   = 10000 //单次导出条数硬上限
+
 	// MenuM 目录
 	MenuM string = "1"
 	// MenuC 菜单

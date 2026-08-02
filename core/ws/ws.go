@@ -30,6 +30,37 @@ type Client struct {
 	CancelFunc context.CancelFunc
 	Socket     *websocket.Conn
 	Message    chan []byte
+	sendMu     sync.Mutex // 保护 closed 标志与 Message 通道，避免关闭后发送导致 panic
+	closed     bool
+}
+
+// safeSend 向客户端发送消息：已注销（通道已关闭）或缓冲区已满时返回 false，不阻塞、不 panic
+func (c *Client) safeSend(msg []byte) bool {
+	if c == nil {
+		return false
+	}
+	c.sendMu.Lock()
+	defer c.sendMu.Unlock()
+	if c.closed {
+		return false
+	}
+	select {
+	case c.Message <- msg:
+		return true
+	default:
+		log.Infof("client [%s] message buffer full, drop message", c.Id)
+		return false
+	}
+}
+
+// close 标记关闭并关闭消息通道，仅允许在持有 manager 锁时调用（避免与 safeSend 竞争）
+func (c *Client) close() {
+	c.sendMu.Lock()
+	defer c.sendMu.Unlock()
+	if !c.closed {
+		c.closed = true
+		close(c.Message)
+	}
 }
 
 // MessageData 单个发送数据信息
@@ -69,7 +100,7 @@ func (c *Client) Read(cxt context.Context) {
 			break
 		}
 		log.Infof("client [%s] receive message: %s", c.Id, string(message))
-		c.Message <- message
+		c.safeSend(message)
 	}
 }
 
@@ -128,7 +159,8 @@ func (manager *Manager) Start() {
 			manager.Lock.Lock()
 			if mGroup, ok := manager.Group[client.Group]; ok {
 				if mClient, ok := mGroup[client.Id]; ok {
-					close(mClient.Message)
+					// 先标记关闭并关通道（加锁），再删除 map 条目，杜绝 "send on closed channel" panic
+					mClient.close()
 					delete(mGroup, client.Id)
 					manager.clientCount -= 1
 					if len(mGroup) == 0 {
@@ -156,10 +188,15 @@ func (manager *Manager) SendService() {
 	for {
 		select {
 		case data := <-manager.Message:
+			// 加锁快照目标 client，避免与 Start 并发读写 Group 触发 map 竞态
+			manager.Lock.Lock()
+			var target *Client
 			if groupMap, ok := manager.Group[data.Group]; ok {
-				if conn, ok := groupMap[data.Id]; ok {
-					conn.Message <- data.Message
-				}
+				target = groupMap[data.Id]
+			}
+			manager.Lock.Unlock()
+			if target != nil {
+				target.safeSend(data.Message)
 			}
 		}
 	}
@@ -171,10 +208,16 @@ func (manager *Manager) SendGroupService() {
 		select {
 		// 发送广播数据到某个组的 channel 变量 Send 中
 		case data := <-manager.GroupMessage:
+			manager.Lock.Lock()
+			clients := make([]*Client, 0, 8)
 			if groupMap, ok := manager.Group[data.Group]; ok {
 				for _, conn := range groupMap {
-					conn.Message <- data.Message
+					clients = append(clients, conn)
 				}
+			}
+			manager.Lock.Unlock()
+			for _, conn := range clients {
+				conn.safeSend(data.Message)
 			}
 		}
 	}
@@ -185,10 +228,16 @@ func (manager *Manager) SendAllService() {
 	for {
 		select {
 		case data := <-manager.BroadCastMessage:
+			manager.Lock.Lock()
+			clients := make([]*Client, 0, 8)
 			for _, v := range manager.Group {
 				for _, conn := range v {
-					conn.Message <- data.Message
+					clients = append(clients, conn)
 				}
+			}
+			manager.Lock.Unlock()
+			for _, conn := range clients {
+				conn.safeSend(data.Message)
 			}
 		}
 	}
@@ -270,6 +319,7 @@ var WebsocketManager = Manager{
 // gin 处理 websocket handler
 func (manager *Manager) WsClient(c *gin.Context) {
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	upGrader := websocket.Upgrader{
 		// cross origin domain

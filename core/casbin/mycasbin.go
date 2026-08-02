@@ -54,3 +54,14 @@ func LoadPolicy(c *gin.Context) (*casbin.SyncedEnforcer, error) {
 		return nil, err
 	}
 }
+
+// GetGlobalEnforcer 获取全局casbin enforcer（优先通配键，单实例部署场景）
+func GetGlobalEnforcer() *casbin.SyncedEnforcer {
+	if e := runtime.RuntimeConfig.GetCasbinKey("*"); e != nil {
+		return e
+	}
+	for _, e := range runtime.RuntimeConfig.GetCasbin() {
+		return e
+	}
+	return nil
+}
