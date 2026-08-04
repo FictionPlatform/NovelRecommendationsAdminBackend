@@ -21,8 +21,6 @@
 我的开发准则：  
 `大道至简`
 
-![启动](/logo.png)
-
 在线体验：  
 [go-admin react开源版入口](http://39.105.148.134:22222/)  
 [go-admin react内部版体验入口](http://39.105.148.134:55555/)
@@ -73,7 +71,7 @@
 * 国际区号
 * 插件（基本的CMS内容管理、App安装包管理、消息管理）
 
-`备注`：截止目前，我也不打算提供定时任务和swagger功能，对我而言，我认为完全没必要。首先定时任务和后台耦合，每次后台发布，很容易引起定时任务的异常，定时任务完全可以搞成一个独立的脚本去运行彻底解耦。而swagger我只感觉鸡肋，除了给自己增加工作量，眼前还没发现任何优势。这两个功能谁如果需要，完全可以自行在现有框架中加进去。
+`备注`：项目内置 swagger 文档（`docs/swagger.json`/`docs/swagger.yaml`，接口注释经 `go generate` 重新生成），暂不提供定时任务功能。定时任务和后台耦合，每次后台发布，很容易引起定时任务的异常，定时任务完全可以搞成一个独立的脚本去运行彻底解耦。定时任务功能谁如果需要，完全可以自行在现有框架中加进去。
 
 ## 3. 遵守规则
 1. 数据库表
@@ -96,7 +94,7 @@
 3. 建好数据库后，直接把我根目录的sql脚本 mysql=>`app_mysql.sql`(由Navicat Lite导出) 或者 postgresql=>`app_pgsql.sql`(自行整理)导入即可
 
 ### 4.2 后台接口部署与启动
-1. 环境：golang版本-1.25.4
+1. 环境：golang版本-1.26.5（与 go.mod 一致）
 2. 编译项目，项目根目录执行如下：
 ```shell
 go mod tidy
@@ -108,10 +106,10 @@ go generate && go build -a -o go-admin-api main.go
 go generate && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o go-admin-api main.go
 ```
 `注`⚠️：`go generate`命令一定要执行（无论打包前还是本地运行），它可以扫描保存你新增的路由，用于后续接口同步
-3. 项目根目录，找到`conf/`，可以直接再`settings.yml`中配置数据库，或者可以拷贝一份，重新命名，比如：`settings.dev.yml`，具体的配置信息，请自行去文件中参考，里面写的很详细，我这里就不再解释了
+3. 项目根目录，找到`config/`，可以直接在`settings.yml`中配置数据库，或者可以拷贝一份，重新命名，比如：`settings.dev.yml`，具体的配置信息，请自行去文件中参考，里面写的很详细，我这里就不再解释了
 4. 启动项目，参考如下两种方式：
 ```shell
-# 将会默认读取conf/目录中settings.yml配置，并启动接口
+# 将会默认读取config/目录中settings.yml配置，并启动接口
 ./admin server
 
 # 读取自定义配置

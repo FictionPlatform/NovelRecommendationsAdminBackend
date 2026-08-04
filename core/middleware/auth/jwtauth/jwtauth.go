@@ -3,11 +3,6 @@ package jwtauth
 import (
 	"errors"
 	"fmt"
-	jwt "github.com/appleboy/gin-jwt/v3"
-	"github.com/appleboy/gin-jwt/v3/core"
-	"github.com/casbin/casbin/v2/util"
-	"github.com/gin-gonic/gin"
-	jwtIn "github.com/golang-jwt/jwt/v5"
 	"go-admin/config/base/constant"
 	baseLang "go-admin/config/base/lang"
 	"go-admin/core/config"
@@ -25,6 +20,12 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	jwt "github.com/appleboy/gin-jwt/v3"
+	"github.com/appleboy/gin-jwt/v3/core"
+	"github.com/casbin/casbin/v2/util"
+	"github.com/gin-gonic/gin"
+	jwtIn "github.com/golang-jwt/jwt/v5"
 )
 
 const (
@@ -36,14 +37,25 @@ const (
 )
 
 // 设备锁管理器，防止竞态条件
+// L21：锁条目按最后使用时间淘汰，防止活跃用户数增长时内存无限膨胀
+const (
+	deviceLockMaxLocks  = 10000
+	deviceLockIdleEvict = 5 * time.Minute
+)
+
+type deviceLockEntry struct {
+	lock     *sync.Mutex
+	lastUsed time.Time
+}
+
 type deviceLockManager struct {
-	locks map[string]*sync.Mutex
+	locks map[string]*deviceLockEntry
 	mu    sync.RWMutex
 }
 
 func newDeviceLockManager() *deviceLockManager {
 	return &deviceLockManager{
-		locks: make(map[string]*sync.Mutex),
+		locks: make(map[string]*deviceLockEntry),
 	}
 }
 
@@ -51,13 +63,35 @@ func (d *deviceLockManager) getLock(userID string) *sync.Mutex {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	if lock, exists := d.locks[userID]; exists {
-		return lock
+	if e, exists := d.locks[userID]; exists {
+		e.lastUsed = time.Now()
+		return e.lock
 	}
 
-	lock := &sync.Mutex{}
-	d.locks[userID] = lock
-	return lock
+	// 达到上限时先淘汰空闲超过阈值的锁；仍满则直接淘汰最久未使用的一个
+	if len(d.locks) >= deviceLockMaxLocks {
+		now := time.Now()
+		for k, e := range d.locks {
+			if now.Sub(e.lastUsed) > deviceLockIdleEvict {
+				delete(d.locks, k)
+			}
+		}
+		if len(d.locks) >= deviceLockMaxLocks {
+			var oldestKey string
+			var oldest time.Time
+			for k, e := range d.locks {
+				if oldest.IsZero() || e.lastUsed.Before(oldest) {
+					oldestKey = k
+					oldest = e.lastUsed
+				}
+			}
+			delete(d.locks, oldestKey)
+		}
+	}
+
+	e := &deviceLockEntry{lock: &sync.Mutex{}, lastUsed: time.Now()}
+	d.locks[userID] = e
+	return e.lock
 }
 
 type JwtAuth struct {
@@ -258,14 +292,20 @@ func (j *JwtAuth) LoginResponse(c *gin.Context, token *core.Token) {
 	// 缓存记录用户最新登录状态
 	j.updateLastActivity(userIDStr)
 
-	// 无密码变更记录时，写入本次登录时间作为基准（不覆盖已有记录，避免多设备互踢）
+	// 无密码变更记录时，写入本次登录时间作为基准（不覆盖已有记录，避免多设备互踢）。
+	// 基准取 token 的 orig_iat（签发时间）而非 time.Now()：签发发生在 LoginResponse 之前，
+	// 登录跨秒时 time.Now() 会大于 orig_iat，导致刚签发的 token 被判早于基准而立即失效
 	if cached, _ := runtime.RuntimeConfig.GetCacheAdapter().Get(JWTPwdChangedPrefix, userIDStr); cached == "" {
-		_ = runtime.RuntimeConfig.GetCacheAdapter().Set(
-			JWTPwdChangedPrefix,
-			userIDStr,
-			strconv.FormatInt(time.Now().Unix(), 10),
-			config.AuthConfig.MaxRefresh,
-		)
+		if issuedAt := issuedAtFromToken(token.AccessToken); issuedAt > 0 {
+			if err := runtime.RuntimeConfig.GetCacheAdapter().Set(
+				JWTPwdChangedPrefix,
+				userIDStr,
+				strconv.FormatInt(issuedAt, 10),
+				config.AuthConfig.MaxRefresh,
+			); err != nil {
+				log.Errorf("set %s cache failed: %v", JWTPwdChangedPrefix, err)
+			}
+		}
 	}
 
 	response.OK(c, gin.H{
@@ -279,12 +319,14 @@ func (j *JwtAuth) RefreshResponse(c *gin.Context, token *core.Token) {
 	if config.ApplicationConfig.IsSingleLogin {
 		userIDStr, _, _ := j.GetUserIdStr(c)
 		if userIDStr != "" {
-			_ = runtime.RuntimeConfig.GetCacheAdapter().Set(
+			if err := runtime.RuntimeConfig.GetCacheAdapter().Set(
 				JWTLoginPrefix,
 				userIDStr,
 				token.AccessToken,
 				config.AuthConfig.Timeout,
-			)
+			); err != nil {
+				log.Errorf("set %s cache failed: %v", JWTLoginPrefix, err)
+			}
 			j.updateLastActivity(userIDStr)
 		}
 	}
@@ -322,12 +364,14 @@ func (j *JwtAuth) revokeToken(c *gin.Context) (int, error) {
 	if j.enableBlacklist {
 		jit, ok := claims[authdto.JTI].(string)
 		if ok && jit != "" {
-			runtime.RuntimeConfig.GetCacheAdapter().Set(
+			if err := runtime.RuntimeConfig.GetCacheAdapter().Set(
 				JWTBlacklistPrefix,
 				jit,
 				"1",
 				config.AuthConfig.MaxRefresh,
-			)
+			); err != nil {
+				log.Errorf("set %s cache failed: %v", JWTBlacklistPrefix, err)
+			}
 		}
 	}
 
@@ -427,7 +471,7 @@ func (j *JwtAuth) Authorizer(c *gin.Context, data interface{}) bool {
 
 func (j *JwtAuth) Unauthorized(c *gin.Context, httpCode int, message string) {
 	_, _ = j.revokeToken(c)
-	temp := strings.SplitN(message, "_", 1)
+	temp := strings.SplitN(message, "_", 2)
 	errCode := httpCode
 	if len(temp) == 2 {
 		code, err := strconv.ParseInt(temp[0], 10, 64)
@@ -456,14 +500,18 @@ func (j *JwtAuth) removeDevice(userID string, deviceFP string) {
 	}
 
 	if len(newList) > 0 {
-		runtime.RuntimeConfig.GetCacheAdapter().Set(
+		if err := runtime.RuntimeConfig.GetCacheAdapter().Set(
 			JWTDevicesPrefix,
 			userID,
 			strings.Join(newList, ","),
 			config.AuthConfig.MaxRefresh,
-		)
+		); err != nil {
+			log.Errorf("set %s cache failed: %v", JWTDevicesPrefix, err)
+		}
 	} else {
-		runtime.RuntimeConfig.GetCacheAdapter().Del(JWTDevicesPrefix, userID)
+		if err := runtime.RuntimeConfig.GetCacheAdapter().Del(JWTDevicesPrefix, userID); err != nil {
+			log.Errorf("del %s cache failed: %v", JWTDevicesPrefix, err)
+		}
 	}
 }
 
@@ -499,12 +547,14 @@ func (j *JwtAuth) recordDevice(userIDStr string, deviceFP string) {
 		deviceList = deviceList[len(deviceList)-j.maxDevices:]
 	}
 
-	runtime.RuntimeConfig.GetCacheAdapter().Set(
+	if err := runtime.RuntimeConfig.GetCacheAdapter().Set(
 		JWTDevicesPrefix,
 		userIDStr,
 		strings.Join(deviceList, ","),
 		config.AuthConfig.MaxRefresh,
-	)
+	); err != nil {
+		log.Errorf("set %s cache failed: %v", JWTDevicesPrefix, err)
+	}
 }
 
 // addDevice 校验并追加设备：加锁后读改写（原子化，避免并发丢失更新/突破上限）。
@@ -528,12 +578,14 @@ func (j *JwtAuth) addDevice(userIDStr string, deviceFP string) bool {
 	}
 
 	deviceList = append(deviceList, deviceFP)
-	_ = runtime.RuntimeConfig.GetCacheAdapter().Set(
+	if err := runtime.RuntimeConfig.GetCacheAdapter().Set(
 		JWTDevicesPrefix,
 		userIDStr,
 		strings.Join(deviceList, ","),
 		config.AuthConfig.MaxRefresh,
-	)
+	); err != nil {
+		log.Errorf("set %s cache failed: %v", JWTDevicesPrefix, err)
+	}
 	return true
 }
 
@@ -575,7 +627,9 @@ func (j *JwtAuth) revokeAllTokens(userID string) {
 
 	keys := []string{JWTLoginPrefix, JWTDevicesPrefix, JWTActivityPrefix}
 	for _, prefix := range keys {
-		runtime.RuntimeConfig.GetCacheAdapter().Del(prefix, userID)
+		if err := runtime.RuntimeConfig.GetCacheAdapter().Del(prefix, userID); err != nil {
+			log.Errorf("del %s cache failed: %v", prefix, err)
+		}
 	}
 }
 
@@ -661,12 +715,14 @@ func (j *JwtAuth) authCheck(c *gin.Context) bool {
 
 // MarkPwdChanged 记录密码变更时间，使该用户所有已签发 token 立即失效（需重新登录）
 func MarkPwdChanged(userID int64) {
-	_ = runtime.RuntimeConfig.GetCacheAdapter().Set(
+	if err := runtime.RuntimeConfig.GetCacheAdapter().Set(
 		JWTPwdChangedPrefix,
 		strconv.FormatInt(userID, 10),
 		strconv.FormatInt(time.Now().Unix(), 10),
 		config.AuthConfig.MaxRefresh,
-	)
+	); err != nil {
+		log.Errorf("set %s cache failed: %v", JWTPwdChangedPrefix, err)
+	}
 }
 
 // checkUserStatus 校验用户与角色状态：用户已删除（记录不存在）/已停用（status != 正常），
@@ -705,7 +761,7 @@ func (j *JwtAuth) checkRoleEnabled(c *gin.Context, roleKey string) bool {
 	return count > 0
 }
 
-// checkPwdChanged 校验密码变更时间：token 签发时间（iat）早于最近一次密码变更时间则失效
+// checkPwdChanged 校验密码变更时间：token 签发时间（orig_iat）早于最近一次密码变更时间则失效
 func (j *JwtAuth) checkPwdChanged(claims jwtIn.MapClaims, userIDStr string) bool {
 	changedAt, _ := runtime.RuntimeConfig.GetCacheAdapter().Get(JWTPwdChangedPrefix, userIDStr)
 	if changedAt == "" {
@@ -715,20 +771,35 @@ func (j *JwtAuth) checkPwdChanged(claims jwtIn.MapClaims, userIDStr string) bool
 	if err != nil {
 		return true
 	}
-	iat, ok := claims["iat"].(float64)
+	// gin-jwt v3 用 orig_iat 作为签发时间（框架保留字段，token 中无标准 iat 声明）
+	iat, ok := claims["orig_iat"].(float64)
 	if !ok {
 		return false
 	}
 	return int64(iat) >= ts
 }
 
+// issuedAtFromToken 解析 token 的签发时间（orig_iat），解析失败返回 0
+func issuedAtFromToken(tokenStr string) int64 {
+	parsed, _, err := jwtIn.NewParser().ParseUnverified(tokenStr, jwtIn.MapClaims{})
+	if err != nil {
+		return 0
+	}
+	if orig, ok := parsed.Claims.(jwtIn.MapClaims)["orig_iat"].(float64); ok {
+		return int64(orig)
+	}
+	return 0
+}
+
 // updateLastActivity 更新最后活动时间
 func (j *JwtAuth) updateLastActivity(userID string) {
 	// 可以记录用户最后活动时间，用于会话管理
-	runtime.RuntimeConfig.GetCacheAdapter().Set(
+	if err := runtime.RuntimeConfig.GetCacheAdapter().Set(
 		JWTActivityPrefix,
 		userID,
 		strconv.FormatInt(time.Now().Unix(), 10),
 		config.AuthConfig.MaxRefresh,
-	)
+	); err != nil {
+		log.Errorf("set %s cache failed: %v", JWTActivityPrefix, err)
+	}
 }

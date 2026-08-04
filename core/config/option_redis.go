@@ -7,21 +7,75 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go-admin/core/utils/log"
 	"os"
+	"sync"
 )
 
-var _redis *redis.Client
+var (
+	// _redis 兼容旧接口的主客户端（默认取 cache 组件的客户端）
+	_redis *redis.Client
 
-// GetRedisClient 获取redis客户端
+	// clientMu 保护 clients/deprecated
+	clientMu sync.Mutex
+	// clients 各组件（cache/locker/queue/limiter）独立的 Redis 客户端。
+	// 组件必须使用自身配置的独立客户端——共享同一客户端会导致其余组件的
+	// Redis 配置（不同 addr/db/密码）被静默忽略（原实现：首个已建客户端被全员复用）。
+	clients = make(map[string]*redis.Client)
+	// deprecated 已被替换、等待 Apply 成功切换后关闭的旧客户端
+	deprecated []*redis.Client
+)
+
+// GetRedisClient 获取兼容入口的主客户端（外部显式设置优先，缺省为 cache 组件的客户端）
 func GetRedisClient() *redis.Client {
-	return _redis
+	clientMu.Lock()
+	defer clientMu.Unlock()
+	if c := clients["external"]; c != nil {
+		return c
+	}
+	return clients["cache"]
 }
 
-// SetRedisClient 设置redis客户端
+// SetRedisClient 设置外部主客户端，替换旧客户端（旧客户端立即关闭）
 func SetRedisClient(c *redis.Client) {
-	if _redis != nil && _redis != c {
-		_redis.Shutdown(context.Background())
+	clientMu.Lock()
+	defer clientMu.Unlock()
+	if old := clients["external"]; old != nil && old != c {
+		_ = old.Shutdown(context.Background())
 	}
-	_redis = c
+	clients["external"] = c
+}
+
+// StageRedisClient 登记组件（cache/locker/queue/limiter）的 Redis 客户端：
+// 替换时旧客户端挂起，等待 Apply 成功切换后统一关闭（构建阶段不能关停仍被线上组件使用的客户端）。
+func StageRedisClient(id string, c *redis.Client) *redis.Client {
+	clientMu.Lock()
+	defer clientMu.Unlock()
+	if old, ok := clients[id]; ok && old != c {
+		deprecated = append(deprecated, old)
+	}
+	clients[id] = c
+	return c
+}
+
+// CommitRedisClients Apply 成功切换组件后关闭被替换的旧客户端（各组件 Handler 的 Apply 调用）
+func CommitRedisClients() {
+	clientMu.Lock()
+	defer clientMu.Unlock()
+	for _, c := range deprecated {
+		_ = c.Shutdown(context.Background())
+	}
+	deprecated = nil
+}
+
+// CloseAllRedisClients 关闭全部登记客户端（进程退出时调用）
+func CloseAllRedisClients() {
+	clientMu.Lock()
+	defer clientMu.Unlock()
+	for id, c := range clients {
+		_ = c.Shutdown(context.Background())
+		delete(clients, id)
+	}
+	deprecated = nil
+	_redis = nil
 }
 
 type RedisConnectOptions struct {

@@ -10,8 +10,9 @@ const (
 	//RoleStatusStop  = "2" //停用
 
 	//登录退出
-	UserLoginStatus  = "1"
-	UserLogoutStatus = "2"
+	UserLoginStatus     = "1"
+	UserLogoutStatus    = "2"
+	UserLoginFailStatus = "3" //登录失败（用于审计暴力破解）
 
 	//数据权限类型
 	DataScope1 = "1" //全部数据

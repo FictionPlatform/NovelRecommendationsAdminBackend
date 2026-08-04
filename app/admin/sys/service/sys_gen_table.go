@@ -135,7 +135,8 @@ func (e *SysGenTable) Insert(c *dto.SysGenTableInsertReq) (int, error) {
 	}
 
 	err = e.Orm.Transaction(func(tx *gorm.DB) error {
-		if err = e.Orm.Create(&sysTables).Error; err != nil {
+		// L24：必须用闭包内的 tx，用 e.Orm 会绕过事务在独立连接上执行（事务形同虚设）
+		if err = tx.Create(&sysTables).Error; err != nil {
 			return err
 		}
 		return nil
@@ -158,12 +159,14 @@ func (e *SysGenTable) Update(c *dto.SysGenTableUpdateReq, p *middleware.DataPerm
 		return false, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
 
-	e.Orm = e.Orm.Begin()
+	// L24：用局部 tx 代替写回共享 e.Orm 的脆弱写法（Begin 结果只在本方法内可见，
+	// 子 service 显式传入 tx，避免共享成员被并发请求覆盖）
+	tx := e.Orm.Begin()
 	defer func() {
 		if err != nil {
-			e.Orm.Rollback()
+			tx.Rollback()
 		} else {
-			e.Orm.Commit()
+			tx.Commit()
 		}
 	}()
 
@@ -198,13 +201,13 @@ func (e *SysGenTable) Update(c *dto.SysGenTableUpdateReq, p *middleware.DataPerm
 	if len(updates) > 0 {
 		updates["updated_at"] = time.Now()
 		updates["update_by"] = c.CurrUserId
-		err = e.Orm.Model(&data).Where("id=?", data.Id).Updates(&updates).Error
+		err = tx.Model(&data).Where("id=?", data.Id).Updates(&updates).Error
 		if err != nil {
 			return false, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
 		}
 		isUpdate = true
 	}
-	columnsService := NewSysColumnsService(&e.Service)
+	columnsService := NewSysColumnsService(&service.Service{Orm: tx, Log: e.Log, Lang: e.Lang})
 	for _, column := range c.Columns {
 		column.CurrUserId = c.CurrUserId
 		var b bool
@@ -226,22 +229,23 @@ func (e *SysGenTable) Delete(ids []int64, p *middleware.DataPermission) (int, er
 		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
 	var err error
-	e.Orm = e.Orm.Begin()
+	// L24：用局部 tx 代替写回共享 e.Orm
+	tx := e.Orm.Begin()
 	defer func() {
 		if err != nil {
-			e.Orm.Rollback()
+			tx.Rollback()
 		} else {
-			e.Orm.Commit()
+			tx.Commit()
 		}
 	}()
 	var data models.SysGenTable
-	err = e.Orm.Scopes(
+	err = tx.Scopes(
 		middleware.Permission(data.TableName(), p),
 	).Delete(&data, ids).Error
 	if err != nil {
 		return baseLang.DataDeleteLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataDeleteCode, baseLang.DataDeleteLogCode, err)
 	}
-	columnsService := NewSysColumnsService(&e.Service)
+	columnsService := NewSysColumnsService(&service.Service{Orm: tx, Log: e.Log, Lang: e.Lang})
 	columnReq := dto.SysGenColumnDeleteReq{}
 	columnReq.TableIds = ids
 	respCode, err := columnsService.Delete(columnReq, p)
@@ -593,12 +597,13 @@ func (e *SysGenTable) GenDB(c dto.SysGenTableGetReq, p *middleware.DataPermissio
 	}
 
 	var err error
-	e.Orm = e.Orm.Begin()
+	// L24：用局部 tx 代替写回共享 e.Orm，子 service（菜单）显式传入 tx
+	tx := e.Orm.Begin()
 	defer func() {
 		if err != nil {
-			e.Orm.Rollback()
+			tx.Rollback()
 		} else {
-			e.Orm.Commit()
+			tx.Commit()
 		}
 	}()
 	table, respCode, err := e.Get(c.Id, p)
@@ -608,7 +613,7 @@ func (e *SysGenTable) GenDB(c dto.SysGenTableGetReq, p *middleware.DataPermissio
 	basePremission := table.PackageName + ":" + table.ModuleName
 	basePath := "/" + table.PackageName + "/" + table.BusinessName + "/" + table.ModuleName
 
-	menuService := NewSysMenuService(&e.Service)
+	menuService := NewSysMenuService(&service.Service{Orm: tx, Log: e.Log, Lang: e.Lang})
 
 	//插入主菜单
 	cMenuInsertReq := dto.SysMenuInsertReq{

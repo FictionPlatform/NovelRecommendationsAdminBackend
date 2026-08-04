@@ -32,6 +32,9 @@ const (
 	SysDeptNameExistCode       = 10203
 	SysDeptChildExistNoDelCode = 10204
 	SysDeptParentSelfCode      = 10205
+	SysDeptParentChildCode     = 10206
+	SysDeptUserExistNoDelCode  = 10207
+	SysDeptRoleExistNoDelCode  = 10208
 
 	//角色管理
 	SysRoleNameEmptyCode         = 10301
@@ -43,11 +46,12 @@ const (
 	SysRoleUserExistNoDeleteCode = 10307
 
 	//岗位管理
-	SysPostNameEmptyCode   = 10400
-	SysPostCodeEmptyCode   = 10401
-	SysPostSortEmptyCode   = 10402
-	SysPostStatusEmptyCode = 10403
-	SysPostNameExistCode   = 10404
+	SysPostNameEmptyCode           = 10400
+	SysPostCodeEmptyCode           = 10401
+	SysPostSortEmptyCode           = 10402
+	SysPostStatusEmptyCode         = 10403
+	SysPostNameExistCode           = 10404
+	SysPostUserExistNoDeleteCode   = 10405
 
 	//用户管理
 	SysUserNameEmptyCode              = 10500
@@ -77,6 +81,7 @@ const (
 	SysUseAvatarUploadErrLogCode      = 10524
 	SysAdminUserNotAllowDeleteErrCode = 10525
 	SysUserNoRoleErrCode              = 10526
+	SysUseLoginLockedCode             = 10527
 
 	//菜单
 	SysMenuParentIdEmptyCode = 10600
@@ -147,6 +152,9 @@ func init() {
 	lang.MsgInfo[SysDeptNameExistCode] = "该部门名称已存在"
 	lang.MsgInfo[SysDeptChildExistNoDelCode] = "该部门有下级部门，不可删除"
 	lang.MsgInfo[SysDeptParentSelfCode] = "不可将自己设置为上级部门"
+	lang.MsgInfo[SysDeptParentChildCode] = "不可将子孙部门设置为上级部门"
+	lang.MsgInfo[SysDeptUserExistNoDelCode] = "该部门下存在用户，无法删除"
+	lang.MsgInfo[SysDeptRoleExistNoDelCode] = "该部门已被角色绑定，无法删除"
 
 	//角色
 	lang.MsgInfo[SysRoleNameEmptyCode] = "角色名称不得为空"
@@ -163,6 +171,7 @@ func init() {
 	lang.MsgInfo[SysPostSortEmptyCode] = "岗位排序不得为空"
 	lang.MsgInfo[SysPostStatusEmptyCode] = "岗位状态不得为空"
 	lang.MsgInfo[SysPostNameExistCode] = "岗位名称已存在"
+	lang.MsgInfo[SysPostUserExistNoDeleteCode] = "该岗位下存在用户，无法删除"
 
 	//用户管理
 	lang.MsgInfo[SysUserNameEmptyCode] = "用户名不得为空"
@@ -192,6 +201,7 @@ func init() {
 	lang.MsgInfo[SysUseAvatarUploadErrLogCode] = "头像上传失败：%s"
 	lang.MsgInfo[SysAdminUserNotAllowDeleteErrCode] = "该账户禁止删除"
 	lang.MsgInfo[SysUserNoRoleErrCode] = "该账户尚未分配角色"
+	lang.MsgInfo[SysUseLoginLockedCode] = "登录失败次数过多，请稍后再试"
 
 	//菜单
 	lang.MsgInfo[SysMenuParentIdEmptyCode] = "上级菜单不得为空"

@@ -13,7 +13,6 @@ type SysUser struct {
 	NickName  string     `json:"nickName" gorm:"size:128;comment:昵称"`
 	Phone     string     `json:"phone" gorm:"size:11;comment:手机号"`
 	RoleId    int64      `json:"roleId" gorm:"size:20;comment:角色ID"`
-	Salt      string     `json:"-" gorm:"size:255;comment:加盐"`
 	Avatar    string     `json:"avatar" gorm:"size:255;comment:头像"`
 	Sex       string     `json:"sex" gorm:"size:255;comment:性别"`
 	Email     string     `json:"email" gorm:"size:128;comment:邮箱"`

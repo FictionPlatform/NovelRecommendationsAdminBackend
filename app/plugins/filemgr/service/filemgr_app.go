@@ -18,6 +18,7 @@ import (
 	"go-admin/core/utils/idgen"
 	"go-admin/core/utils/ossutils"
 	"mime/multipart"
+	"net/url"
 	"path"
 	"strings"
 
@@ -35,6 +36,16 @@ const maxAppUploadSize = 200 << 20
 
 // allowedAppExt 允许上传的 APP 安装包扩展名白名单
 var allowedAppExt = map[string]bool{".apk": true, ".ipa": true, ".zip": true}
+
+// validDownloadScheme 校验下载根地址仅允许 http/https 协议，
+// 拒绝 javascript:、data: 等可执行/伪协议拼接进下载链接
+func validDownloadScheme(rawurl string) bool {
+	u, err := url.Parse(rawurl)
+	if err != nil || u.Scheme == "" {
+		return false
+	}
+	return u.Scheme == "http" || u.Scheme == "https"
+}
 
 // NewFilemgrAppService plugins-实例化APP管理
 func NewFilemgrAppService(s *service.Service) *FilemgrApp {
@@ -173,6 +184,10 @@ func (e *FilemgrApp) Insert(c *dto.FilemgrAppInsertReq) (int64, int, error) {
 		if c.LocalRootUrl == "" {
 			return 0, baseLang.AppLocalUrlEmptyCode, lang.MsgErr(baseLang.AppLocalUrlEmptyCode, e.Lang)
 		}
+		//L25：仅允许 http/https 协议，拒绝 javascript: 等可执行协议注入下载链接
+		if !validDownloadScheme(c.LocalRootUrl) {
+			return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+		}
 		//c.LocalAddress = strings.Replace(c.LocalAddress, config.ApplicationConfig.FileRootPath, "", -1)
 		c.DownloadUrl = c.LocalRootUrl + c.LocalAddress
 	}
@@ -230,6 +245,9 @@ func (e *FilemgrApp) Delete(ids []int64, p *middleware.DataPermission) (int, err
 	if len(ids) <= 0 {
 		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
+	//L25：先统计需清理的 OSS 资源（不删除），DB 删除成功后再清理，
+	//避免 DB 失败时 OSS 文件已丢导致记录悬空、下载链接失效
+	var pendingOssObjectKeys []string
 	for _, id := range ids {
 		result, respCode, err := e.Get(id, p)
 		if respCode != baseLang.DataNotFoundCode && err != nil {
@@ -247,11 +265,9 @@ func (e *FilemgrApp) Delete(ids []int64, p *middleware.DataPermission) (int, err
 			return respCode, err
 		}
 		if count <= 1 {
-			//oss删除对应资源,无论删除成功与否
 			objectKey, _ := e.generateAppOssObjectKey(result)
-			oss, _ := e.getOssClient()
-			if oss != nil && objectKey != "" {
-				_ = oss.Bucket.DeleteObject(objectKey, nil)
+			if objectKey != "" {
+				pendingOssObjectKeys = append(pendingOssObjectKeys, objectKey)
 			}
 		}
 	}
@@ -261,6 +277,15 @@ func (e *FilemgrApp) Delete(ids []int64, p *middleware.DataPermission) (int, err
 	).Delete(&data, ids).Error
 	if err != nil {
 		return baseLang.DataDeleteLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataDeleteCode, baseLang.DataDeleteLogCode, err)
+	}
+	//DB 删除成功后清理 OSS 资源（删除失败仅告警，不阻断主流程）
+	oss, _ := e.getOssClient()
+	if oss != nil {
+		for _, objectKey := range pendingOssObjectKeys {
+			if err := oss.Bucket.DeleteObject(objectKey, nil); err != nil {
+				e.Log.Warnf("delete oss object %s error:%s", objectKey, err.Error())
+			}
+		}
 	}
 	return baseLang.SuccessCode, nil
 }

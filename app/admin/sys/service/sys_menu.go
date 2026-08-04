@@ -470,7 +470,9 @@ func (e *SysMenu) Delete(ids []int64, p *middleware.DataPermission) (int, error)
 // DeleteCasbinByMenu 删除菜单后刷新全局 casbin 内存策略（事务提交后调用）
 func (e *SysMenu) DeleteCasbinByMenu() {
 	if cb := mycasbin.GetGlobalEnforcer(); cb != nil {
-		_ = cb.LoadPolicy()
+		if err := cb.LoadPolicy(); err != nil && e.Log != nil {
+			e.Log.Errorf("reload casbin policy error:%s", err.Error())
+		}
 	}
 }
 

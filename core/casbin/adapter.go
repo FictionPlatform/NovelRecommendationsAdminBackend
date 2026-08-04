@@ -21,6 +21,7 @@ import (
 
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
+	"go-admin/core/utils/dberr"
 	"gorm.io/gorm"
 )
 
@@ -261,6 +262,11 @@ func (a *Adapter) createTable() error {
 	hasIndex := a.db.Migrator().HasIndex(t, index)
 	if !hasIndex {
 		if err := a.db.Exec(fmt.Sprintf("CREATE UNIQUE INDEX %s ON %s (p_type,v0,v1,v2,v3,v4,v5)", index, tableName)).Error; err != nil {
+			// L20：多实例并发启动时多个进程会同时走到这里，后到者报"索引已存在"，
+			// 视为成功（幂等），避免 Setup 中 panic 导致实例启动失败
+			if dberr.IsDuplicateIndex(err) {
+				return nil
+			}
 			return err
 		}
 	}

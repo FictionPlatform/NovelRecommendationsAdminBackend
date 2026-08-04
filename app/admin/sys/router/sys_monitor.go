@@ -13,7 +13,7 @@ func init() {
 // 需认证的路由代码
 func registerSysMonitorRouter(v1 *gin.RouterGroup) {
 	api := apis.Monitor{}
-	r := v1.Group("/admin/sys/sys-monitor").Use(middleware.Auth()).Use(middleware.AuthCheckRole())
+	r := v1.Group("/admin/sys/sys-monitor").Use(middleware.Auth()).Use(middleware.AuthCheckRole()).Use(middleware.AdminOnly())
 	{
 		r.GET("", api.GetMonitor)
 		r.GET("/ping", api.Ping)

@@ -1,6 +1,7 @@
 package mycasbin
 
 import (
+	"fmt"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/gin-gonic/gin"
@@ -42,17 +43,21 @@ func Setup(db *gorm.DB, _ string) *casbin.SyncedEnforcer {
 		panic(err)
 	}
 
-	e.EnableLog(true)
+	// L19：关闭 casbin 内置日志——Enforce 每请求打日志拖累性能，鉴权结果已由 AuthCheckRole 中间件记录
+	e.EnableLog(false)
 	return e
 }
 
 func LoadPolicy(c *gin.Context) (*casbin.SyncedEnforcer, error) {
-	if err := runtime.RuntimeConfig.GetCasbinKey(c.Request.Host).LoadPolicy(); err == nil {
-		return runtime.RuntimeConfig.GetCasbinKey(c.Request.Host), err
-	} else {
+	enforcer := runtime.RuntimeConfig.GetCasbinKey(c.Request.Host)
+	if enforcer == nil {
+		return nil, fmt.Errorf("casbin enforcer not found for host %s", c.Request.Host)
+	}
+	if err := enforcer.LoadPolicy(); err != nil {
 		log.Errorf("casbin rbac_model or policy init error, %s ", err.Error())
 		return nil, err
 	}
+	return enforcer, nil
 }
 
 // GetGlobalEnforcer 获取全局casbin enforcer（优先通配键，单实例部署场景）

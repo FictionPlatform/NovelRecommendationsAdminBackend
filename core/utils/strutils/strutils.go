@@ -2,7 +2,9 @@ package strutils
 
 import (
 	"crypto/md5"
+	"crypto/rand"
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -14,7 +16,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"math"
-	"math/rand"
 	"os"
 	"regexp"
 	"strconv"
@@ -55,12 +56,25 @@ func IsNum(d decimal.Decimal) bool {
 }
 
 // GenerateValidateCode
-// @Description: 随机生成6位数字验证码
+// @Description: 随机生成6位数字验证码（crypto/rand，不可预测）
 // @return string
 func GenerateValidateCode() string {
-	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	rndCode := fmt.Sprintf("%06v", rnd.Int31n(1000000))
-	return rndCode
+	// 拒绝采样消除模偏差：只接受 [0, ceiling) 的值，保证 0-999999 均匀
+	const max = 1000000
+	const ceiling = (1 << 32) / max * max
+	var n uint32
+	for {
+		b := make([]byte, 4)
+		if _, err := rand.Read(b); err != nil {
+			// crypto/rand 失败为致命错误（熵源不可用），直接暴露
+			panic("GenerateValidateCode: crypto/rand failed: " + err.Error())
+		}
+		n = binary.BigEndian.Uint32(b)
+		if n < ceiling {
+			break
+		}
+	}
+	return fmt.Sprintf("%06d", n%max)
 }
 
 // VerifyEmailFormat

@@ -177,7 +177,9 @@ func (e *SysApi) Delete(ids []int64, p *middleware.DataPermission) (int, error) 
 	}
 	// 刷新全局 casbin 内存策略
 	if cb := mycasbin.GetGlobalEnforcer(); cb != nil {
-		_ = cb.LoadPolicy()
+		if err := cb.LoadPolicy(); err != nil {
+			e.Log.Errorf("reload casbin policy error:%s", err.Error())
+		}
 	}
 	return baseLang.SuccessCode, nil
 }
@@ -219,7 +221,9 @@ func (e *SysApi) Sync() (int, error) {
 	}
 	// 同步可能删除了失效接口，刷新全局 casbin 内存策略
 	if cb := mycasbin.GetGlobalEnforcer(); cb != nil {
-		_ = cb.LoadPolicy()
+		if err := cb.LoadPolicy(); err != nil {
+			e.Log.Errorf("reload casbin policy error:%s", err.Error())
+		}
 	}
 	return baseLang.SuccessCode, nil
 }

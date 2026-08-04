@@ -13,6 +13,7 @@ import (
 	"go-admin/core/global"
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
+	"go-admin/core/utils/dberr"
 	"go-admin/core/utils/excelutils"
 	"gorm.io/gorm"
 	"time"
@@ -138,6 +139,9 @@ func (e *UserLevel) Insert(c *dto.UserLevelInsertReq) (int64, int, error) {
 	data.UpdatedAt = &now
 	err = e.Orm.Create(&data).Error
 	if err != nil {
+		if dberr.IsDuplicateKey(err) {
+			return 0, baseLang.UserLevelNameAndTypeExistCode, lang.MsgErr(baseLang.UserLevelNameAndTypeExistCode, e.Lang)
+		}
 		return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
 	}
 	return data.Id, baseLang.SuccessCode, nil
@@ -179,6 +183,9 @@ func (e *UserLevel) Update(c *dto.UserLevelUpdateReq, p *middleware.DataPermissi
 		updates["update_by"] = c.CurrUserId
 		err = e.Orm.Model(&data).Where("id=?", data.Id).Updates(&updates).Error
 		if err != nil {
+			if dberr.IsDuplicateKey(err) {
+				return false, baseLang.UserLevelNameAndTypeExistCode, lang.MsgErr(baseLang.UserLevelNameAndTypeExistCode, e.Lang)
+			}
 			return false, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
 		}
 		return true, baseLang.SuccessCode, nil

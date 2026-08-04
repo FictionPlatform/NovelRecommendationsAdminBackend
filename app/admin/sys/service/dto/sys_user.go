@@ -82,7 +82,7 @@ type SysUserUpdateReq struct {
 	DeptId     int64  `json:"deptId" comment:"部门"`
 	PostId     int64  `json:"postId" comment:"岗位"`
 	Remark     string `json:"remark" comment:"备注"`
-	Status     string `json:"status" comment:"状态"sss`
+	Status     string `json:"status" comment:"状态"`
 	CurrUserId int64  `json:"-" comment:""`
 	//Password   string `json:"password" comment:""`
 }

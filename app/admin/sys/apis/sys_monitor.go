@@ -43,9 +43,13 @@ type Monitor struct {
 // @Failure 400 {object} response.Response "请求失败"
 // @Router /admin/sys/sys-monitor [get]
 func (e Monitor) GetMonitor(c *gin.Context) {
-	e.Context = c
+	e.MakeContext(c)
 
 	sysInfo, err := host.Info()
+	if err != nil {
+		e.Error(baseLang.DataQueryCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err).Error())
+		return
+	}
 	osDic := make(map[string]interface{}, 0)
 	osDic["goOs"] = runtime.GOOS
 	osDic["arch"] = runtime.GOARCH
@@ -58,18 +62,26 @@ func (e Monitor) GetMonitor(c *gin.Context) {
 	osDic["hostName"] = sysInfo.Hostname
 	osDic["time"] = time.Now().Format("2006-01-02 15:04:05")
 
-	dis, _ := disk.Usage("/")
+	dis, err := disk.Usage("/")
+	if err != nil {
+		e.Error(baseLang.DataQueryCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err).Error())
+		return
+	}
 	diskTotalGB := int(dis.Total) / GB
 	diskFreeGB := int(dis.Free) / GB
 	diskDic := make(map[string]interface{}, 0)
 	diskDic["total"] = diskTotalGB
 	diskDic["free"] = diskFreeGB
 
-	mem, _ := mem.VirtualMemory()
-	memUsedMB := int(mem.Used) / GB
-	memTotalMB := int(mem.Total) / GB
-	memFreeMB := int(mem.Free) / GB
-	memUsedPercent := int(mem.UsedPercent)
+	memInfo, err := mem.VirtualMemory()
+	if err != nil {
+		e.Error(baseLang.DataQueryCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err).Error())
+		return
+	}
+	memUsedMB := int(memInfo.Used) / GB
+	memTotalMB := int(memInfo.Total) / GB
+	memFreeMB := int(memInfo.Free) / GB
+	memUsedPercent := int(memInfo.UsedPercent)
 	memDic := make(map[string]interface{}, 0)
 	memDic["total"] = memTotalMB
 	memDic["used"] = memUsedMB
@@ -77,12 +89,34 @@ func (e Monitor) GetMonitor(c *gin.Context) {
 	memDic["usage"] = memUsedPercent
 
 	cpuDic := make(map[string]interface{}, 0)
-	cpuDic["cpuInfo"], _ = cpu.Info()
-	percent, _ := cpu.Percent(0, false)
-	cpuDic["Percent"] = strutils.Round(percent[0], 2)
-	cpus, _ := cpu.Percent(time.Duration(200)*time.Millisecond, true)
+	cpuInfo, err := cpu.Info()
+	if err != nil {
+		e.Error(baseLang.DataQueryCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err).Error())
+		return
+	}
+	cpuDic["cpuInfo"] = cpuInfo
+	percent, err := cpu.Percent(0, false)
+	if err != nil {
+		e.Error(baseLang.DataQueryCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err).Error())
+		return
+	}
+	if len(percent) > 0 {
+		cpuDic["Percent"] = strutils.Round(percent[0], 2)
+	} else {
+		cpuDic["Percent"] = 0
+	}
+	cpus, err := cpu.Percent(time.Duration(200)*time.Millisecond, true)
+	if err != nil {
+		e.Error(baseLang.DataQueryCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err).Error())
+		return
+	}
 	cpuDic["cpus"] = cpus
-	cpuDic["cpuNum"], _ = cpu.Counts(false)
+	cpuNum, err := cpu.Counts(false)
+	if err != nil {
+		e.Error(baseLang.DataQueryCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err).Error())
+		return
+	}
+	cpuDic["cpuNum"] = cpuNum
 
 	//服务器磁盘信息
 	disklist := make([]disk.UsageStat, 0)

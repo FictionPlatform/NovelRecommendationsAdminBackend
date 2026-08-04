@@ -20,7 +20,7 @@ type SysLoginLog struct {
 	Platform      string     `json:"platform" gorm:"size:255;comment:固件"`
 	LoginTime     *time.Time `json:"loginTime" gorm:"comment:登录时间"`
 	Remark        string     `json:"remark" gorm:"size:255;comment:备注"`
-	Status        string     `json:"status" gorm:"size:1;comment:状态 1-登录 2-退出"`
+	Status        string     `json:"status" gorm:"size:1;comment:状态 1-登录 2-退出 3-登录失败"`
 	CreatedAt     *time.Time `json:"createdAt" gorm:"comment:创建时间"`
 	UpdatedAt     *time.Time `json:"updatedAt" gorm:"comment:最后更新时间"`
 	CreateBy      int64      `json:"createBy" gorm:"index;comment:创建者"`

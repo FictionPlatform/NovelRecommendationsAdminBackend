@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"go-admin/core/utils/log"
 	"os"
 )
 
@@ -22,23 +21,22 @@ var (
 )
 
 // InitLang 用于支持现有系统,当前支持英文
-func InitLang() {
-	var err error
+func InitLang() error {
 	enLang, err := newI18n("config/lang", "en")
 	if err != nil {
-		log.Warnf("en lang init error: %s", err.Error())
-		return
+		return fmt.Errorf("en lang init error: %s", err.Error())
 	}
 	EnLang = enLang
+	return nil
 }
 
 func newI18n(path string, lang string) (*I18n, error) {
 	fileName := fmt.Sprintf("%s/%s.csv", path, lang)
 	fs1, err := os.Open(fileName)
-
 	if err != nil {
 		return nil, err
 	}
+	defer fs1.Close()
 
 	r1 := csv.NewReader(fs1)
 	r1.Comma = ','
@@ -63,6 +61,10 @@ func (i *I18n) T(key string, args ...interface{}) string {
 		format = i.Data[key]
 	} else {
 		for _, row := range i.Source {
+			// 行长度校验：空行/单列行跳过，避免 row[0]/row[1] 越界 panic
+			if len(row) < 2 {
+				continue
+			}
 			if row[0] == key {
 				i.Data[key] = row[1]
 				format = row[1]
@@ -84,6 +86,10 @@ func (i *I18n) TOption(key string, lang string, args ...interface{}) string {
 	}
 
 	for _, row := range i18nClient.Source {
+		// 行长度校验：空行/单列行跳过，避免 row[0]/row[1] 越界 panic
+		if len(row) < 2 {
+			continue
+		}
 		if row[0] == key {
 			i18nClient.Data[key] = row[1]
 			format = row[1]

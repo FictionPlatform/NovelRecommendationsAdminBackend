@@ -20,13 +20,13 @@ func (e Cache) Setup() (storage.AdapterCache, error) {
 		if err != nil {
 			return nil, err
 		}
-		r, err := cache.NewRedis(GetRedisClient(), options)
+		// 独立客户端：cache 使用自身 Redis 配置（原实现复用首个已建客户端，其余组件的 Redis 配置被静默忽略）
+		r, err := cache.NewRedis(nil, options)
 		if err != nil {
 			return nil, err
 		}
-		if _redis == nil {
-			_redis = r.GetClient()
-		}
+		StageRedisClient("cache", r.GetClient())
+		_redis = r.GetClient()
 		return r, nil
 	}
 	return cache.NewMemory(), nil

@@ -17,8 +17,7 @@ func NewCache(store storage.AdapterCache) storage.AdapterCache {
 }
 
 type Cache struct {
-	store           storage.AdapterCache
-	wxTokenStoreKey string
+	store storage.AdapterCache
 }
 
 func (e *Cache) Exist(prefix, key string) bool {

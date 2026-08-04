@@ -18,6 +18,7 @@ import (
 	"go-admin/core/utils/dateutils"
 	"go-admin/core/utils/iputils"
 	"go-admin/core/utils/strutils"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"strconv"
 	"time"
@@ -462,7 +463,7 @@ func (e *SysUser) UpdateStatus(c *dto.SysUserStatusUpdateReq, p *middleware.Data
 	}
 
 	updates := map[string]interface{}{}
-	if c.Status != "" && u.Avatar != c.Status {
+	if c.Status != "" && u.Status != c.Status {
 		updates["status"] = c.Status
 	}
 
@@ -490,7 +491,8 @@ func (e *SysUser) ResetPwd(c *dto.ResetSysUserPwdReq, p *middleware.DataPermissi
 		return false, respCode, err
 	}
 
-	if u.Password != c.Password {
+	//新密码与旧密码一致时跳过（bcrypt 哈希与明文不可直接比较，用校验函数判断）
+	if bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(c.Password)) != nil {
 		now := time.Now()
 		err = e.Orm.Where("id=?", c.UserId).Updates(&models.SysUser{
 			Password:  c.Password,
@@ -744,10 +746,11 @@ func (e *SysUser) LoginLogToDB(c *gin.Context, status string, msg string, userId
 	}
 	l := make(map[string]interface{})
 
+	clientIP := iputils.GetClientIP(c)
 	ua := user_agent.New(c.Request.UserAgent())
-	l["ipaddr"] = iputils.GetClientIP(c)
+	l["ipaddr"] = clientIP
 	//用于定位ip所在城市
-	l["loginLocation"] = iputils.GetLocation(iputils.GetClientIP(c), config.ApplicationConfig.AmpKey)
+	l["loginLocation"] = iputils.GetLocation(clientIP, config.ApplicationConfig.AmpKey)
 	l["loginTime"] = strutils.GetCurrentTime()
 	l["status"] = status
 	l["agent"] = c.Request.UserAgent()
@@ -761,12 +764,23 @@ func (e *SysUser) LoginLogToDB(c *gin.Context, status string, msg string, userId
 	q := runtime.RuntimeConfig.GetMemoryQueue(c.Request.Host)
 	message, err := runtime.RuntimeConfig.GetStreamMessage("", global.LoginLog, l)
 	if err != nil {
-		e.Log.Errorf("SysUserService LoginLogToDB error:%s", err)
-		//日志报错错误，不中断请求
-	} else {
-		err = q.Append(message)
 		if e.Log != nil {
 			e.Log.Errorf("SysUserService LoginLogToDB error:%s", err)
 		}
+		//日志报错错误，不中断请求
+		return
 	}
+	err = q.Append(message)
+	if err != nil && e.Log != nil {
+		e.Log.Errorf("SysUserService LoginLogToDB error:%s", err)
+	}
+}
+
+// LoginFailToDB admin-记录登录失败日志（用于审计暴力破解尝试）
+func (e *SysUser) LoginFailToDB(c *gin.Context, username string, msg string) {
+	remark := msg
+	if username != "" {
+		remark = "登录失败[账号:" + username + "]:" + msg
+	}
+	e.LoginLogToDB(c, constant.UserLoginFailStatus, remark, 0)
 }

@@ -192,8 +192,25 @@ func (e *SysDept) Update(c *dto.SysDeptUpdateReq, p *middleware.DataPermission) 
 	if c.Sort > 0 && data.Sort != c.Sort {
 		updates["sort"] = c.Sort
 	}
+	var newParentIds string
 	if c.ParentId > 0 && data.ParentId != c.ParentId {
+		// 循环检测：新父级不能是自身或自身的子孙部门
+		childReq := dto.SysDeptQueryReq{}
+		childReq.ParentIds = "," + strconv.FormatInt(c.Id, 10) + ","
+		childCount, respCode, err := e.Count(&childReq)
+		if err != nil && respCode != baseLang.DataNotFoundCode {
+			return false, respCode, err
+		}
+		if childCount > 0 {
+			return false, baseLang.SysDeptParentChildCode, lang.MsgErr(baseLang.SysDeptParentChildCode, e.Lang)
+		}
+		parentDept, respCode, err := e.Get(c.ParentId, nil)
+		if err != nil {
+			return false, respCode, err
+		}
+		newParentIds = parentDept.ParentIds + strconv.FormatInt(parentDept.Id, 10) + ","
 		updates["parent_id"] = c.ParentId
+		updates["parent_ids"] = newParentIds
 	}
 	if c.Leader != "" && data.Leader != c.Leader {
 		updates["leader"] = c.Leader
@@ -211,6 +228,16 @@ func (e *SysDept) Update(c *dto.SysDeptUpdateReq, p *middleware.DataPermission) 
 		err = e.Orm.Model(&data).Where("id=?", data.Id).Updates(&updates).Error
 		if err != nil {
 			return false, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
+		}
+		//部门移动后，级联重锚所有子孙部门的 parent_ids（防止路径链失效）
+		if newParentIds != "" {
+			oldPrefix := data.ParentIds + strconv.FormatInt(data.Id, 10) + ","
+			err = e.Orm.Model(&models.SysDept{}).
+				Where("parent_ids like ?", oldPrefix+"%").
+				Update("parent_ids", gorm.Expr("REPLACE(parent_ids, ?, ?)", oldPrefix, newParentIds)).Error
+			if err != nil {
+				return false, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
+			}
 		}
 		return true, baseLang.SuccessCode, nil
 	}
@@ -233,6 +260,28 @@ func (e *SysDept) Delete(ids []int64, p *middleware.DataPermission) (int, error)
 		}
 		if count > 0 {
 			return baseLang.SysDeptChildExistNoDelCode, lang.MsgErr(baseLang.SysDeptChildExistNoDelCode, e.Lang)
+		}
+
+		//部门下存在用户，不得删除
+		userService := NewSysUserService(&e.Service)
+		userReq := dto.SysUserQueryReq{}
+		userReq.DeptId = id
+		userCount, respCode, err := userService.Count(&userReq)
+		if err != nil && respCode != baseLang.DataNotFoundCode {
+			return respCode, err
+		}
+		if userCount > 0 {
+			return baseLang.SysDeptUserExistNoDelCode, lang.MsgErr(baseLang.SysDeptUserExistNoDelCode, e.Lang)
+		}
+
+		//已被角色绑定，不得删除
+		var roleCount int64
+		err = e.Orm.Table("admin_sys_role_dept").Where("dept_id = ?", id).Count(&roleCount).Error
+		if err != nil {
+			return baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+		}
+		if roleCount > 0 {
+			return baseLang.SysDeptRoleExistNoDelCode, lang.MsgErr(baseLang.SysDeptRoleExistNoDelCode, e.Lang)
 		}
 	}
 

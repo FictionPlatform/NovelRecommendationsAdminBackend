@@ -1,8 +1,6 @@
 package apis
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"go-admin/app/admin/sys/service"
 	"go-admin/app/admin/sys/service/dto"
 	"go-admin/config/base/constant"
@@ -18,9 +16,14 @@ import (
 	"go-admin/core/utils/captchautils"
 	"go-admin/core/utils/fileutils"
 	"go-admin/core/utils/idgen"
+	"go-admin/core/utils/iputils"
+	"go-admin/core/utils/loginlock"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 // maxAvatarUploadSize 头像上传大小上限 2MB
@@ -538,17 +541,33 @@ func (e SysUser) Login(c *gin.Context) {
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
+		// 参数解析失败同样记录审计日志，避免漏掉畸形请求
+		loginlock.RecordFail("", iputils.GetClientIP(c))
+		s.LoginFailToDB(c, "", lang.MsgByCode(baseLang.DataDecodeCode, e.Lang))
 		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
 		return
 	}
 
+	clientIP := iputils.GetClientIP(c)
+	// 登录爆破防护：账号/IP 任一锁定即拦截（先于验证码/口令校验，减少无效尝试）
+	if loginlock.Check(req.Username, clientIP) {
+		msg := lang.MsgByCode(baseLang.SysUseLoginLockedCode, e.Lang)
+		s.LoginFailToDB(c, req.Username, msg)
+		e.ErrorByHttpCode(http.StatusTooManyRequests, baseLang.SysUseLoginLockedCode, msg)
+		return
+	}
+
 	if req.Code == "" || req.Password == "" || req.Username == "" {
+		loginlock.RecordFail(req.Username, clientIP)
+		s.LoginFailToDB(c, req.Username, lang.MsgByCode(baseLang.ParamErrCode, e.Lang))
 		e.Error(baseLang.ParamErrCode, lang.MsgByCode(baseLang.ParamErrCode, e.Lang))
 		return
 	}
 
 	if config.ApplicationConfig.Mode != "dev" {
 		if !captchautils.Verify(req.UUID, req.Code, true) {
+			loginlock.RecordFail(req.Username, clientIP)
+			s.LoginFailToDB(c, req.Username, lang.MsgByCode(baseLang.SysUseCapErrLogCode, e.Lang))
 			e.Error(baseLang.SysUseCapErrLogCode, lang.MsgByCode(baseLang.SysUseCapErrLogCode, e.Lang))
 			return
 		}
@@ -556,10 +575,14 @@ func (e SysUser) Login(c *gin.Context) {
 
 	userResp, respCode, err := s.LoginVerify(&req)
 	if err != nil {
+		loginlock.RecordFail(req.Username, clientIP)
+		s.LoginFailToDB(c, req.Username, err.Error())
 		e.Error(respCode, err.Error())
 		return
 	}
 
+	// 登录成功：清除账号/IP 的失败计数与锁定
+	loginlock.Clear(req.Username, clientIP)
 	c.Set(authdto.LoginUserId, userResp.Id)
 	c.Set(authdto.UserName, userResp.Username)
 	c.Set(authdto.RoleKey, userResp.Role.RoleKey)

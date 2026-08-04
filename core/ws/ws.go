@@ -2,11 +2,11 @@ package ws
 
 import (
 	"context"
-	"go-admin/core/utils/fileutils"
+	"go-admin/core/config"
 	"go-admin/core/utils/log"
 	"net/http"
+	"strings"
 	"sync"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -322,9 +322,19 @@ func (manager *Manager) WsClient(c *gin.Context) {
 	defer cancel()
 
 	upGrader := websocket.Upgrader{
-		// cross origin domain
+		// cross origin domain（L18：校验 Origin 白名单，防跨站 WebSocket 劫持 CSWSH）
 		CheckOrigin: func(r *http.Request) bool {
-			return true
+			origin := r.Header.Get("Origin")
+			if origin == "" {
+				// 非浏览器客户端（curl/服务端推送）无 Origin，放行
+				return true
+			}
+			for _, o := range config.ApplicationConfig.CorsOrigins {
+				if o == "*" || strings.EqualFold(o, origin) {
+					return true
+				}
+			}
+			return false
 		},
 		// 处理 Sec-WebSocket-Protocol Header
 		Subprotocols: []string{c.GetHeader("Sec-WebSocket-Protocol")},
@@ -347,9 +357,9 @@ func (manager *Manager) WsClient(c *gin.Context) {
 	manager.RegisterClient(client)
 	go client.Read(ctx)
 	go client.Write(ctx)
-	time.Sleep(time.Second * 15)
-
-	_ = fileutils.FileMonitoringById(ctx, "tmp/logs/job/db-20200820.log", c.Param("id"), c.Param("channel"), SendOne)
+	// L18：移除阻塞 handler 的 time.Sleep 与硬编码不存在的日志路径（tmp/logs/job/db-20200820.log），
+	// 连接生命周期由 ctx cancel 控制，断开即退出
+	<-ctx.Done()
 }
 
 func (manager *Manager) UnWsClient(c *gin.Context) {

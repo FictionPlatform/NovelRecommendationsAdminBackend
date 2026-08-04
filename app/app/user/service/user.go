@@ -16,6 +16,7 @@ import (
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
 	"go-admin/core/utils/encrypt"
+	"go-admin/core/utils/dberr"
 	"go-admin/core/utils/idgen"
 	"go-admin/core/utils/strutils"
 	"strconv"
@@ -224,13 +225,17 @@ func (e *User) Insert(c *dto.UserInsertReq) (int, error) {
 	//事务 开启-关闭
 	var err error
 	respCode := baseLang.SuccessCode
-	e.Orm = e.Orm.Begin()
+	// L24：register 内部方法均通过 e.Orm 访问 DB，需写回事务；
+	// 结束后恢复原连接，避免共享成员残留已提交的 tx（同实例二次 Begin 会开嵌套事务）
+	baseOrm := e.Orm
+	e.Orm = baseOrm.Begin()
 	defer func() {
 		if err != nil {
 			e.Orm.Rollback()
 		} else {
 			e.Orm.Commit()
 		}
+		e.Orm = baseOrm
 	}()
 
 	for _, mobile := range mobiles {
@@ -323,17 +328,8 @@ func (e *User) insertMemUser(registerType, email, mobile, mobileTitle string, re
 		user.MobileTitle = mobileTitle
 	}
 
-	//确保推荐码不重复
-	refCode := idgen.InviteId()
+	//确保推荐码不重复（M16：并发冲突改为换码重试，数据库唯一索引兜底）
 	queryUserCondition := dto.UserQueryReq{}
-	queryUserCondition.RefCode = refCode
-	count, respCode, err := e.Count(&queryUserCondition)
-	if err != nil && respCode != baseLang.DataNotFoundCode {
-		return 0, respCode, err
-	}
-	if count > 0 {
-		return 0, baseLang.UserRefCodeErrLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.UserRegisterErrCode, baseLang.UserRefCodeErrLogCode, err)
-	}
 
 	//插入数据
 	sysConfService := adminService.NewSysConfigService(&e.Service)
@@ -364,7 +360,6 @@ func (e *User) insertMemUser(registerType, email, mobile, mobileTitle string, re
 	user.TreeSorts = refUserTreeSorts + strconv.FormatInt(user.TreeSort, 10) + ","
 	user.TreeLeaf = global.SysStatusOk
 	user.TreeLevel = int64(strings.Count(user.ParentIds, ","))
-	user.RefCode = refCode
 	user.UserName = "- -"
 	if registerType == constant.AccountEmailType {
 		user.Email = email
@@ -380,9 +375,49 @@ func (e *User) insertMemUser(registerType, email, mobile, mobileTitle string, re
 	user.UpdateBy = user.Id
 	user.CreateBy = user.Id
 	user.Status = global.SysStatusOk
-	err = e.Orm.Create(&user).Error
-	if err != nil {
-		return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
+
+	//插入数据（M16：推荐码冲突自动换码重试，账号冲突返回"已存在"，数据库唯一索引兜底并发）
+	var createErr error
+	inserted := false
+	for i := 0; i < 5; i++ {
+		user.RefCode = idgen.InviteId()
+		queryUserCondition.RefCode = user.RefCode
+		count, respCode, err := e.Count(&queryUserCondition)
+		if err != nil && respCode != baseLang.DataNotFoundCode {
+			return 0, respCode, err
+		}
+		if count > 0 {
+			continue
+		}
+		createErr = e.Orm.Create(&user).Error
+		if createErr == nil {
+			inserted = true
+			break
+		}
+		if dberr.IsDuplicateKey(createErr) {
+			//并发冲突：推荐码重复则换码重试，否则视为手机号/邮箱已存在
+			refCodeCount, respCode, checkErr := e.Count(&dto.UserQueryReq{RefCode: user.RefCode})
+			if checkErr != nil && respCode != baseLang.DataNotFoundCode {
+				return 0, respCode, checkErr
+			}
+			if refCodeCount > 0 {
+				continue
+			}
+			account := ""
+			if email != "" {
+				account, _ = encrypt.AesDecrypt(email, []byte(config.AuthConfig.SecretAes))
+			} else if mobile != "" {
+				account, _ = encrypt.AesDecrypt(mobile, []byte(config.AuthConfig.SecretAes))
+			}
+			return 0, baseLang.UserAccountExistLogCode, lang.MsgErrf(baseLang.UserAccountExistLogCode, e.Lang, account)
+		}
+		return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, createErr)
+	}
+	if !inserted {
+		if dberr.IsDuplicateKey(createErr) {
+			return 0, baseLang.UserRefCodeErrLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.UserRegisterErrCode, baseLang.UserRefCodeErrLogCode, createErr)
+		}
+		return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, createErr)
 	}
 
 	//如果原先上级为叶子节点，则将上级变为非叶子节点

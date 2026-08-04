@@ -34,7 +34,10 @@ func AesEncrypt(v string, k []byte) (string, error) {
 }
 
 func AesDecrypt(v string, k []byte) (string, error) {
-	value, _ := hex.DecodeString(v)
+	value, err := hex.DecodeString(v)
+	if err != nil {
+		return "", err
+	}
 	block, err := aes.NewCipher(k)
 	if err != nil {
 		return "", err
@@ -42,7 +45,7 @@ func AesDecrypt(v string, k []byte) (string, error) {
 	size := len(value)
 	result := make([]byte, size)
 	blocksize := block.BlockSize()
-	if size%blocksize != 0 {
+	if size == 0 || size%blocksize != 0 {
 		return "", errors.New("待解密数据异常")
 	}
 	temp := result
@@ -51,17 +54,16 @@ func AesDecrypt(v string, k []byte) (string, error) {
 		value = value[blocksize:]
 		temp = temp[blocksize:]
 	}
-	count := 0
-	for i := size - 1; i >= 0; i-- {
-		if result[i] > 16 { //尾部空格
-			break
+	//校验 PKCS7 填充一致性，避免误剥数据
+	padding := int(result[size-1])
+	if padding == 0 || padding > blocksize || padding > size {
+		return "", errors.New("待解密数据填充异常")
+	}
+	for i := size - padding; i < size; i++ {
+		if result[i] != byte(padding) {
+			return "", errors.New("待解密数据填充异常")
 		}
-		count++
 	}
-	sub := size - count
-	if sub < 0 {
-		sub = 0
-	}
-	result = result[:sub]
+	result = result[:size-padding]
 	return string(result), nil
 }

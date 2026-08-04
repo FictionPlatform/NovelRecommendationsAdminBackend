@@ -237,13 +237,13 @@ func (e *SysPost) Delete(ids []int64, p *middleware.DataPermission) (int, error)
 	for _, id := range ids {
 		userService := NewSysUserService(&e.Service)
 		userReq := dto.SysUserQueryReq{}
-		userReq.RoleId = id
+		userReq.PostId = id
 		count, respCode, err := userService.Count(&userReq)
 		if err != nil && respCode != baseLang.DataNotFoundCode {
 			return respCode, err
 		}
 		if count > 0 {
-			return baseLang.SysRoleUserExistNoDeleteCode, lang.MsgErr(baseLang.SysRoleUserExistNoDeleteCode, e.Lang)
+			return baseLang.SysPostUserExistNoDeleteCode, lang.MsgErr(baseLang.SysPostUserExistNoDeleteCode, e.Lang)
 		}
 	}
 

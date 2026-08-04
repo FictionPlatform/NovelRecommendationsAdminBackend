@@ -1,7 +1,6 @@
-package apis
+﻿package apis
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-admin/app/admin/sys/service"
 	"go-admin/app/admin/sys/service/dto"
 	baseLang "go-admin/config/base/lang"
@@ -11,6 +10,8 @@ import (
 	"go-admin/core/middleware"
 	"go-admin/core/middleware/auth"
 	"go-admin/core/runtime"
+
+	"github.com/gin-gonic/gin"
 )
 
 type SysMenu struct {
@@ -161,7 +162,9 @@ func (e SysMenu) Update(c *gin.Context) {
 		e.OK(nil, lang.MsgByCode(baseLang.DataNotUpdateCode, e.Lang))
 		return
 	}
-	_, _ = mycasbin.LoadPolicy(c)
+	if _, err := mycasbin.LoadPolicy(c); err != nil {
+		e.Logger.Errorf("reload casbin policy error:%s", err.Error())
+	}
 	e.OK(nil, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
@@ -225,7 +228,7 @@ func (e SysMenu) GetMenuRole(c *gin.Context) {
 		e.Error(respCode, err.Error())
 		return
 	}
-	if result == nil || len(result) <= 0 {
+	if len(result) <= 0 {
 		e.Error(baseLang.SysNoRoleMenuCode, lang.MsgErr(baseLang.SysNoRoleMenuCode, e.Lang).Error())
 		return
 	}

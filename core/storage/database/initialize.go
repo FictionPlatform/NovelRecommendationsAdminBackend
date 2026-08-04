@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"go-admin/core/config"
@@ -18,17 +19,63 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-// Setup 配置数据库
-func Setup() {
-	for k := range config.DatabasesConfig {
-		setupSimpleDatabase(k, config.DatabasesConfig[k])
-	}
+// Handler 数据库热更新处理器：
+// Build 构建全部数据库连接（暂存，不触碰线上），全部构建成功后才 Apply 原子切换；
+// 配置未变化时复用现有连接，避免无关配置变更导致无谓断连。
+type Handler struct {
+	staged      map[string]*gorm.DB
+	pendingJSON string
+	appliedJSON string
 }
 
-func setupSimpleDatabase(host string, c *config.Database) {
-	c.Source = resolveEnv(c.Source)
+func NewHandler() *Handler {
+	return &Handler{}
+}
+
+// Build 构建新数据库连接（失败返回 error，线上连接不受影响）
+func (h *Handler) Build() error {
+	// resolveEnv 会原地改写 Source（${ENV} 占位符替换为实际值），先解析再比较，保证与上次应用后的配置可比
+	for _, c := range config.DatabasesConfig {
+		c.Source = resolveEnv(c.Source)
+	}
+	curr, err := json.Marshal(config.DatabasesConfig)
+	if err != nil {
+		return err
+	}
+	if h.appliedJSON == string(curr) {
+		return nil
+	}
+	dbs := make(map[string]*gorm.DB, len(config.DatabasesConfig))
+	for k := range config.DatabasesConfig {
+		db, err := setupSimpleDatabase(k, config.DatabasesConfig[k])
+		if err != nil {
+			return err
+		}
+		dbs[k] = db
+	}
+	h.staged = dbs
+	h.pendingJSON = string(curr)
+	return nil
+}
+
+// Apply 切换为新连接。
+// 注意：不关闭旧连接池——casbin 等组件仍持有旧 *gorm.DB 引用，关闭会导致权限校验失效；
+// 旧连接仅在进程退出时回收。
+func (h *Handler) Apply() {
+	if h.pendingJSON == "" {
+		return
+	}
+	for k, db := range h.staged {
+		runtime.RuntimeConfig.SetDb(k, db)
+	}
+	h.staged = nil
+	h.appliedJSON = h.pendingJSON
+	h.pendingJSON = ""
+}
+
+func setupSimpleDatabase(host string, c *config.Database) (*gorm.DB, error) {
 	if err := validateDSNPassword(c.Source); err != nil {
-		panic(err)
+		return nil, err
 	}
 	log.Infof("%s => %s", host, textutils.Green(maskDSN(c.Source)))
 	registers := make([]database.ResolverConfigure, len(c.Registers))
@@ -63,11 +110,11 @@ func setupSimpleDatabase(host string, c *config.Database) {
 	}, opens[c.Driver])
 
 	if err != nil {
-		panic(fmt.Sprintf(c.Driver+" connect error :", err))
+		return nil, fmt.Errorf("%s connect error: %s", c.Driver, err.Error())
 	}
 	log.Info(textutils.Green(c.Driver + " connect success !"))
 
-	runtime.RuntimeConfig.SetDb(host, db)
+	return db, nil
 }
 
 // envVarRegex 仅匹配 ${VAR} 形式的占位符（不展开裸 $VAR，避免破坏密码中的 $ 字符）

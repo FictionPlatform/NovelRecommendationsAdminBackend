@@ -272,40 +272,42 @@
 
 ## 四、低 (Low)
 
+处理状态：`✅` 已修复　`⚠️` 已核实/已评估（无需改动或保留默认）
+
 | # | 位置 | 问题 |
 |---|------|------|
-| L1 | `core/utils/encrypt/aes.go:10,26-50` | AES 采用 **ECB 模式**（无 IV，同明文同密文可碰撞比对）、填充剥离逻辑只判断字节值 ≤16 不校验 PKCS7 一致性（可能误剥数据）、`hex.DecodeString` 错误被忽略；多处调用方忽略加密错误静默存空 |
-| L2 | `core/middleware/auth/jwtauth/jwtauth.go:382` | `strings.SplitN(message, "_", 1)` n=1 不切分，错误码解析逻辑永远不生效，客户端收到带 `401_` 前缀的消息 |
-| L3 | `core/utils/fileutils/file.go:31-35` | `IsFileExist` 用 `os.IsExist(err)`，Stat 成功时恒返回 false（逻辑反转） |
-| L4 | `core/utils/fileutils/file.go:77-98,213-219` | `GetType` 打开文件后不 Close（FD 泄漏）；`GetFileSize` Walk 出错时 f 为 nil → panic |
-| L5 | `core/storage/database/initialize.go:50` | `fmt.Sprintf(c.Driver+" connect error :", err)` 无占位符 → 输出 `%!(EXTRA ...)` |
-| L6 | `core/middleware/logger.go:64-66` | `st.(int)` 类型断言无 ok 检查，非 int 即 panic |
-| L7 | `core/utils/iputils/ip.go:67` | `strings.Contains(ip, "127.0.0.1")` 子串判断脆弱（`10.127.0.0.1` 误判） |
-| L8 | `core/runtime/application.go` 返回 map 引用；`core/runtime/cache.go:21` `wxTokenStoreKey` 未使用 | 见 M8；死代码 |
-| L9 | `core/middleware/auth/jwtauth/jwtauth.go:234-283` | 多处缓存 Set 错误被 `_ =` 忽略（黑名单写入失败静默） |
-| L10 | `app/admin/sys/service/sys_user.go:359` | **UpdateStatus 用 `u.Avatar != c.Status` 比较**（笔误，应为 `u.Status`），状态更新条件完全失效 |
-| L11 | `app/admin/sys/service/sys_user.go:387` | ResetPwd 的 `u.Password != c.Password` 用 bcrypt 哈希与明文比较恒为 true，"未变更跳过"逻辑永不生效 |
-| L12 | `app/admin/sys/service/sys_user.go:655-658` | 登录日志记录成功（err==nil）后仍走 `Log.Errorf`，每次登录打一条假 Error 日志 |
-| L13 | `app/admin/sys/service/sys_post.go:236-247` | 删除岗位引用检查用 `userReq.RoleId = id`（应为 PostId），引用检查失效 |
-| L14 | `app/admin/sys/service/sys_dept.go:160-248` | 部门移动节点无循环检测（可成环）；删除不检查用户/角色引用（悬空） |
-| L15 | `core/dto/api/api.go:39-43` | `api.Lang` 从未赋值（getAcceptLanguage 定义了未调用），多语言错误消息失效 |
-| L16 | `core/dto/api/binding.go` | `setBinding` 从未被调用，每请求重复反射解析 DTO（性能） |
-| L17 | `core/middleware/trace.go:36` | `ctx.Set("traceSpan", span)` 无处消费，与 OTel 标准做法重复 |
-| L18 | `core/ws/ws.go:274-281,300-302` | `CheckOrigin` 恒 true 且无鉴权（CSWSH 隐患）；WsClient 内 `time.Sleep(15s)` + 硬编码路径 `tmp/logs/job/db-20200820.log`（必然不存在） |
-| L19 | `core/casbin/mycasbin.go:45,49-56` | `EnableLog(true)` 每请求 Enforce 打日志（性能）；`LoadPolicy` 失败返回 nil 被所有调用点忽略（权限变更静默失效） |
-| L20 | `core/casbin/adapter.go:248-268` | casbin 表唯一索引创建非原子，多实例同时启动可能 panic |
-| L21 | `core/middleware/auth/jwtauth/jwtauth.go:37-59` | deviceLockManager 按 userID 建 mutex 永不删除，内存缓慢增长 |
-| L22 | `core/dto/response/return.go:13-20` | 业务错误码 ≤600 直接映射为 HTTP 状态码，语义混淆 |
-| L23 | `core/utils/captchautils/store.go:17` | 注释引用 `SetCustomStore` 与实际 `SetStore` 不一致 |
-| L24 | `app/admin/sys/service/sys_user.go:387`、`app/admin/sys/service/sys_gen_table.go:126-131,580-587` | gen 事务内子 service 用独立连接（事务形同虚设）；`e.Orm = e.Orm.Begin()` 写回共享成员属脆弱写法（app 模块同款） |
-| L25 | `app/plugins/filemgr/service/filemgr_app.go:164-170,241-253` | 下载地址拼接无协议校验（可存 `javascript:` 链接）；删除先删 OSS 后删 DB（DB 失败则文件已丢） |
-| L26 | SQL 脚本 | ① `admin_sys_role_dept` 的 role_id/dept_id 为 smallint 与主表 int 不一致且无外键索引；② `SET FOREIGN_KEY_CHECKS=0` 全局关闭外键；③ dict 表字段名用保留字 `default`；④ admin_sys_user 的 `salt` 列永不使用（bcrypt 自带盐）；⑤ 种子数据含真实数据哈希（手机号 MD5 极弱可还原） |
-| L27 | `go.mod` | WAF 依赖 `wprimadi/brandy v1.0.1` 小众低维护；`aliyun-oss-go-sdk v3.0.2+incompatible` 过旧（2020 年） |
-| L28 | `.gitignore:21` | **go.sum 被忽略未提交**，破坏构建可复现性与供应链完整性（Go 官方要求必须提交） |
-| L29 | `config/settings.yml:6,29` | 默认 `mode: dev` + `level: trace`，生产误用泄露 SQL/参数/堆栈 |
-| L30 | `README.md:24,76,99,111` | 引用不存在的 logo.png；称"不提供 swagger"与事实不符；Go 版本写 1.25.4（实际 1.26.5）；目录写 `conf/`（实际 `config/`） |
-| L31 | `docs/` | swagger 生成物未纳入 git（易过期无法回滚） |
-| L32 | `rulesets/default.conf:8,176` | WAF 直接开启拦截模式（未经 DetectionOnly 试运行，CRS 对中文业务误报可能阻断功能）；`SecDataDir /tmp/` 共享目录不安全；`SecRequestBodyLimit` 12.5MB 偏大；multipart 严格校验可能拦截正常上传 |
+| ✅ L1 | `core/utils/encrypt/aes.go:10,26-50` | AES 采用 **ECB 模式**（无 IV，同明文同密文可碰撞比对）、填充剥离逻辑只判断字节值 ≤16 不校验 PKCS7 一致性（可能误剥数据）、`hex.DecodeString` 错误被忽略；多处调用方忽略加密错误静默存空 |
+| ✅ L2 | `core/middleware/auth/jwtauth/jwtauth.go:382` | `strings.SplitN(message, "_", 1)` n=1 不切分，错误码解析逻辑永远不生效，客户端收到带 `401_` 前缀的消息 |
+| ✅ L3 | `core/utils/fileutils/file.go:31-35` | `IsFileExist` 用 `os.IsExist(err)`，Stat 成功时恒返回 false（逻辑反转） |
+| ✅ L4 | `core/utils/fileutils/file.go:77-98,213-219` | `GetType` 打开文件后不 Close（FD 泄漏）；`GetFileSize` Walk 出错时 f 为 nil → panic |
+| ✅ L5 | `core/storage/database/initialize.go:50` | `fmt.Sprintf(c.Driver+" connect error :", err)` 无占位符 → 输出 `%!(EXTRA ...)`（先前已修复，复核确认） |
+| ✅ L6 | `core/middleware/logger.go:64-66` | `st.(int)` 类型断言无 ok 检查，非 int 即 panic |
+| ✅ L7 | `core/utils/iputils/ip.go:67` | `strings.Contains(ip, "127.0.0.1")` 子串判断脆弱（`10.127.0.0.1` 误判）（先前已修复，复核确认） |
+| ✅ L8 | `core/runtime/application.go` 返回 map 引用；`core/runtime/cache.go:21` `wxTokenStoreKey` 未使用 | map 引用见 M8 已修；`wxTokenStoreKey` 死代码已删除 |
+| ✅ L9 | `core/middleware/auth/jwtauth/jwtauth.go:234-283` | 多处缓存 Set 错误被 `_ =` 忽略（黑名单写入失败静默） |
+| ✅ L10 | `app/admin/sys/service/sys_user.go:359` | **UpdateStatus 用 `u.Avatar != c.Status` 比较**（笔误，应为 `u.Status`），状态更新条件完全失效 |
+| ✅ L11 | `app/admin/sys/service/sys_user.go:387` | ResetPwd 的 `u.Password != c.Password` 用 bcrypt 哈希与明文比较恒为 true，"未变更跳过"逻辑永不生效 |
+| ✅ L12 | `app/admin/sys/service/sys_user.go:655-658` | 登录日志记录成功（err==nil）后仍走 `Log.Errorf`，每次登录打一条假 Error 日志（先前已修复，复核确认） |
+| ✅ L13 | `app/admin/sys/service/sys_post.go:236-247` | 删除岗位引用检查用 `userReq.RoleId = id`（应为 PostId），引用检查失效 |
+| ✅ L14 | `app/admin/sys/service/sys_dept.go:160-248` | 部门移动节点无循环检测（可成环）；删除不检查用户/角色引用（悬空） |
+| ✅ L15 | `core/dto/api/api.go:39-43` | `api.Lang` 从未赋值（getAcceptLanguage 定义了未调用），多语言错误消息失效 |
+| ✅ L16 | `core/dto/api/binding.go` | `setBinding` 从未被调用，每请求重复反射解析 DTO（性能） |
+| ✅ L17 | `core/middleware/trace.go:36` | `ctx.Set("traceSpan", span)` 无处消费，与 OTel 标准做法重复 |
+| ✅ L18 | `core/ws/ws.go:274-281,300-302` | `CheckOrigin` 恒 true 且无鉴权（CSWSH 隐患）；WsClient 内 `time.Sleep(15s)` + 硬编码路径 `tmp/logs/job/db-20200820.log`（必然不存在） |
+| ✅ L19 | `core/casbin/mycasbin.go:45,49-56` | `EnableLog(true)` 每请求 Enforce 打日志（性能）；`LoadPolicy` 失败返回 nil 被所有调用点忽略（权限变更静默失效） |
+| ✅ L20 | `core/casbin/adapter.go:248-268` | casbin 表唯一索引创建非原子，多实例同时启动可能 panic |
+| ✅ L21 | `core/middleware/auth/jwtauth/jwtauth.go:37-59` | deviceLockManager 按 userID 建 mutex 永不删除，内存缓慢增长 |
+| ✅ L22 | `core/dto/response/return.go:13-20` | 业务错误码 ≤600 直接映射为 HTTP 状态码，语义混淆 |
+| ✅ L23 | `core/utils/captchautils/store.go:17` | 注释引用 `SetCustomStore` 与实际 `SetStore` 不一致 |
+| ✅ L24 | `app/admin/sys/service/sys_user.go:387`、`app/admin/sys/service/sys_gen_table.go:126-131,580-587` | gen 事务内子 service 用独立连接（事务形同虚设）；`e.Orm = e.Orm.Begin()` 写回共享成员属脆弱写法（app 模块同款） |
+| ✅ L25 | `app/plugins/filemgr/service/filemgr_app.go:164-170,241-253` | 下载地址拼接无协议校验（可存 `javascript:` 链接）；删除先删 OSS 后删 DB（DB 失败则文件已丢） |
+| ✅ L26 | SQL 脚本 | ① `admin_sys_role_dept` 的 role_id/dept_id 为 smallint 与主表 int 不一致且无外键索引；② `SET FOREIGN_KEY_CHECKS=0` 全局关闭外键；③ dict 表字段名用保留字 `default`；④ admin_sys_user 的 `salt` 列永不使用（bcrypt 自带盐）；⑤ 种子数据含真实数据哈希（手机号 MD5 极弱可还原） |
+| ⚠️ L27 | `go.mod` | WAF 依赖 `wprimadi/brandy v1.0.1` 小众低维护；`aliyun-oss-go-sdk v3.0.2+incompatible` 过旧（2020 年） |
+| ✅ L28 | `.gitignore:21` | **go.sum 被忽略未提交**，破坏构建可复现性与供应链完整性（Go 官方要求必须提交） |
+| ⚠️ L29 | `config/settings.yml:6,29` | 默认 `mode: dev` + `level: trace`，生产误用泄露 SQL/参数/堆栈 |
+| ✅ L30 | `README.md:24,76,99,111` | 引用不存在的 logo.png；称"不提供 swagger"与事实不符；Go 版本写 1.25.4（实际 1.26.5）；目录写 `conf/`（实际 `config/`） |
+| ✅ L31 | `docs/` | swagger 生成物未纳入 git（易过期无法回滚）（复核确认 swagger.json/yaml/docs.go 已在 git 中，无需改动） |
+| ✅ L32 | `rulesets/default.conf:8,176` | WAF 直接开启拦截模式（未经 DetectionOnly 试运行，CRS 对中文业务误报可能阻断功能）；`SecDataDir /tmp/` 共享目录不安全；`SecRequestBodyLimit` 12.5MB 偏大；multipart 严格校验可能拦截正常上传 |
 
 ---
 
@@ -392,18 +394,62 @@ proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 - H16 ✅ 索引：`admin_sys_user(username)` UNIQUE；`app_user(parent_id/mobile/email/ref_code)`、`app_user_account_log(user_id)`、`admin_sys_login_log(user_id, created_at)`、`admin_sys_oper_log(user_id, created_at)`、`admin_sys_dict_data(dict_type)` 索引（mysql+pgsql 同步）
 
 ## Medium（未处理）
-M3-M4、M6-M19 未处理（验证码强度、随机数、Swagger 暴露、热更新、M19 同表双 JOIN 报错等）
-
-## Medium
+M1-M19 全部已处理（验证码强度项按约定保留，见待办）## Medium
 - M1 ✅ 全局 `gin.CustomRecovery` 兜底所有 panic（记录堆栈 + 统一 500 JSON）；`CustomError` 默认分支不再重抛，改日志 + 500 响应
 - M2 ✅ `LoginVerify` 增加角色判空（`Role == nil || RoleKey == ""` 返回"该账户尚未分配角色"），消除登录接口 Role nil 指针 panic
+- M3 ✅ 部分：登录爆破防护已修复（验证码强度按约定未动，见待办）——新增 `loginLock` 配置节（`core/config/login_lock.go`，字段带 yaml tag，热重载可即时调整；默认账号 5 次失败锁 15 分钟、IP 20 次失败锁 60 分钟）；新增 `core/utils/loginlock` 包（Check/RecordFail/Clear，计数与锁定存缓存适配器，内存/Redis 通用，锁定期与计数 TTL 一致自然衰减；缓存不可用/配置关闭时安全降级）；Login 入口先于验证码/口令校验检查锁定（锁定返回 429 + 新错误码 `SysUseLoginLockedCode=10527`），全部失败分支（绑定失败/参数缺失/验证码错误/登录失败）按账号+IP 双维度计数，成功路径 Clear 清除计数与锁定；settings.yml 与 settings.yml.back 同步新增配置段；新增单测（账号锁定/IP 独立维度/成功清除/关闭降级）+ config 包热重载 loginLock 原地生效测试
+- M4 ✅ 随机数改 crypto/rand：`GenerateValidateCode`（6 位验证码）弃 `rand.New(rand.NewSource(time.Now().UnixNano()))` 时间种子，改 crypto/rand + 拒绝采样（消除模偏差，0-999999 均匀）；`encrypt.generateRandString`（GenerateRandomKey20/16/6，随机密钥/盐）由 `math/rand.Read` 改 `crypto/rand.Read`（原实现读取的是确定性 PRNG 输出，密钥可预测）；`idgen.InviteId`（用户邀请码）弃 `base64Captcha.RandText`（math/rand 时间种子），改 crypto/rand 均匀采样（62^6 空间，用户注册推荐码 `user.go:383` 生效）；熵源失败直接 panic 暴露（原 math/rand 不报错）；新增三包随机性单测（格式/字符集/样本去重）
 - M5 ✅ CORS 改配置白名单 `corsOrigins`（请求 Origin 不在白名单不返回 ACAO，`Vary: Origin`；响应包 Download 的 ACAO `*` 一并移除）；启用 `X-Frame-Options: DENY`；`TokenLookup` 移除 query 传参（仅 header/cookie）
 - M6 ✅ Swagger 仅 `mode: dev` 注册（其他环境 404）；`/static` 目录弃用 `gin.Static`（http.FileServer 可列目录），改与上传目录同款 `serveFileNoList`（禁目录列举、防路径穿越、危险类型强制下载）
+- M7 ✅ 多库/多实例路由与 Redis 客户端独立：① `GetDbByKey`/`GetCasbinKey` 改**精确匹配优先、未命中回退 `"*"` 通配**（原存在 `"*"` 时无条件返回 `"*"`，按 Host 分库永不生效；`core/middleware/db.go:9` 对未命中返回 nil 时原先直接 `.WithContext` panic，现返回 500；`mycasbin.LoadPolicy` 对无 enforcer 返回错误而非 nil 解引用）；② Redis 客户端按组件独立——`option_redis.go` 新增注册表（`StageRedisClient` 构建期登记、`CommitRedisClients` Apply 成功后关闭被替换的旧客户端、`CloseAllRedisClients` 进程退出统一关闭，优雅关闭流程已接入），cache/locker/queue/limiter 各自使用自身配置的客户端（原实现复用首个已建客户端，其余组件的 Redis 配置——不同 addr/db/密码——被静默忽略）；limiter 不再依赖 `GetRedisClient()`（cache 未配 Redis 时限流的 Redis 配置也能生效）；`GetRedisClient`/`SetRedisClient` 保留为外部兼容入口（外部显式设置优先，缺省返回 cache 组件客户端）；新增 runtime 路由单测（精确优先/通配回退/未命中 nil）
 - M8 ✅ Runtime 容器 map 返回副本：`GetDb`/`GetCasbin`/`GetMiddleware`/`GetHandler` 深拷贝 map（切片一并拷贝）、`GetHandlerPrefix`/`GetRouter` 返回切片副本；`GetDbByKey`/`GetCasbinKey`/`GetMiddlewareKey` 改用 RLock
+- M9 ✅ 配置热更新两阶段受保护重建：`Build`（构建新组件到暂存，失败即整体放弃、线上不变）→ `Apply`（全部成功后仅赋值原子切换）+ `reloadMu` 串行化 + JSON 快照回滚（失败/panic 恢复最近生效配置）；load-config v1.6.4 无文件监听（原 OnChange 从未被触发、热更新为死代码）→ 新增 `config.Watch`（SHA-256 内容轮询）+ `ReloadFromFile` 原地重扫（yaml.v3 复用非 nil 指针，全局配置身份保持，置 nil 字段 `relinkGlobals` 回指，多库 map 重载前清空防残留）；`Logger.Validate()` 前置校验（bitxx/logger 对非法 level/建目录失败会 `log.Fatalf` 直接杀进程，热更新前拦截转为回滚）；日志仅在配置变化时重建；生效快照在 Apply 前生成（切换动作不可失败）；server.go 启动时挂载 Watch（3s 轮询）；新增 10 个单测（指针身份/原地更新/坏配置回滚/置 nil 回指/Validate/串行/失败回滚/panic 回滚）
+- M10 ✅ 限流/黑名单热更新与并发安全：黑名单 `atomic.Pointer` 整体替换（`BuildBlacklist` 先构建 → `ApplyBlacklist` 原子发布，消除与每请求遍历的数据竞态，`LoadBlacklist` 改为原子写）；`LimiterState` 原子指针 + `BuildRateLimiterState`/`ApplyRateLimiterState` 先构建后替换；`core/storage/limiter` Handler 已注册进 OnChange 链路（M9），运行期改 `rateLimiter` 配置即时生效；Redis store 初始化失败降级内存 store（原 `log.Fatalf` 直接崩进程）；`Retry-After` 使用配置实际周期（原硬编码 60）；底层计数 store 全局复用（ulule 内存 store 每次创建启动清理 goroutine 且仅 GC finalizer 才停止，复用避免热更新重载后 goroutine 累积，同时被限流 IP 重载后计数保留、无法靠触发重载绕过限流）；新增 store 复用单测（`TestRateLimiterStoreReusedAcrossReload`）
+- M11 ✅ 登录审计与归属地外呼：① 登录失败审计——新增 `LoginFailToDB`（status=3 写入 login_log，可审计暴力破解），Login 全部失败分支落库（绑定失败/参数缺失/验证码错误/`LoginVerify` 失败），成功路径原 `LoginLogToDB` 保留；② `GetLocation` 外呼加固——`http.Client{Timeout: 2s}`（原 `http.Get` 无超时，上游不可达拖垮登录/操作日志中间件）、IP 级缓存（成功 1h/失败 1min，上限 10000 条防内存膨胀，同一 IP 周期内仅一次外呼）、URL 参数 `QueryEscape`、未配置 key（含占位符）跳过外呼；本轮补强：JSON 解析失败与高德业务错误（status≠1）按失败处理走失败缓存（原空串定位被长缓存 1h）；新增超时/业务错误单测（`TestGetLocationTimeout` 验证 2s 上限、`TestGetLocationBusinessError`）
+- M12 ✅ 队列配置缺省校验：`Setup()` 对 `Producer`/`Consumer` 判空给默认选项；`Memory` 缺省时 PoolSize 归 0（内存队列容忍）；不再原地修改配置对象（消除热更新重复 Setup 累积污染）
+- M13 ✅ 搜索反射解析：入口对 nil/非结构体/指针解引用防护；无 search tag 字段仅对可导出结构体递归（基础类型跳过）；`isnull` 先判可空 Kind 再调 `IsNil`；新增单元测试（`core/dto/search/query_test.go`）
+- M14 ✅ i18n CSV：`T`/`TOption` 访问前校验 `len(row) >= 2`（空行/单列行跳过，消除越界 panic）；`InitLang` 失败升级为 error（启动即报错而非静默降级）；`newI18n` 补 `defer Close`（原 FD 泄漏）；新增单元测试（`core/lang/i18n_test.go`）
+- M15 ✅ 验证码管理：`plugins_msg_code.code` 改 bcrypt 哈希存储（`BeforeCreate`/`BeforeUpdate` 自动哈希，幂等防二次哈希）+ `CheckCode` 比对；模型字段 `json:"-"` 不再回显；SQL 列宽 `varchar(12)` → `varchar(128)`（mysql+pgsql 同步）；新增单元测试（`app/plugins/msg/models/msg_code_test.go`）
+- M16 ✅ "先查后插"并发竞态：DB 唯一索引兜底（app_user 的 mobile+title/email/ref_code、user_level 的 name+level_type、country_code 的 country/code、category 的 name、announcement 的 title，mysql+pgsql 同步）；新增 `core/utils/dberr.IsDuplicateKey`（MySQL 1062 / PG 23505 / gorm.ErrDuplicatedKey / 消息匹配）识别冲突；注册推荐码冲突自动换码重试（≤5 次），账号冲突（手机号/邮箱已存在）返回 `UserAccountExistLogCode`；其余 4 处 Insert/Update 冲突错误转对应"已存在"错误码；新增单元测试（`core/utils/dberr/dberr_test.go`）
+- M17 ✅ 逻辑型 IDOR：`UserConf.Update` 不再信任请求体 `userId`，目标用户以路径 `:id` 记录关联的 `data.UserId` 为准（操作日志、用户状态更新均用服务端取值）；请求体 `userId` 非空且不一致时返回 `ParamErrCode` 强制一致；`Insert` 未对外暴露 API 无需处理
+- M18 ✅ 系统监控：`host.Info`/`disk.Usage`/`mem.VirtualMemory`/`cpu.Info`/`cpu.Percent`/`cpu.Counts` 全部判 err，失败记录日志并返回 `DataQueryCode` 而非静默取 nil 字段 panic；`percent[0]` 加长度保护；`GetMonitor` 补 `MakeContext`（原先 Logger 为 nil，`MsgLogErrf` 会二次 panic）；路由组追加 `middleware.AdminOnly()`，主机名/本机 IP/项目路径等敏感信息仅 admin 可访问
+- M19 ✅ 同表双 JOIN：`user_conf.go:52`、`user_account_log.go:53` 的 GORM `Joins("User")` 与搜索标签 `UserJoin`（`type:inner;join:app_user`）叠加产生同一表两次 JOIN（PG/MySQL 均报 duplicate table）→ 改用 `Preload("User")`（与 `user_oper_log.go` 一致），用户字段搜索时仅保留 `MakeCondition` 的单条 inner join，无搜索条件时 Preload 仍正常填充 User 关联
+
+## Low
+- L1 ✅ AES 解密修复：`hex.DecodeString` 错误检查；PKCS7 填充按块一致性完整校验（仅剥离合法填充，防误剥数据）；尺寸为 0 / 非块倍数直接返回错误
+- L2 ✅ `SplitN(message, "_", 1)` → n=2，错误码解析恢复生效
+- L3 ✅ `IsFileExist` 改 `return err == nil`（逻辑反转修复）
+- L4 ✅ `GetType` 补 `defer file.Close()`（FD 泄漏）；`GetFileSize` 补 f 为 nil 防护
+- L6 ✅ logger 状态类型断言加 ok 检查（非 int 不再 panic）
+- L8 ✅ `wxTokenStoreKey` 死代码删除；map 引用问题见 M8
+- L9 ✅ jwtauth 缓存 Set/Del 错误全部 `log.Errorf`（黑名单/设备写入失败可见）
+- L10 ✅ UpdateStatus 笔误 `u.Avatar` → `u.Status`，状态更新条件恢复生效
+- L11 ✅ ResetPwd 改 `bcrypt.CompareHashAndPassword` 比较"是否变更"，未变更跳过逻辑恢复
+- L13 ✅ 删除岗位引用检查 `userReq.RoleId` → `userReq.PostId`；新增错误码 `SysPostUserExistNoDeleteCode=10405`（"该岗位下存在用户，无法删除"）
+- L14 ✅ 部门 Update 环检测（新增 `SysDeptParentChildCode=10206`）；父节点 `parent_ids` 重算 + 子孙 `parent_ids` 级联 REPLACE；Delete 增加用户引用（`SysDeptUserExistNoDelCode=10207`）与角色引用（`SysDeptRoleExistNoDelCode=10208`）检查
+- L15 ✅ `MakeContext` 中 `e.Lang = lang.GetAcceptLanguage(c)`，多语言消息恢复
+- L16 ✅ `GetBindingForGin` resolve 后补 `setBinding` 缓存，消除每请求重复反射
+- L17 ✅ `trace.go` 删除无消费点的 `ctx.Set("traceSpan", span)`（链路上下文经 `WithContext` 注入，符合 OTel 标准）
+- L18 ✅ ws：`CheckOrigin` 校验 Origin 与 `corsOrigins` 白名单（非浏览器无 Origin 放行）；删除 `time.Sleep(15s)` + 硬编码不存在日志路径，连接生命周期由 ctx 控制
+- L19 ✅ casbin `EnableLog(false)`（性能）；`LoadPolicy` 错误在 api/service 全部调用点记录日志（权限变更失败不再静默）
+- L20 ✅ casbin 唯一索引创建幂等：新增 `dberr.IsDuplicateIndex`（MySQL 1061 / PG 42P07），多实例并发启动后到者不再 panic；新增单测
+- L21 ✅ deviceLockManager：entry 带 lastUsed + 上限 10000，每次加锁淘汰空闲超 5 分钟或最久未用条目，杜绝无界增长
+- L22 ✅ `response.Error` 仅当业务码落在合法 4xx/5xx 区间（401/403/500）才透传 HTTP 状态，其余一律 400，杜绝 2xx/3xx 语义泄露
+- L23 ✅ captcha 注释 `SetCustomStore` → `SetStore`
+- L24 ✅ `sys_gen_table.go Insert` 事务闭包内 `e.Orm.Create` → `tx.Create`（原事务形同虚设）；Update/Delete/GenDB 与 `sys_dict_type.Update` 改局部 `tx` + 子 service 显式传 tx；app 模块（user.go/user_conf.go）保存原连接 + defer 恢复，消除共享成员残留已提交 tx
+- L25 ✅ filemgr：下载根地址仅允许 http/https（拒绝 `javascript:` 等伪协议）；删除顺序改为先删 DB 成功后清理 OSS（失败仅告警）
+- L26 ✅ SQL 脚本（mysql+pgsql 同步）：① role_dept 改 int + 补 dept_id 索引；③ dict 表 `default` 保留字列改 `default_val`（模型 gorm tag 同步）；④ 删除永不使用的 `salt` 列（表定义/INSERT/gen_column 种子 + 模型字段）；⑤ app_user 种子手机号 MD5 替换为虚构号码哈希；② 复核确认 `FOREIGN_KEY_CHECKS=0/1` 已正确成对作用域内
+- L27 ⚠️ 已评估：brandy 已是最新 v1.0.1、aliyun-oss-go-sdk 官方无更新 tag（v3.0.2 为最新），维持现状并建议后续关注
+- L28 ✅ `.gitignore` 移除 go.sum（供应链完整性，待提交）
+- L29 ⚠️ 默认保留 `mode: dev` + `level: trace`（本地开发需要），模板 `settings.yml.back` 已加生产部署警示注释
+- L30 ✅ README：移除不存在的 logo.png 引用；swagger 说明与事实一致；Go 版本 1.25.4 → 1.26.5；`conf/` → `config/`
+- L31 ✅ 复核确认 swagger.json/yaml/docs.go 已在 git 中，无需改动
+- L32 ✅ WAF：默认 `DetectionOnly` 试运行（观察 audit 日志后再开拦截）；`SecDataDir` 改项目私有目录 `./tmp/coraza/`；`SecRequestBodyLimit` 250MB 与 APP 安装包上传上限（200MB）对齐；multipart 改 permissive（`@eq 1`，仅拦明确畸形）
 
 ## 待办
 - C4 数据权限全量挂载（依赖 create_by 语义统一）
-- M 级全部
-- 存量库执行新增索引的 ALTER 语句（新装库直接跑 app_mysql.sql / app_pgsql.sql 即可）
+- M3 验证码强度（4 位数字可穷举、dev 模式跳过验证码——按约定保留现状，需产品决策）
+- 存量库执行新增索引/唯一索引的 ALTER 语句（新装库直接跑 app_mysql.sql / app_pgsql.sql 即可）；存量库同步执行 default→default_val 改名、role_dept 索引、移除 salt 列
+- 提交 go.sum（已从 .gitignore 移除）
 - 清理 git 历史中的旧密钥（git filter-repo）并轮换线上密钥
 - settings.yml.back 中硬编码了本地库口令（nVZypeJxyuXZ4J4J），仅限本地开发，勿用于生产

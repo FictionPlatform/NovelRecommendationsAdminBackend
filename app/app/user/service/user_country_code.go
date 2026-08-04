@@ -12,6 +12,7 @@ import (
 	"go-admin/core/dto/service"
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
+	"go-admin/core/utils/dberr"
 	"go-admin/core/utils/excelutils"
 	"gorm.io/gorm"
 	"time"
@@ -146,6 +147,17 @@ func (e *UserCountryCode) Insert(c *dto.UserCountryCodeInsertReq) (int64, int, e
 	data.UpdatedAt = &now
 	err = e.Orm.Create(&data).Error
 	if err != nil {
+		if dberr.IsDuplicateKey(err) {
+			//并发冲突：区分是重复国家还是重复区号
+			count, respCode, checkErr := e.Count(&reqName)
+			if checkErr != nil && respCode != baseLang.DataNotFoundCode {
+				return 0, respCode, checkErr
+			}
+			if count > 0 {
+				return 0, baseLang.UserCountryHasExistCode, lang.MsgErr(baseLang.UserCountryHasExistCode, e.Lang)
+			}
+			return 0, baseLang.UserCountryCodeHasExistCode, lang.MsgErr(baseLang.UserCountryCodeHasExistCode, e.Lang)
+		}
 		return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
 	}
 	return data.Id, baseLang.SuccessCode, nil

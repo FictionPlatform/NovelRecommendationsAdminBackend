@@ -10,9 +10,12 @@ import (
 var Default = &response{}
 
 // Error 失败数据处理
+// L22：仅当业务码落在合法 4xx/5xx 区间（AuthErr=401/ForbitErr=403/ServerErr=500）时
+// 才作为 HTTP 状态码透传，其余业务码（≥888）一律返回 400，避免 2xx/3xx 等
+// 非错误码语义泄露到 HTTP 层
 func Error(c *gin.Context, code int, msg string) {
 	httpCode := http.StatusBadRequest
-	if code <= 600 {
+	if code >= http.StatusBadRequest && code <= 599 {
 		httpCode = code
 	}
 	ErrorByHttpCode(c, httpCode, code, msg)

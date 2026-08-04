@@ -24,10 +24,12 @@ type bindConstructor struct {
 }
 
 func (e *bindConstructor) GetBindingForGin(d interface{}) []binding.Binding {
-	bs := e.getBinding(reflect.TypeOf(d).String())
+	name := reflect.TypeOf(d).String()
+	bs := e.getBinding(name)
 	if bs == nil {
-		//重新构建
+		//首次解析后写入缓存，避免每请求重复反射
 		bs = e.resolve(d)
+		e.setBinding(name, bs)
 	}
 	gbs := make([]binding.Binding, 0)
 	mp := make(map[uint8]binding.Binding, 0)

@@ -68,7 +68,9 @@ func LoggerToFile() gin.HandlerFunc {
 		st, bl := c.Get("status")
 		var statusBus = 0
 		if bl {
-			statusBus = st.(int)
+			if v, ok := st.(int); ok {
+				statusBus = v
+			}
 		}
 
 		// 请求方式

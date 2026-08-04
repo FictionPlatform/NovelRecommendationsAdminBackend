@@ -16,7 +16,7 @@ type cacheStore struct {
 
 // NewCacheStore returns a new standard memory store for captchas with the
 // given collection threshold and expiration time (duration). The returned
-// store must be registered with SetCustomStore to replace the default one.
+// store must be registered with SetStore to replace the default one.
 func NewCacheStore(cache storage.AdapterCache, expiration int) base64Captcha.Store {
 	s := new(cacheStore)
 	s.cache = cache

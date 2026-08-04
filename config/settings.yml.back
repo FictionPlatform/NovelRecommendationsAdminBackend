@@ -2,7 +2,7 @@
 settings:
   application:
     Author: Jason
-    # dev开发环境 test测试环境 prod线上环境
+    # dev开发环境 test测试环境 prod线上环境（L29：生产部署请显式改为 prod，否则默认 dev 会泄露堆栈/参数）
     mode: dev
     # 服务器ip，默认使用 0.0.0.0
     host: 0.0.0.0
@@ -25,7 +25,7 @@ settings:
     path: files/logs
     # 日志输出，file：文件，default：命令行，其他：命令行
     stdout: '' #控制台日志，启用后，不输出到文件
-    # 日志等级, trace, debug, info, warn, error, fatal
+    # 日志等级, trace, debug, info, warn, error, fatal（L29：trace 会输出全部 SQL/参数，生产请用 warn 以上）
     level: trace
     # 数据库日志开关
     enabledDB: false
@@ -120,3 +120,14 @@ settings:
 #      addr: 127.0.0.1:6379
 #      password: 密码
 #      db: 0
+  loginLock:
+    # 登录爆破防护开关：账号/IP 双维度失败计数，达到阈值后临时锁定
+    enabled: true
+    # 同一账号连续失败超过该次数后锁定
+    maxFailsByAccount: 5
+    # 账号锁定时长 单位：分钟
+    accountLockMinutes: 15
+    # 同一IP连续失败超过该次数后锁定
+    maxFailsByIP: 20
+    # IP锁定时长 单位：分钟
+    ipLockMinutes: 60

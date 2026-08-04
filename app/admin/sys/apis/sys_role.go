@@ -1,4 +1,4 @@
-package apis
+﻿package apis
 
 import (
 	"github.com/gin-gonic/gin"
@@ -158,7 +158,9 @@ func (e SysRole) Insert(c *gin.Context) {
 		e.Error(respCode, err.Error())
 		return
 	}
-	_, _ = mycasbin.LoadPolicy(c)
+	if _, err := mycasbin.LoadPolicy(c); err != nil {
+		e.Logger.Errorf("reload casbin policy error:%s", err.Error())
+	}
 	e.OK(id, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
@@ -204,7 +206,9 @@ func (e SysRole) Update(c *gin.Context) {
 		e.OK(nil, lang.MsgByCode(baseLang.DataNotUpdateCode, e.Lang))
 		return
 	}
-	_, _ = mycasbin.LoadPolicy(c)
+	if _, err := mycasbin.LoadPolicy(c); err != nil {
+		e.Logger.Errorf("reload casbin policy error:%s", err.Error())
+	}
 	e.OK(nil, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
@@ -237,7 +241,9 @@ func (e SysRole) Delete(c *gin.Context) {
 		e.Error(respCode, err.Error())
 		return
 	}
-	_, _ = mycasbin.LoadPolicy(c) //把最新决策加载到内存
+	if _, err := mycasbin.LoadPolicy(c); err != nil {
+		e.Logger.Errorf("reload casbin policy error:%s", err.Error())
+	} //把最新决策加载到内存
 	e.OK(req.Ids, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
@@ -316,6 +322,8 @@ func (e SysRole) UpdateDataScope(c *gin.Context) {
 		e.OK(nil, lang.MsgByCode(baseLang.DataNotUpdateCode, e.Lang))
 		return
 	}
-	_, _ = mycasbin.LoadPolicy(c)
+	if _, err := mycasbin.LoadPolicy(c); err != nil {
+		e.Logger.Errorf("reload casbin policy error:%s", err.Error())
+	}
 	e.OK(nil, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }

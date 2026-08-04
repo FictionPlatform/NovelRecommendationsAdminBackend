@@ -49,7 +49,7 @@ func (e *UserConf) GetPage(c *dto.UserConfQueryReq, p *middleware.DataPermission
 		}
 	}
 
-	err = e.Orm.Joins("User").Order("created_at desc").Model(&data).
+	err = e.Orm.Preload("User").Order("created_at desc").Model(&data).
 		Scopes(
 			cDto.MakeCondition(c.GetNeedSearch()),
 			cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
@@ -179,14 +179,22 @@ func (e *UserConf) Update(c *dto.UserConfUpdateReq, p *middleware.DataPermission
 	if err != nil {
 		return false, respCode, err
 	}
+	//M17：目标用户以记录关联为准，请求体 userId 必须与之一致，防止越权操作他人
+	if c.UserId != 0 && c.UserId != data.UserId {
+		return false, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+	}
 
-	e.Orm = e.Orm.Begin()
+	// L24：子 service 通过共享 e.Orm 加入事务，结束后恢复原连接
+	// （与 user.go 注册事务同款：避免共享成员残留已提交的 tx）
+	baseOrm := e.Orm
+	e.Orm = baseOrm.Begin()
 	defer func() {
 		if err != nil {
 			e.Orm.Rollback()
 		} else {
 			e.Orm.Commit()
 		}
+		e.Orm = baseOrm
 	}()
 
 	//最小化变更改动过的数据
@@ -203,7 +211,7 @@ func (e *UserConf) Update(c *dto.UserConfUpdateReq, p *middleware.DataPermission
 		//操作行为日志
 		userOperLogService := NewUserOperLogService(&e.Service)
 		userOperLogInsertReq := dto.UserOperLogInsertReq{}
-		userOperLogInsertReq.UserId = c.UserId
+		userOperLogInsertReq.UserId = data.UserId
 		userOperLogInsertReq.CurrUserId = c.CurrUserId
 		userOperLogInsertReq.ActionType = actionType
 		_, respCode, err = userOperLogService.Insert(&userOperLogInsertReq)
@@ -217,7 +225,7 @@ func (e *UserConf) Update(c *dto.UserConfUpdateReq, p *middleware.DataPermission
 		userStatusUpdateReq := dto.UserStatusUpdateReq{}
 		userStatusUpdateReq.Status = status
 		userStatusUpdateReq.CurrUserId = c.CurrUserId
-		userStatusUpdateReq.Id = c.UserId
+		userStatusUpdateReq.Id = data.UserId
 		userService := NewUserService(&e.Service)
 		_, respCode, err = userService.UpdateStatus(&userStatusUpdateReq, p)
 		if err != nil {

@@ -51,14 +51,15 @@ func (e *Application) GetDb() map[string]*gorm.DB {
 	return cp
 }
 
-// GetDbByKey 根据key获取db
+// GetDbByKey 根据key获取db：优先精确匹配 key，未命中回退 "*" 通配键。
+// 原实现存在 "*" 时无条件返回 "*"，多库按 Host 路由永不生效。
 func (e *Application) GetDbByKey(key string) *gorm.DB {
 	e.mux.RLock()
 	defer e.mux.RUnlock()
-	if db, ok := e.dbs["*"]; ok {
+	if db, ok := e.dbs[key]; ok {
 		return db
 	}
-	return e.dbs[key]
+	return e.dbs["*"]
 }
 
 func (e *Application) SetCasbin(key string, enforcer *casbin.SyncedEnforcer) {
@@ -78,14 +79,14 @@ func (e *Application) GetCasbin() map[string]*casbin.SyncedEnforcer {
 	return cp
 }
 
-// GetCasbinKey 根据key获取casbin
+// GetCasbinKey 根据key获取casbin：优先精确匹配 key，未命中回退 "*" 通配键
 func (e *Application) GetCasbinKey(key string) *casbin.SyncedEnforcer {
 	e.mux.RLock()
 	defer e.mux.RUnlock()
-	if e, ok := e.casbins["*"]; ok {
-		return e
+	if enforcer, ok := e.casbins[key]; ok {
+		return enforcer
 	}
-	return e.casbins[key]
+	return e.casbins["*"]
 }
 
 // SetEngine 设置路由引擎

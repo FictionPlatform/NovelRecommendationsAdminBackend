@@ -14,6 +14,7 @@ import (
 	"go-admin/core/lang"
 	"go-admin/core/middleware"
 	"go-admin/core/utils/dateutils"
+	"go-admin/core/utils/dberr"
 
 	"go-admin/core/utils/excelutils"
 	"gorm.io/gorm"
@@ -129,6 +130,9 @@ func (e *ContentCategory) Insert(c *dto.ContentCategoryInsertReq) (int64, int, e
 	data.CreatedAt = &now
 	err = e.Orm.Create(&data).Error
 	if err != nil {
+		if dberr.IsDuplicateKey(err) {
+			return 0, baseLang.PluginsCategoryNameHasUsedCode, lang.MsgErr(baseLang.PluginsCategoryNameHasUsedCode, e.Lang)
+		}
 		return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
 	}
 	return data.Id, baseLang.SuccessCode, nil
@@ -168,6 +172,9 @@ func (e *ContentCategory) Update(c *dto.ContentCategoryUpdateReq, p *middleware.
 		updates["update_by"] = c.CurrUserId
 		err = e.Orm.Model(&data).Where("id=?", data.Id).Updates(&updates).Error
 		if err != nil {
+			if dberr.IsDuplicateKey(err) {
+				return false, baseLang.PluginsCategoryNameHasUsedCode, lang.MsgErr(baseLang.PluginsCategoryNameHasUsedCode, e.Lang)
+			}
 			return false, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
 		}
 		return true, baseLang.SuccessCode, nil

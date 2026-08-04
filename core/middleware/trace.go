@@ -31,11 +31,7 @@ func Trace() gin.HandlerFunc {
 		// 4. 确保 Span 结束
 		defer span.End()
 
-		// 5. 将 Span 存储到 gin.Context 中 (保持原代码逻辑，方便业务代码手动获取)
-		// 注意：类型由 opentracing.Span 变为 trace.Span
-		ctx.Set("traceSpan", span)
-
-		// 6. 【关键步骤】将包含 Span 的新 Context 注入到 Request 中
+		// 5. 将包含 Span 的新 Context 注入到 Request 中
 		// 这样后续的 Controller、Service、DB 调用才能拿到链路上下文
 		ctx.Request = ctx.Request.WithContext(newCtx)
 

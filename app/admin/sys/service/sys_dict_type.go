@@ -159,12 +159,13 @@ func (e *SysDictType) Update(c *dto.SysDictTypeUpdateReq, p *middleware.DataPerm
 		return false, respCode, err
 	}
 
-	e.Orm = e.Orm.Begin()
+	// L24：用局部 tx 代替写回共享 e.Orm
+	tx := e.Orm.Begin()
 	defer func() {
 		if err != nil {
-			e.Orm.Rollback()
+			tx.Rollback()
 		} else {
-			e.Orm.Commit()
+			tx.Commit()
 		}
 	}()
 
@@ -186,7 +187,7 @@ func (e *SysDictType) Update(c *dto.SysDictTypeUpdateReq, p *middleware.DataPerm
 			return false, baseLang.SysDictTypeTypeExistCode, lang.MsgErr(baseLang.SysDictTypeTypeExistCode, e.Lang)
 		}
 		updates["dict_type"] = c.DictType
-		dictDataService := NewSysDictDataService(&e.Service)
+		dictDataService := NewSysDictDataService(&service.Service{Orm: tx, Log: e.Log, Lang: e.Lang})
 		respCode, err = dictDataService.UpdateDictType(data.DictType, c.DictType)
 		if err != nil {
 			return false, respCode, err
@@ -199,7 +200,7 @@ func (e *SysDictType) Update(c *dto.SysDictTypeUpdateReq, p *middleware.DataPerm
 	if len(updates) > 0 {
 		updates["update_by"] = c.CurrUserId
 		updates["updated_at"] = time.Now()
-		err = e.Orm.Model(&data).Where("id=?", data.Id).Updates(&updates).Error
+		err = tx.Model(&data).Where("id=?", data.Id).Updates(&updates).Error
 		if err != nil {
 			return false, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
 		}

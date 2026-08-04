@@ -20,13 +20,14 @@ type queue chan storage.Messager
 func NewMemory(poolNum uint) *Memory {
 	return &Memory{
 		queue:   new(sync.Map),
+		stop:    make(chan struct{}),
 		PoolNum: poolNum,
 	}
 }
 
 type Memory struct {
 	queue   *sync.Map
-	wait    sync.WaitGroup
+	stop    chan struct{}
 	mutex   sync.RWMutex
 	PoolNum uint
 }
@@ -109,10 +110,14 @@ func (m *Memory) Register(name string, f storage.ConsumerFunc) {
 }
 
 func (m *Memory) Run() {
-	m.wait.Add(1)
-	m.wait.Wait()
+	// 等待 Shutdown 信号。用 channel 而非 WaitGroup：Shutdown 可在 Run 尚未开始前调用（幂等、无负计数竞态）
+	<-m.stop
 }
 
 func (m *Memory) Shutdown() {
-	m.wait.Done()
+	select {
+	case <-m.stop:
+	default:
+		close(m.stop)
+	}
 }

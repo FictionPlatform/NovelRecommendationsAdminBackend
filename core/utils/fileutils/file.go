@@ -31,7 +31,7 @@ func GetExt(fileName string) string {
 func IsFileExist(src string) bool {
 	_, err := os.Stat(src)
 
-	return os.IsExist(err)
+	return err == nil
 }
 
 // CheckPermission 检查文件权限
@@ -80,6 +80,7 @@ func GetType(p string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer file.Close()
 
 	buff := make([]byte, 512)
 
@@ -213,6 +214,12 @@ func FileMonitoringById(ctx context.Context, filePth string, id string, group st
 func GetFileSize(filename string) int64 {
 	var result int64
 	filepath.Walk(filename, func(path string, f os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if f == nil {
+			return nil
+		}
 		result = f.Size()
 		return nil
 	})

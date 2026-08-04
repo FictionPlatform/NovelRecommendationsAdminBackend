@@ -12,6 +12,7 @@ import (
 	"go-admin/core/runtime"
 	"go-admin/core/storage/cache"
 	"go-admin/core/storage/database"
+	limiterSetup "go-admin/core/storage/limiter"
 	"go-admin/core/storage/locker"
 	queueSetup "go-admin/core/storage/queue"
 	"go-admin/core/utils/iputils"
@@ -63,7 +64,9 @@ func init() {
 			auth.InitAuth()
 
 			//国际化-初始化底层
-			lang.InitLang()
+			if err := lang.InitLang(); err != nil {
+				return err
+			}
 
 			//国际化-业务
 
@@ -77,13 +80,14 @@ func init() {
 }
 
 func setup() {
-	// 1. 读取配置
+	// 1. 读取配置（各组件 Handler 支持配置热更新：全部构建成功后才原子切换，失败保持旧组件）
 	config.Setup(
 		file.NewSource(file.WithPath(configPath)),
-		database.Setup,
-		cache.Setup,
-		queueSetup.Setup,
-		locker.Setup,
+		database.NewHandler(),
+		cache.NewHandler(),
+		queueSetup.NewHandler(),
+		locker.NewHandler(),
+		limiterSetup.NewHandler(),
 	)
 
 	// 2.casbin设置
@@ -92,6 +96,9 @@ func setup() {
 		e := mycasbin.Setup(db, "admin_sys_")
 		runtime.RuntimeConfig.SetCasbin(host, e)
 	}
+
+	// 3. 配置热更新：轮询监听配置文件，变更后受保护重建 DB/缓存/队列/锁/限流（全部构建成功才切换，失败自动回滚）
+	go config.Watch(configPath, 3*time.Second)
 
 	// 3. 注册监听函数
 	queue := runtime.RuntimeConfig.GetMemoryQueue("")
@@ -158,6 +165,8 @@ func run() error {
 	if appQueue != nil {
 		appQueue.Shutdown()
 	}
+	// 关闭全部组件登记的 Redis 客户端
+	config.CloseAllRedisClients()
 	log.Info("Server exiting")
 
 	return nil

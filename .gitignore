@@ -18,8 +18,7 @@ config/settings.dev.yml.log
 config/settings.b.dev.yml
 .DS_Store
 
-# go sum
-go.sum
+# L28: go.sum 必须提交（供应链完整性），已从忽略列表移除
 .jpg
 .jpeg
 .png
