@@ -1,13 +1,13 @@
 package models
 
 import (
-	"errors"
 	"fmt"
 	"go-admin/config/base/constant"
 	"go-admin/core/runtime"
-	"gorm.io/gorm"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type SysApi struct {
@@ -47,7 +47,7 @@ func SaveSysApi(db *gorm.DB, routers []runtime.Router) (err error) {
 	var dbApilist []SysApi
 	err = db.Model(&SysApi{}).Find(&dbApilist).Error
 	if err != nil {
-		err = errors.New(fmt.Sprintf("get Api dbApilist error: %s \r\n ", err.Error()))
+		err = fmt.Errorf("get Api dbApilist error: %s \r\n ", err.Error())
 		return
 	}
 	for _, item := range dbApilist {
@@ -94,7 +94,7 @@ func SaveSysApi(db *gorm.DB, routers []runtime.Router) (err error) {
 			return err
 		}
 		if err != nil {
-			err = errors.New(fmt.Sprintf("Models SaveSysApi error: %s \r\n ", err.Error()))
+			err = fmt.Errorf("Models SaveSysApi error: %s \r\n ", err.Error())
 			return
 		}
 		for _, item := range newSysApis {
@@ -130,7 +130,7 @@ func SaveSysApi(db *gorm.DB, routers []runtime.Router) (err error) {
 			return
 		}
 		if err != nil {
-			err = errors.New(fmt.Sprintf("sync delete api error: %s \r\n ", err.Error()))
+			err = fmt.Errorf("sync delete api error: %s \r\n ", err.Error())
 			return
 		}
 	}

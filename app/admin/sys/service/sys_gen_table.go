@@ -17,12 +17,13 @@ import (
 	"go-admin/core/middleware"
 	"go-admin/core/utils/dateutils"
 	"go-admin/core/utils/fileutils"
-	"gorm.io/gorm"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"text/template"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 var genPathFieldPattern = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
@@ -260,7 +261,10 @@ func (e *SysGenTable) GetDBTablePage(c dto.DBTableQueryReq) ([]dto.DBTableResp, 
 	var list []models.DBTable
 	var count int64
 	var err error
-	if config.DatabaseConfig.Driver == global.DBDriverPostgres {
+
+	switch config.DatabaseConfig.Driver {
+	case global.DBDriverPostgres:
+		// 处理 PostgreSQL
 		subQuery := e.Orm.Model(&models.DBTable{}).
 			Select(`tablename AS table_name,
             obj_description(('"' || tablename || '"')::regclass, 'pg_class') AS table_comment,
@@ -275,7 +279,8 @@ func (e *SysGenTable) GetDBTablePage(c dto.DBTableQueryReq) ([]dto.DBTableResp, 
 			Where("tables.table_name not in ('admin_sys_role_menu','admin_sys_role_dept','admin_sys_menu_api_rule','admin_sys_gen_column','admin_sys_casbin_rule')").
 			Where("tables.table_name not in (select table_name from admin_sys_gen_table)").
 			Find(&list).Limit(-1).Offset(-1).Count(&count).Error
-	} else if config.DatabaseConfig.Driver == global.DBDriverMysql {
+	case global.DBDriverMysql:
+		// 处理 MySQL
 		subQuery := e.Orm.Model(&models.DBTable{}).
 			Select("TABLE_NAME as table_name,"+
 				"ENGINE as engine,TABLE_ROWS as table_rows,"+
@@ -294,6 +299,10 @@ func (e *SysGenTable) GetDBTablePage(c dto.DBTableQueryReq) ([]dto.DBTableResp, 
 			Where("tables.table_name not in ('admin_sys_role_menu','admin_sys_role_dept','admin_sys_menu_api_rule','admin_sys_gen_column','admin_sys_casbin_rule')").
 			Where("tables.table_name not in (select table_name from admin_sys_gen_table)").
 			Find(&list).Limit(-1).Offset(-1).Count(&count).Error
+	// case global.DBDriverSQLite:
+	// 处理 SQLite
+	default:
+		// 未知驱动
 	}
 	if err != nil {
 		return nil, 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
@@ -342,7 +351,7 @@ func (e *SysGenTable) genTables(dbTableNames []string) ([]models.SysGenTable, in
 		}
 
 		tbNameSplits := strings.Split(tableNoPrefix, "_")
-		for index, _ := range tbNameSplits {
+		for index := range tbNameSplits {
 			strStart := string([]byte(tbNameSplits[index])[:1])
 			strend := string([]byte(tbNameSplits[index])[1:])
 			// 大驼峰表名 结构体使用
@@ -457,14 +466,17 @@ func (e *SysGenTable) getDBTableList(tableNames []string) ([]models.DBTable, int
 	var list []models.DBTable
 	var err error
 
-	if config.DatabaseConfig.Driver == global.DBDriverPostgres {
+	switch config.DatabaseConfig.Driver {
+	case global.DBDriverPostgres:
+		// 处理 PostgreSQL
 		err = e.Orm.Select(`tablename AS table_name,
             obj_description(('"' || tablename || '"')::regclass, 'pg_class') AS table_comment,
             NULL::text AS create_time`).
 			Where("schemaname = 'public'").
 			Where("tablename IN (?)", tableNames).
 			Find(&list).Error
-	} else if config.DatabaseConfig.Driver == global.DBDriverMysql {
+	case global.DBDriverMysql:
+		// 处理 MySQL
 		err = e.Orm.Select("TABLE_NAME as table_name,"+
 			"ENGINE as engine,TABLE_ROWS as table_rows,"+
 			"TABLE_COLLATION as table_collation,"+
@@ -473,6 +485,10 @@ func (e *SysGenTable) getDBTableList(tableNames []string) ([]models.DBTable, int
 			"TABLE_COMMENT as table_comment").
 			Where("table_schema= ? ", e.Orm.Migrator().CurrentDatabase()).
 			Where("TABLE_NAME in (?)", tableNames).Find(&list).Error
+	// case global.DBDriverSQLite:
+	// 处理 SQLite
+	default:
+		// 未知驱动
 	}
 
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {

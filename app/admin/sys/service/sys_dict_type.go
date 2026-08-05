@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+
 	"github.com/xuri/excelize/v2"
 
 	"go-admin/app/admin/sys/models"
@@ -15,8 +16,9 @@ import (
 	"go-admin/core/middleware"
 	"go-admin/core/utils/dateutils"
 	"go-admin/core/utils/excelutils"
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type SysDictType struct {
@@ -256,6 +258,43 @@ func (e *SysDictType) GetList(c *dto.SysDictTypeQueryReq) ([]models.SysDictType,
 		).Find(&list).Error
 	if err != nil {
 		return nil, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+	return list, baseLang.SuccessCode, nil
+}
+
+// GetAllWithData admin-获取字典类型全部列表(关联字典数据)
+func (e *SysDictType) GetAllWithData() ([]dto.SysDictTypeDataResp, int, error) {
+	var types []dto.SysGetAllDictTypeQuery
+	err := e.Orm.Order("created_at desc").Model(&models.SysDictType{}).
+		Select("id, dict_type, dict_name").
+		Scopes(func(db *gorm.DB) *gorm.DB {
+			return db.Where("status = ?", global.SysStatusOk)
+		}).Find(&types).Error
+	if err != nil {
+		return nil, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+
+	var dataList []dto.SysGetAllDictDataQuery
+	err = e.Orm.Order("dict_sort asc, id asc").Model(&models.SysDictData{}).
+		Select("id, dict_type, dict_label, dict_value").
+		Scopes(func(db *gorm.DB) *gorm.DB {
+			return db.Where("status = ?", global.SysStatusOk)
+		}).Find(&dataList).Error
+	if err != nil {
+		return nil, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+
+	dataMap := make(map[string][]dto.SysGetAllDictDataQuery)
+	for _, data := range dataList {
+		dataMap[data.DictType] = append(dataMap[data.DictType], data)
+	}
+
+	list := make([]dto.SysDictTypeDataResp, 0, len(types))
+	for _, item := range types {
+		list = append(list, dto.SysDictTypeDataResp{
+			SysGetAllDictTypeQuery: item,
+			DictData:               dataMap[item.DictType],
+		})
 	}
 	return list, baseLang.SuccessCode, nil
 }

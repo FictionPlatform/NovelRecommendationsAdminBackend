@@ -40,7 +40,7 @@ func (e *ALiYunOSS) InitOssClient(key, secret, endpoint, bucketName string) erro
 // GeneratePresignedUrl
 // @Description: 获取下载链接
 // @receiver e
-// @param key
+// @param key query string true "对象key"
 // @return string
 // @return error
 func (e *ALiYunOSS) GeneratePresignedUrl(key string) (string, error) {
@@ -57,8 +57,8 @@ func (e *ALiYunOSS) GeneratePresignedUrl(key string) (string, error) {
 // Upload
 // @Description: 上传文件
 // @receiver e
-// @param objectKey
-// @param localPath
+// @param objectKey query string true "对象key"
+// @param localPath query string true "本地路径"
 // @return error
 func (e *ALiYunOSS) Upload(objectKey, localPath string) error {
 	// 上传本地文件
@@ -68,8 +68,8 @@ func (e *ALiYunOSS) Upload(objectKey, localPath string) error {
 // UploadWithSpace
 // @Description: 分片上传
 // @receiver e
-// @param objectKey
-// @param localPath
+// @param objectKey query string true "对象key"
+// @param localPath query string true "本地路径"
 // @return error
 func (e *ALiYunOSS) UploadWithSpace(objectKey, localPath string) error {
 	// 上传本地文件

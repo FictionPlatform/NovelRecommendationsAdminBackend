@@ -1448,6 +1448,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/sys/sys-dict/type/all-with-data": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取字典类型全部列表(关联字典数据)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "系统字典管理"
+                ],
+                "summary": "获取字典类型全部列表(关联字典数据)",
+                "responses": {
+                    "200": {
+                        "description": "请求成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/sys/sys-dict/type/export": {
             "get": {
                 "security": [
@@ -7032,16 +7066,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "admin"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "e10adc3949ba59abbe56e057f20f883e"
                 },
                 "username": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "9414"
                 },
                 "uuid": {
-                    "type": "string"
+                    "type": "string",
+                    "default": "RHbvb4rDODsX2Ak869kz"
                 }
             }
         },

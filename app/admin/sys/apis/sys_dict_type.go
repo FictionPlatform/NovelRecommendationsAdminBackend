@@ -1,8 +1,6 @@
 package apis
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"go-admin/app/admin/sys/service"
 	adminService "go-admin/app/admin/sys/service"
 	"go-admin/app/admin/sys/service/dto"
@@ -15,6 +13,9 @@ import (
 	"go-admin/core/middleware/auth"
 	"go-admin/core/utils/dateutils"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 type SysDictType struct {
@@ -228,6 +229,34 @@ func (e SysDictType) GetList(c *gin.Context) {
 		return
 	}
 	list, respCode, err := s.GetList(&req)
+	if err != nil {
+		e.Error(respCode, err.Error())
+		return
+	}
+	e.OK(list, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
+}
+
+// GetAllWithData admin-获取字典类型全部列表(关联字典数据)
+// @Summary 获取字典类型全部列表(关联字典数据)
+// @Description 获取字典类型全部列表(关联字典数据)
+// @Tags 系统字典管理
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /admin/sys/sys-dict/type/all-with-data [get]
+func (e SysDictType) GetAllWithData(c *gin.Context) {
+	s := service.SysDictType{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
+		return
+	}
+	list, respCode, err := s.GetAllWithData()
 	if err != nil {
 		e.Error(respCode, err.Error())
 		return

@@ -1,8 +1,9 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-admin/app/admin/sys/apis"
+
+	"github.com/gin-gonic/gin"
 
 	"go-admin/core/middleware"
 )
@@ -25,6 +26,7 @@ func registerDictRouter(v1 *gin.RouterGroup) {
 		dicts.GET("/data/select", dataApi.GetList)
 
 		dicts.GET("/type/option-select", dictApi.GetList)
+		dicts.GET("/type/all-with-data", dictApi.GetAllWithData)
 		dicts.GET("/type", dictApi.GetPage)
 		dicts.GET("/type/:id", dictApi.Get)
 		dicts.POST("/type", dictApi.Insert)

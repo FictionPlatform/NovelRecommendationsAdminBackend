@@ -5,14 +5,15 @@ package lang
 import (
 	"errors"
 	"fmt"
-	"github.com/bitxx/logger/logbase"
 	"strings"
+
+	"github.com/bitxx/logger/logbase"
 )
 
 // MsgByCode
 // @Description: i18n
-// @param errCode
-// @param lang
+// @param errCode query int true "错误码"
+// @param lang query string true "语言"
 // @return string
 func MsgByCode(errCode int, lang string) string {
 	switch lang {
@@ -25,8 +26,8 @@ func MsgByCode(errCode int, lang string) string {
 
 // MsgByValue
 // @Description: 直接根据值返回对应语言
-// @param value
-// @param lang
+// @param value query string true "值"
+// @param lang query string true "语言"
 // @return string
 func MsgByValue(value string, lang string) string {
 	switch lang {
@@ -39,8 +40,8 @@ func MsgByValue(value string, lang string) string {
 
 // MsgErr
 // @Description: 获取error
-// @param errCode
-// @param lang
+// @param errCode query int true "错误码"
+// @param lang query string true "语言"
 // @return error
 func MsgErr(errCode int, lang string) error {
 	return errors.New(MsgByCode(errCode, lang))
@@ -48,21 +49,21 @@ func MsgErr(errCode int, lang string) error {
 
 // MsgErrf
 // @Description:
-// @param errCode
-// @param lang
-// @param f
+// @param errCode query int true "错误码"
+// @param lang query string true "语言"
+// @param f query object false "格式化参数"
 // @return error
 func MsgErrf(errCode int, lang string, f ...interface{}) error {
-	return errors.New(fmt.Sprintf(MsgByCode(errCode, lang), f))
+	return fmt.Errorf(MsgByCode(errCode, lang), f)
 }
 
 // MsgLogErrf
 // @Description: 带有参数，有些底层消息不应当被使用者感知，该类消息记录在日志中，并返回应用层可理解的消息
-// @param log  用于记录日志，
-// @param errCodeReplace 最终需要给应用层返回的消息内容，这里传入消息码。若errCodeReplace=errCode或errCodeReplace<=0，则返回真实消息
-// @param errCode  真实消息码
-// @param lang  语言
-// @param f
+// @param log query object true "日志句柄"
+// @param lang query string true "语言"
+// @param errCodeReplace query int true "对外返回的消息码"
+// @param errCode query int true "真实消息码"
+// @param f query object false "格式化参数"
 // @return error
 func MsgLogErrf(log *logbase.Helper, lang string, errCodeReplace, errCode int, f ...interface{}) error {
 	err := MsgErrf(errCode, lang, f)
@@ -75,10 +76,10 @@ func MsgLogErrf(log *logbase.Helper, lang string, errCodeReplace, errCode int, f
 
 // MsgLogErr
 // @Description: 无参数，有些底层消息不应当被使用者感知，该类消息记录在日志中，并返回应用层可理解的消息
-// @param log
-// @param lang
-// @param errCodeReplace
-// @param errCode
+// @param log query object true "日志句柄"
+// @param lang query string true "语言"
+// @param errCodeReplace query int true "对外返回的消息码"
+// @param errCode query int true "真实消息码"
 // @return error
 func MsgLogErr(log *logbase.Helper, lang string, errCodeReplace, errCode int) error {
 	err := MsgErr(errCode, lang)
@@ -91,8 +92,8 @@ func MsgLogErr(log *logbase.Helper, lang string, errCodeReplace, errCode int) er
 
 // TranslationText
 // @Description: 仅支持 - 分隔符
-// @param l
-// @param name
+// @param l query string true "语言"
+// @param text query string true "文本"
 // @return string
 func TranslationText(l string, text string) string {
 	values := strings.Split(text, "-")

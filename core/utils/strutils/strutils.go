@@ -26,8 +26,8 @@ import (
 // HidePartStr
 /**
  * @Description: 字符串中间替换为*
- * @param value
- * @param n
+ * @param value query string true "原始字符串"
+ * @param n query int true "替换长度"
  * @return string
  */
 func HidePartStr(value string, n int) string {
@@ -79,7 +79,7 @@ func GenerateValidateCode() string {
 
 // VerifyEmailFormat
 // @Description: 检测邮箱格式
-// @param email
+// @param email query string true "邮箱"
 // @return bool
 func VerifyEmailFormat(email string) bool {
 	if email == "" {
@@ -102,7 +102,7 @@ func IsEmail(email string) bool {
 
 // VersionOrdinal
 // @Description:
-// @param version
+// @param version query string true "版本号"
 // @return string
 // @return error
 func VersionOrdinal(version string) (string, error) {

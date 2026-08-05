@@ -80,9 +80,9 @@ func (m *Memory) Get(prefix, key string) (string, error) {
 // Set
 // @Description:
 // @receiver m
-// @param key
-// @param val
-// @param expire 单位秒，若小于0，则表示不清除，始终停留在内存中
+// @param key query string true "键"
+// @param val query object true "值"
+// @param expire query int true "过期时间(秒)"
 // @return error
 func (m *Memory) Set(prefix, key string, val interface{}, expire int) error {
 	key = prefix + runtime.IntervalTenant + key

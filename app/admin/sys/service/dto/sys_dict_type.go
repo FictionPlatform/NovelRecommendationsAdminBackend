@@ -2,6 +2,7 @@ package dto
 
 import (
 	"go-admin/core/dto"
+	"time"
 )
 
 type SysDictTypeQueryReq struct {
@@ -42,4 +43,41 @@ type SysDictTypeGetReq struct {
 // SysDictDeleteReq 功能删除请求参数
 type SysDictrDeleteReq struct {
 	Ids []int64 `json:"ids"`
+}
+
+// SysDictTypeDataResp 字典类型及关联字典数据响应体
+type SysDictTypeDataResp struct {
+	SysGetAllDictTypeQuery
+	DictData []SysGetAllDictDataQuery `json:"dictData"`
+}
+
+type SysDictTypeQuery struct {
+	ID        uint      `json:"id"`
+	DictType  string    `json:"dict_type"`
+	DictName  string    `json:"dict_name"`
+	Status    int       `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type SysDictDataQuery struct {
+	ID        uint      `json:"id"`
+	DictType  string    `json:"dict_type"`
+	DictLabel string    `json:"dict_label"`
+	DictValue string    `json:"dict_value"`
+	DictSort  int       `json:"dict_sort"`
+	Status    int       `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type SysGetAllDictTypeQuery struct {
+	ID       uint   `json:"id"`
+	DictType string `json:"dict_type"`
+	DictName string `json:"dict_name"`
+}
+
+type SysGetAllDictDataQuery struct {
+	ID        uint   `json:"id"`
+	DictType  string `json:"dict_type"`
+	DictLabel string `json:"dict_label"`
+	DictValue string `json:"dict_value"`
 }

@@ -128,10 +128,10 @@ type UpdateSysUserPwdReq struct {
 }
 
 type LoginReq struct {
-	Username string `form:"username" json:"username"`
-	Password string `form:"password" json:"password"`
-	Code     string `form:"code" json:"code"`
-	UUID     string `form:"uuid" json:"uuid"`
+	Username string `form:"username" json:"username" default:"9414"`
+	Password string `form:"password" json:"password" default:"e10adc3949ba59abbe56e057f20f883e"`
+	Code     string `form:"code" json:"code" default:"admin"`
+	UUID     string `form:"uuid" json:"uuid" default:"RHbvb4rDODsX2Ak869kz"`
 }
 
 // SysUserDeleteReq 功能删除请求参数

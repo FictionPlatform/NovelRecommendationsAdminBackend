@@ -6,12 +6,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"go-admin/core/config"
 	"go-admin/core/global"
 	"go-admin/core/runtime"
 	"go-admin/core/ws"
 	"mime"
+
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -26,9 +27,9 @@ func InitRouter() {
 	if h == nil {
 		panic("not found engine...")
 	}
-	switch h.(type) {
+	switch e := h.(type) {
 	case *gin.Engine:
-		r = h.(*gin.Engine)
+		r = e
 	default:
 		panic("not found engine...")
 	}
@@ -69,7 +70,7 @@ func InitSysRouter(r *gin.Engine) *gin.RouterGroup {
 	return g
 }
 
-func sysBaseRouter(r *gin.RouterGroup) {
+func sysBaseRouter(*gin.RouterGroup) {
 
 	go ws.WebsocketManager.Start()
 	go ws.WebsocketManager.SendService()

@@ -119,12 +119,16 @@ definitions:
   dto.LoginReq:
     properties:
       code:
+        default: admin
         type: string
       password:
+        default: e10adc3949ba59abbe56e057f20f883e
         type: string
       username:
+        default: "9414"
         type: string
       uuid:
+        default: RHbvb4rDODsX2Ak869kz
         type: string
     type: object
   dto.ResetSysUserPwdReq:
@@ -1936,6 +1940,27 @@ paths:
       security:
       - Bearer: []
       summary: 更新字典类型
+      tags:
+      - 系统字典管理
+  /admin/sys/sys-dict/type/all-with-data:
+    get:
+      consumes:
+      - application/json
+      description: 获取字典类型全部列表(关联字典数据)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 获取字典类型全部列表(关联字典数据)
       tags:
       - 系统字典管理
   /admin/sys/sys-dict/type/export:

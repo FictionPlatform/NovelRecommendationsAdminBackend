@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+
 	"github.com/xuri/excelize/v2"
 
 	baseLang "go-admin/config/base/lang"
@@ -12,8 +13,9 @@ import (
 	"go-admin/core/middleware"
 	"go-admin/core/runtime"
 	"go-admin/core/utils/dateutils"
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 
 	"go-admin/app/admin/sys/models"
 	"go-admin/app/admin/sys/service/dto"
@@ -168,7 +170,7 @@ func (e *SysApi) Delete(ids []int64, p *middleware.DataPermission) (int, error) 
 		// 重建受影响角色的 casbin 策略（回收已删接口对应的权限残留）
 		roleService := NewSysRoleService(&e.Service)
 		if respCode, err := roleService.RebuildCasbinByRoles(affectedRoleIds, tx, mycasbin.GetGlobalEnforcer()); err != nil {
-			return errors.New(fmt.Sprintf("rebuild casbin error: code=%d err=%s", respCode, err.Error()))
+			return fmt.Errorf("rebuild casbin error: code=%d err=%s", respCode, err.Error())
 		}
 		return nil
 	})
