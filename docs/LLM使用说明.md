@@ -9,7 +9,7 @@
 
 - **模块名**: `go-admin`（Gin 风格 go-admin 后台管理系统）
 - **定位**: 基于 Golang 的后台管理系统，前后端分离（本仓库仅含**后端**，`web/` 前端目录不在本仓库内）
-- **接口前缀**: 所有 API 均挂在 `/admin-api/v1` 下（常量 `core/global/constant.go` 中 `RouteRootPath = "/admin-api"`）
+- **接口前缀**: 管理后台 API 挂在 `/admin-api/v1` 下（常量 `core/global/constant.go` 中 `RouteRootPath = "/admin-api"`）；小说推荐平台等对外业务模块挂在独立的 `/web-api/v1` 下（模块内自定义前缀，见 `docs/小说推荐平台需求文档.md` §4.1）
 - **默认端口**: 8888（`config/settings.yml` 中 `settings.application.port`）
 - **默认账户**: admin/123456（顶级账户）、test/123456（受限账户）
 - **支持数据库**: MySQL 8.x 与 PostgreSQL 16.x（脚本见根目录 `app_mysql.sql` / `app_pgsql.sql`，共 28 张表）
