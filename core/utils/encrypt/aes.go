@@ -46,7 +46,7 @@ func AesDecrypt(v string, k []byte) (string, error) {
 	result := make([]byte, size)
 	blocksize := block.BlockSize()
 	if size == 0 || size%blocksize != 0 {
-		return "", errors.New("待解密数据异常")
+		return "", errors.New("invalid ciphertext length")
 	}
 	temp := result
 	for len(value) > 0 {
@@ -57,11 +57,11 @@ func AesDecrypt(v string, k []byte) (string, error) {
 	//校验 PKCS7 填充一致性，避免误剥数据
 	padding := int(result[size-1])
 	if padding == 0 || padding > blocksize || padding > size {
-		return "", errors.New("待解密数据填充异常")
+		return "", errors.New("invalid ciphertext padding")
 	}
 	for i := size - padding; i < size; i++ {
 		if result[i] != byte(padding) {
-			return "", errors.New("待解密数据填充异常")
+			return "", errors.New("invalid ciphertext padding")
 		}
 	}
 	result = result[:size-padding]

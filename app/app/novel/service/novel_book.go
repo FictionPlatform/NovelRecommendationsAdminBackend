@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ import (
 	"go-admin/core/dto/service"
 	"go-admin/core/global"
 	"go-admin/core/lang"
+	"go-admin/core/runtime"
 	"gorm.io/gorm"
 )
 
@@ -41,12 +43,19 @@ func (e *NovelBook) GetPage(c *dto.NovelBookQueryReq) ([]models.NovelBook, int64
 		c.Status = global.SysStatusOk
 	}
 
-	db := e.Orm.Model(&data).Scopes(cDto.MakeCondition(c.GetNeedSearch()))
+	db := e.Orm.Model(&data).Scopes(
+		cDto.MakeCondition(c.GetNeedSearch()),
+		cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
+	)
 
-	// 关键字（书名/作者/标签，不区分大小写）
+	// 关键字（书名/作者/标签，不区分大小写）；tags 为 JSON，PG 需 CAST(TEXT)
 	if c.Keyword != "" {
 		kw := strings.ToLower(c.Keyword)
-		db = db.Where("LOWER(title) like ? or LOWER(author) like ? or LOWER(tags) like ?", "%"+kw+"%", "%"+kw+"%", "%"+kw+"%")
+		if e.Orm.Dialector.Name() == "postgres" {
+			db = db.Where("LOWER(title) like ? or LOWER(author) like ? or CAST(tags AS TEXT) like ?", "%"+kw+"%", "%"+kw+"%", "%"+kw+"%")
+		} else {
+			db = db.Where("LOWER(title) like ? or LOWER(author) like ? or tags like ?", "%"+kw+"%", "%"+kw+"%", "%"+kw+"%")
+		}
 	}
 
 	// 排序：latest-最新发布 rating-高分优先 click-热门热度
@@ -83,9 +92,21 @@ func (e *NovelBook) Get(id int64, currUserId int64) (*models.NovelBook, int, err
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, baseLang.NovelBookNotExistCode, lang.MsgErr(baseLang.NovelBookNotExistCode, e.Lang)
 	}
-	// 点击 +1（防刷新刷量后续可按 IP/会话去重）
-	_ = e.Orm.Model(&models.NovelBook{}).Where("id = ?", data.Id).Update("clicks", gorm.Expr("clicks + 1")).Error
-	data.Clicks++
+	// 点击 +1（当日去重防刷；匿名无标识用户不计数）
+	if currUserId > 0 {
+		cache := runtime.RuntimeConfig.GetCacheAdapter()
+		deduped := false
+		if cache != nil {
+			v, _ := cache.Get(NovelClickCachePrefix, fmt.Sprintf("book:%d:%d", data.Id, currUserId))
+			deduped = v != ""
+		}
+		if !deduped {
+			if cache == nil || cache.Set(NovelClickCachePrefix, fmt.Sprintf("book:%d:%d", data.Id, currUserId), "1", 86400) == nil {
+				_ = e.Orm.Model(&models.NovelBook{}).Where("id = ?", data.Id).Update("clicks", gorm.Expr("clicks + 1")).Error
+				data.Clicks++
+			}
+		}
+	}
 
 	tmp := []models.NovelBook{*data}
 	e.fillBookExt(tmp, currUserId)
@@ -111,6 +132,21 @@ func (e *NovelBook) Insert(c *dto.NovelBookInsertReq) (int64, int, error) {
 	if strings.TrimSpace(c.Category) == "" {
 		return 0, baseLang.NovelBookCategoryEmptyCode, lang.MsgErr(baseLang.NovelBookCategoryEmptyCode, e.Lang)
 	}
+	if len([]rune(c.Title)) > 100 {
+		return 0, baseLang.NovelBookTitleTooLongCode, lang.MsgErr(baseLang.NovelBookTitleTooLongCode, e.Lang)
+	}
+	if len([]rune(c.Author)) > 64 {
+		return 0, baseLang.NovelBookAuthorTooLongCode, lang.MsgErr(baseLang.NovelBookAuthorTooLongCode, e.Lang)
+	}
+	if len([]rune(c.Slogan)) > 30 {
+		return 0, baseLang.NovelBookSloganTooLongCode, lang.MsgErr(baseLang.NovelBookSloganTooLongCode, e.Lang)
+	}
+	if len([]rune(c.Cover)) > 500 {
+		return 0, baseLang.NovelBookCoverTooLongCode, lang.MsgErr(baseLang.NovelBookCoverTooLongCode, e.Lang)
+	}
+	if len([]rune(c.Description)) > 500 {
+		return 0, baseLang.NovelBookDescTooLongCode, lang.MsgErr(baseLang.NovelBookDescTooLongCode, e.Lang)
+	}
 	// 书名唯一校验
 	count, respCode, err := e.countByTitle(c.Title)
 	if err != nil {
@@ -125,8 +161,9 @@ func (e *NovelBook) Insert(c *dto.NovelBookInsertReq) (int64, int, error) {
 	data.Title = strings.TrimSpace(c.Title)
 	data.Author = strings.TrimSpace(c.Author)
 	data.Cover = c.Cover
-	data.Rating = 5.0
-	data.ReviewCount = 0
+	// 新书默认值对齐需求文档 §3.2：评分 9.5 / 书评数 1 / 点击 1200 / 章节 30 / 当天发布 / 默认 3 标签（首个取所选分类）
+	data.Rating = 9.5
+	data.ReviewCount = 1
 	data.SerialStatus = c.SerialStatus
 	if data.SerialStatus == "" {
 		data.SerialStatus = "1"
@@ -135,17 +172,27 @@ func (e *NovelBook) Insert(c *dto.NovelBookInsertReq) (int64, int, error) {
 	if len(c.Tags) > 0 {
 		tagJSON, _ := json.Marshal(c.Tags)
 		data.Tags = string(tagJSON)
+	} else {
+		tagJSON, _ := json.Marshal([]string{"#" + c.Category, "#新书热推", "#精彩必读"})
+		data.Tags = string(tagJSON)
 	}
 	data.Slogan = c.Slogan
 	data.Description = c.Description
-	data.Clicks = 0
+	data.Clicks = 1200
 	if c.PublishDate != nil && *c.PublishDate != "" {
 		if t, err := time.Parse("2006-01-02", *c.PublishDate); err == nil {
+			data.PublishDate = &t
+		}
+	} else {
+		if t, err := time.Parse("2006-01-02", time.Now().Format("2006-01-02")); err == nil {
 			data.PublishDate = &t
 		}
 	}
 	data.WordCount = c.WordCount
 	data.Chapters = c.Chapters
+	if data.Chapters <= 0 {
+		data.Chapters = 30
+	}
 	data.IsFeatured = c.IsFeatured
 	data.ReadUrl = c.ReadUrl
 	data.Status = c.Status
@@ -178,6 +225,9 @@ func (e *NovelBook) Update(c *dto.NovelBookUpdateReq) (bool, int, error) {
 	}
 	// 改名时校验唯一
 	if strings.TrimSpace(c.Title) != "" && c.Title != data.Title {
+		if len([]rune(c.Title)) > 100 {
+			return false, baseLang.NovelBookTitleTooLongCode, lang.MsgErr(baseLang.NovelBookTitleTooLongCode, e.Lang)
+		}
 		count, respCode, err := e.countByTitle(c.Title)
 		if err != nil {
 			return false, respCode, err
@@ -185,6 +235,18 @@ func (e *NovelBook) Update(c *dto.NovelBookUpdateReq) (bool, int, error) {
 		if count > 0 {
 			return false, baseLang.NovelBookTitleExistCode, lang.MsgErr(baseLang.NovelBookTitleExistCode, e.Lang)
 		}
+	}
+	if c.Author != "" && len([]rune(c.Author)) > 64 {
+		return false, baseLang.NovelBookAuthorTooLongCode, lang.MsgErr(baseLang.NovelBookAuthorTooLongCode, e.Lang)
+	}
+	if c.Slogan != "" && len([]rune(c.Slogan)) > 30 {
+		return false, baseLang.NovelBookSloganTooLongCode, lang.MsgErr(baseLang.NovelBookSloganTooLongCode, e.Lang)
+	}
+	if c.Cover != "" && len([]rune(c.Cover)) > 500 {
+		return false, baseLang.NovelBookCoverTooLongCode, lang.MsgErr(baseLang.NovelBookCoverTooLongCode, e.Lang)
+	}
+	if c.Description != "" && len([]rune(c.Description)) > 500 {
+		return false, baseLang.NovelBookDescTooLongCode, lang.MsgErr(baseLang.NovelBookDescTooLongCode, e.Lang)
 	}
 
 	updates := map[string]interface{}{}
@@ -324,13 +386,13 @@ func (e *NovelBook) GetHome() (*dto.NovelHomeResp, int, error) {
 	e.fillBookExt(resp.Featured, 0)
 	e.fillBookExt(resp.HotBooks, 0)
 
-	// 最新/热门帖子
+	// 最新/热门帖子（首页各取 5 条）
 	postService := NewNovelPostService(&e.Service)
-	latestPosts, _, respCode, err := postService.GetPage(&dto.NovelPostQueryReq{Sort: "latest"}, 0)
+	latestPosts, _, respCode, err := postService.GetPage(&dto.NovelPostQueryReq{Pagination: cDto.Pagination{PageSize: 5}, Sort: "latest"}, 0)
 	if err != nil {
 		return nil, respCode, err
 	}
-	hotPosts, _, respCode, err := postService.GetPage(&dto.NovelPostQueryReq{Sort: "hot"}, 0)
+	hotPosts, _, respCode, err := postService.GetPage(&dto.NovelPostQueryReq{Pagination: cDto.Pagination{PageSize: 5}, Sort: "hot"}, 0)
 	if err != nil {
 		return nil, respCode, err
 	}

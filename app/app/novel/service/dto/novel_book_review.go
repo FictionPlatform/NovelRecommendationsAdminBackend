@@ -8,6 +8,7 @@ type NovelReviewQueryReq struct {
 	dto.Pagination `search:"-"`
 	BookId         int64  `form:"bookId" search:"type:exact;column:book_id;table:app_novel_book_review" comment:"书籍编号"`
 	Filter         string `form:"filter" search:"-" comment:"all-全部 five-5星 hot-热门"`
+	Mine           int    `form:"mine" search:"-" comment:"1-只看我的书评"`
 	CurrUserId     int64  `form:"-" search:"-" comment:"当前登录用户"`
 }
 

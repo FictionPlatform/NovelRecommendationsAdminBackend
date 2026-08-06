@@ -25,7 +25,6 @@ type BookReview struct {
 // @Param pageSize query int false "每页条数"
 // @Param bookId query int false "书籍编号"
 // @Param filter query string false "all|five|hot"
-// @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
 // @Router /app/novel/book-review/page [get]
@@ -41,6 +40,8 @@ func (e BookReview) GetPage(c *gin.Context) {
 		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
 		return
 	}
+	uid, _, _ := auth.Auth.GetUserId(c)
+	req.CurrUserId = uid
 	list, count, respCode, err := s.GetPage(&req)
 	if err != nil {
 		e.Error(respCode, err.Error())

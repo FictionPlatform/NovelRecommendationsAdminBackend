@@ -105,7 +105,7 @@ type JwtAuth struct {
 // validateSecrets 启动时校验 JWT/AES 密钥：必须非空、不得使用默认值或已泄露的旧值
 func validateSecrets() error {
 	invalid := func(name string) error {
-		return fmt.Errorf("auth.%s 必须设置为自定义密钥，禁止使用空值、占位符或历史默认值", name)
+		return fmt.Errorf("auth.%s must be set to a custom secret; empty, placeholder and legacy default values are prohibited", name)
 	}
 
 	secret := config.AuthConfig.Secret
@@ -118,7 +118,7 @@ func validateSecrets() error {
 		return invalid("secretAes")
 	}
 	if len(secretAes) != 16 && len(secretAes) != 24 && len(secretAes) != 32 {
-		return fmt.Errorf("auth.secretAes 长度必须为 16/24/32 字节（AES-128/192/256），当前为 %d 字节", len(secretAes))
+		return fmt.Errorf("auth.secretAes length must be 16/24/32 bytes (AES-128/192/256), currently %d bytes", len(secretAes))
 	}
 	return nil
 }
@@ -442,7 +442,7 @@ func (j *JwtAuth) PayloadFunc(data interface{}) jwtIn.MapClaims {
 func (j *JwtAuth) Authenticator(c *gin.Context) (interface{}, error) {
 	userId, _, _ := j.GetUserId(c)
 	if userId <= 0 {
-		return nil, errors.New("incorrect Username or Password")
+		return nil, lang.MsgErr(baseLang.LoginFailCode, lang.GetAcceptLanguage(c))
 	}
 	roleKey, _ := c.Get(authdto.RoleKey)
 	resp := map[string]interface{}{
@@ -732,6 +732,16 @@ func (j *JwtAuth) checkUserStatus(c *gin.Context, userID int64, tokenRoleKey str
 	db := runtime.RuntimeConfig.GetDbByKey(c.Request.Host)
 	if db == nil {
 		return false
+	}
+	// 读者角色（小说平台 app 端）：校验 app_user 表（与 admin_sys_user 分离，登录/状态均走读者体系）
+	if tokenRoleKey == constant.RoleKeyReader {
+		var count int64
+		if err := db.Table("app_user").
+			Where("id = ? AND status = ?", userID, global.SysStatusOk).
+			Count(&count).Error; err != nil {
+			return false
+		}
+		return count > 0
 	}
 	var user struct {
 		RoleKey string

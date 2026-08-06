@@ -12,6 +12,9 @@ import (
 	"gorm.io/gorm"
 )
 
+// NovelClickCachePrefix 详情点击当日去重缓存前缀（key=book:{bookId}:{userId}，TTL 24h）
+const NovelClickCachePrefix = "novelClick"
+
 // getUserSnapshot 读取读者昵称/头像快照（app_user 复用）
 func getUserSnapshot(e *service.Service, userId int64) (string, string, int, error) {
 	u := &userModels.User{}

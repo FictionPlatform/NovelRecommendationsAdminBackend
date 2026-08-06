@@ -32,7 +32,18 @@ func (e *NovelBookReview) GetPage(c *dto.NovelReviewQueryReq) ([]models.NovelBoo
 	var list []models.NovelBookReview
 	var count int64
 
-	db := e.Orm.Model(&data).Scopes(cDto.MakeCondition(c.GetNeedSearch()))
+	db := e.Orm.Model(&data)
+	// 只看我的书评
+	if c.Mine == 1 {
+		if c.CurrUserId <= 0 {
+			return nil, 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+		}
+		db = db.Where("user_id = ?", c.CurrUserId)
+	}
+	db = db.Scopes(
+		cDto.MakeCondition(c.GetNeedSearch()),
+		cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
+	)
 	switch c.Filter {
 	case "five":
 		db = db.Where("rating = 5")
@@ -70,13 +81,16 @@ func (e *NovelBookReview) GetPage(c *dto.NovelReviewQueryReq) ([]models.NovelBoo
 // Insert app-新增书评（评分联动事务）
 func (e *NovelBookReview) Insert(c *dto.NovelReviewInsertReq) (int64, int, error) {
 	if c.CurrUserId <= 0 {
-		return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.DataQueryCode, e.Lang)
+		return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
 	if c.BookId <= 0 {
 		return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
 	if c.Rating < 1 || c.Rating > 5 {
 		return 0, baseLang.NovelReviewRatingRangeCode, lang.MsgErr(baseLang.NovelReviewRatingRangeCode, e.Lang)
+	}
+	if len([]rune(c.Content)) > 1000 {
+		return 0, baseLang.NovelContentTooLongCode, lang.MsgErr(baseLang.NovelContentTooLongCode, e.Lang)
 	}
 
 	userName, userAvatar, respCode, err := getUserSnapshot(&e.Service, c.CurrUserId)

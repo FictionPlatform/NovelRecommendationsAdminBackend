@@ -1,9 +1,5 @@
 package dto
 
-type NovelProfileGetReq struct {
-	CurrUserId int64 `json:"-" comment:"当前登录用户"`
-}
-
 type NovelProfileUpdateReq struct {
 	Nickname            string   `json:"nickname" comment:"昵称"`
 	Avatar              string   `json:"avatar" comment:"头像"`

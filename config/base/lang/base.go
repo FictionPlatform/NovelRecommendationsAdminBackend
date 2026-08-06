@@ -27,6 +27,15 @@ const (
 	ServerErrLogCode     = 1012
 	BadRequestErrLogCode = 1013
 	AuthErrLogCode       = 1014
+
+	// 通用安全/平台类错误码（多用于中间件，响应层按 response.Error 规则透传）
+	AdminOnlyErrCode       = 1015
+	RateLimitServerErrCode = 1016
+	RateLimitErrCode       = 1017
+	IpBlacklistCode        = 1018
+	DbConnFailCode         = 1019
+	PermissionErrCode      = 1020
+	LoginFailCode          = 1021
 )
 
 func init() {
@@ -54,4 +63,11 @@ func init() {
 	lang.MsgInfo[ServerErrLogCode] = "内部错误：%s"
 	lang.MsgInfo[BadRequestErrLogCode] = "错误请求：%s"
 	lang.MsgInfo[AuthErrLogCode] = "认证失败：%s"
+	lang.MsgInfo[AdminOnlyErrCode] = "仅超级管理员可访问"
+	lang.MsgInfo[RateLimitServerErrCode] = "限流服务异常"
+	lang.MsgInfo[RateLimitErrCode] = "请求过于频繁，请稍后再试"
+	lang.MsgInfo[IpBlacklistCode] = "禁止访问"
+	lang.MsgInfo[DbConnFailCode] = "数据库连接获取失败"
+	lang.MsgInfo[PermissionErrCode] = "数据权限处理失败，请联系管理员"
+	lang.MsgInfo[LoginFailCode] = "账号或密码错误"
 }

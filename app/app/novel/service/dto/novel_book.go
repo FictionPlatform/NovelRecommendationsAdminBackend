@@ -75,10 +75,6 @@ type NovelBookRankReq struct {
 	CurrUserId int64  `form:"-" comment:"当前登录用户"`
 }
 
-type NovelBookHomeReq struct {
-	CurrUserId int64 `form:"-" comment:"当前登录用户"`
-}
-
 // NovelHomeResp 首页聚合响应
 type NovelHomeResp struct {
 	Featured    []models.NovelBook `json:"featured" comment:"精选轮播"`

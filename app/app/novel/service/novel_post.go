@@ -55,13 +55,31 @@ func (e *NovelPost) GetPage(c *dto.NovelPostQueryReq, currUserId int64) ([]model
 	var list []models.NovelPost
 	var count int64
 
-	db := e.Orm.Model(&data).Where("status = ?", global.SysStatusOk).Scopes(cDto.MakeCondition(c.GetNeedSearch()))
-	// 排序：latest-最新 hot-热门
+	db := e.Orm.Model(&data).Where("status = ?", global.SysStatusOk)
+	// 只看我的帖子
+	if c.Mine == 1 {
+		if currUserId <= 0 {
+			return nil, 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+		}
+		db = db.Where("user_id = ?", currUserId)
+	}
+	// 只看我收藏的帖子
+	if c.IsCollected == 1 {
+		if currUserId <= 0 {
+			return nil, 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+		}
+		db = db.Where("id in (select post_id from app_novel_post_collect where user_id = ?)", currUserId)
+	}
+	db = db.Scopes(
+		cDto.MakeCondition(c.GetNeedSearch()),
+		cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
+	)
+	// 排序：latest-最新 hot-热门（热门=点赞+评论数）
 	switch c.Sort {
 	case "hot":
-		db = db.Order("likes desc, created_at desc")
+		db = db.Order("(likes + comment_count) desc, created_at desc")
 	default:
-		db = db.Order("created_at desc")
+		db = db.Order("created_at desc, id desc")
 	}
 	err := db.Find(&list).Limit(-1).Offset(-1).Count(&count).Error
 	if err != nil {
@@ -121,6 +139,9 @@ func (e *NovelPost) Insert(c *dto.NovelPostInsertReq) (int64, int, error) {
 	}
 	if strings.TrimSpace(c.Title) == "" {
 		return 0, baseLang.NovelPostTitleEmptyCode, lang.MsgErr(baseLang.NovelPostTitleEmptyCode, e.Lang)
+	}
+	if len([]rune(c.Title)) > 200 {
+		return 0, baseLang.NovelPostTitleTooLongCode, lang.MsgErr(baseLang.NovelPostTitleTooLongCode, e.Lang)
 	}
 	contentLen := len([]rune(c.Content))
 	if contentLen < 5000 || contentLen > 10000 {
@@ -373,20 +394,58 @@ func (e *NovelPost) Interact(c *dto.NovelPostInteractReq) (int, error) {
 	return baseLang.SuccessCode, nil
 }
 
-// AddComment app-新增评论/回复（@昵称）
+// AddComment app-新增评论/回复（@昵称，事务内校验帖子并回写计数）
 func (e *NovelPost) AddComment(c *dto.NovelPostCommentInsertReq) (int64, int, error) {
-	if c.CurrUserId <= 0 {
+	if c.CurrUserId <= 0 || c.PostId <= 0 {
 		return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
 	if strings.TrimSpace(c.Content) == "" {
-		return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+		return 0, baseLang.NovelPostCommentEmptyCode, lang.MsgErr(baseLang.NovelPostCommentEmptyCode, e.Lang)
 	}
-	// 父评论存在性（楼中楼）
+	if len([]rune(c.Content)) > 1000 {
+		return 0, baseLang.NovelContentTooLongCode, lang.MsgErr(baseLang.NovelContentTooLongCode, e.Lang)
+	}
+
+	baseOrm := e.Orm
+	e.Orm = baseOrm.Begin()
+	var txErr error
+	committed := false
+	defer func() {
+		if committed {
+			e.Orm.Commit()
+		} else {
+			e.Orm.Rollback()
+		}
+		e.Orm = baseOrm
+	}()
+
+	// 锁定帖子行，校验存在且状态正常（防孤儿评论 + comment_count 空增）
+	post := &models.NovelPost{}
+	txErr = e.Orm.Clauses(clause.Locking{Strength: "UPDATE"}).First(post, c.PostId).Error
+	if txErr != nil {
+		if errors.Is(txErr, gorm.ErrRecordNotFound) {
+			txErr = nil
+			return 0, baseLang.NovelPostNotExistCode, lang.MsgErr(baseLang.NovelPostNotExistCode, e.Lang)
+		}
+		return 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, txErr)
+	}
+	if post.Status != global.SysStatusOk {
+		return 0, baseLang.NovelPostNotExistCode, lang.MsgErr(baseLang.NovelPostNotExistCode, e.Lang)
+	}
+
+	// 父评论存在性 + 必须属于同一帖子（楼中楼结构一致）
 	if c.ParentId != nil && *c.ParentId > 0 {
 		parent := &models.NovelPostComment{}
 		err := e.Orm.First(parent, *c.ParentId).Error
 		if err != nil {
-			return 0, baseLang.NovelPostCommentNotExistCode, lang.MsgErr(baseLang.NovelPostCommentNotExistCode, e.Lang)
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return 0, baseLang.NovelPostCommentNotExistCode, lang.MsgErr(baseLang.NovelPostCommentNotExistCode, e.Lang)
+			}
+			txErr = err
+			return 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+		}
+		if parent.PostId != post.Id {
+			return 0, baseLang.NovelParentNotSamePostCode, lang.MsgErr(baseLang.NovelParentNotSamePostCode, e.Lang)
 		}
 	}
 
@@ -406,13 +465,17 @@ func (e *NovelPost) AddComment(c *dto.NovelPostCommentInsertReq) (int64, int, er
 	data.ReplyToCommentId = c.ReplyToCommentId
 	data.Content = c.Content
 	data.CreatedAt = &now
-	err = e.Orm.Create(&data).Error
-	if err != nil {
+	if err := e.Orm.Create(&data).Error; err != nil {
+		txErr = err
 		return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
 	}
-	// 评论数 +1
-	_ = e.Orm.Model(&models.NovelPost{}).Where("id = ?", c.PostId).
-		Update("comment_count", gorm.Expr("comment_count + 1")).Error
+	// 评论数 +1（事务内与帖子行锁联动）
+	if err := e.Orm.Model(&models.NovelPost{}).Where("id = ?", c.PostId).
+		Update("comment_count", gorm.Expr("comment_count + 1")).Error; err != nil {
+		txErr = err
+		return 0, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
+	}
+	committed = true
 	return data.Id, baseLang.SuccessCode, nil
 }
 
@@ -439,6 +502,48 @@ func (e *NovelPost) DeleteComment(id int64, currUserId int64) (int, error) {
 	_ = e.Orm.Model(&models.NovelPost{}).Where("id = ?", comment.PostId).
 		Update("comment_count", gorm.Expr("CASE WHEN comment_count > 0 THEN comment_count - 1 ELSE 0 END")).Error
 	return baseLang.SuccessCode, nil
+}
+
+// GetMyComments app-分页查询我的评论（含原帖标题）
+func (e *NovelPost) GetMyComments(c *dto.NovelCommentQueryReq) ([]models.NovelPostComment, int64, int, error) {
+	if c.CurrUserId <= 0 {
+		return nil, 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+	}
+	var data models.NovelPostComment
+	var list []models.NovelPostComment
+	var count int64
+	err := e.Orm.Model(&data).Where("user_id = ?", c.CurrUserId).
+		Order("created_at desc, id desc").
+		Scopes(cDto.Paginate(c.GetPageSize(), c.GetPageIndex())).
+		Find(&list).Limit(-1).Offset(-1).Count(&count).Error
+	if err != nil {
+		return nil, 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+	e.fillCommentExt(list)
+	return list, count, baseLang.SuccessCode, nil
+}
+
+// fillCommentExt app-内部方法，批量填充评论所属帖子标题
+func (e *NovelPost) fillCommentExt(list []models.NovelPostComment) {
+	if len(list) == 0 {
+		return
+	}
+	postIds := make([]int64, 0, len(list))
+	for _, cm := range list {
+		postIds = append(postIds, cm.PostId)
+	}
+	var posts []models.NovelPost
+	err := e.Orm.Where("id in (?)", postIds).Find(&posts).Error
+	if err != nil {
+		return
+	}
+	titleMap := map[int64]string{}
+	for _, p := range posts {
+		titleMap[p.Id] = p.Title
+	}
+	for i := range list {
+		list[i].PostTitle = titleMap[list[i].PostId]
+	}
 }
 
 // fillPostExt app-内部方法，填充关联书名与当前用户互动状态

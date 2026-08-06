@@ -10,13 +10,26 @@ import (
 	"github.com/bitxx/logger/logbase"
 )
 
+// NormalizeLang 归一化语言标签：取主语言（en-US/en-GB/zh-CN -> en/zh），
+// 仅识别 en，其余一律回落中文（当前仅支持中/英）
+func NormalizeLang(lang string) string {
+	lang = strings.TrimSpace(strings.ToLower(lang))
+	if i := strings.IndexByte(lang, '-'); i >= 0 {
+		lang = lang[:i]
+	}
+	if lang == "en" {
+		return "en"
+	}
+	return ""
+}
+
 // MsgByCode
 // @Description: i18n
 // @param errCode query int true "错误码"
 // @param lang query string true "语言"
 // @return string
 func MsgByCode(errCode int, lang string) string {
-	switch lang {
+	switch NormalizeLang(lang) {
 	case "en":
 		return EnLang.T(MsgInfo[errCode])
 	default:
@@ -30,7 +43,7 @@ func MsgByCode(errCode int, lang string) string {
 // @param lang query string true "语言"
 // @return string
 func MsgByValue(value string, lang string) string {
-	switch lang {
+	switch NormalizeLang(lang) {
 	case "en":
 		return EnLang.T(value)
 	default:
@@ -54,7 +67,7 @@ func MsgErr(errCode int, lang string) error {
 // @param f query object false "格式化参数"
 // @return error
 func MsgErrf(errCode int, lang string, f ...interface{}) error {
-	return fmt.Errorf(MsgByCode(errCode, lang), f)
+	return fmt.Errorf(MsgByCode(errCode, lang), f...)
 }
 
 // MsgLogErrf

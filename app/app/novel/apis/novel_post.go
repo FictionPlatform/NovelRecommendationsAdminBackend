@@ -26,7 +26,6 @@ type Post struct {
 // @Param topicTag query string false "话题标签"
 // @Param sort query string false "latest|hot"
 // @Param refBookId query int false "关联小说"
-// @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
 // @Router /app/novel/post/page [get]
@@ -58,7 +57,6 @@ func (e Post) GetPage(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "帖子编号"
-// @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
 // @Router /app/novel/post/{id} [get]
@@ -74,11 +72,7 @@ func (e Post) Get(c *gin.Context) {
 		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
 		return
 	}
-	uid, rCode, err := auth.Auth.GetUserId(c)
-	if err != nil {
-		e.Error(rCode, err.Error())
-		return
-	}
+	uid, _, _ := auth.Auth.GetUserId(c)
 	result, respCode, err := s.Get(req.Id, uid)
 	if err != nil {
 		e.Error(respCode, err.Error())
@@ -234,6 +228,44 @@ func (e Post) AddComment(c *gin.Context) {
 		return
 	}
 	e.OK(id, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
+}
+
+// MyComments app-分页查询我的评论
+// @Summary 分页查询我的评论
+// @Description 当前登录用户的帖子评论（含原帖标题）
+// @Tags 小说长文
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/novel/post-comment/mine [get]
+func (e Post) MyComments(c *gin.Context) {
+	req := dto.NovelCommentQueryReq{}
+	s := service.NovelPost{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
+		return
+	}
+	uid, rCode, err := auth.Auth.GetUserId(c)
+	if err != nil {
+		e.Error(rCode, err.Error())
+		return
+	}
+	req.CurrUserId = uid
+	list, count, respCode, err := s.GetMyComments(&req)
+	if err != nil {
+		e.Error(respCode, err.Error())
+		return
+	}
+	e.PageOK(list, nil, count, req.GetPageIndex(), req.GetPageSize(), lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
 // DeleteComment app-删除评论

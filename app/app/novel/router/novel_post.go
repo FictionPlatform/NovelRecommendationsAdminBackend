@@ -7,20 +7,30 @@ import (
 )
 
 func init() {
-	routerCheckRole = append(routerCheckRole, registerPostRouter)
+	routerNoCheckRole = append(routerNoCheckRole, registerPostRouter)
+	routerCheckRole = append(routerCheckRole, registerPostWriteRouter)
 }
 
-// registerPostRouter 注册长文帖子路由
+// registerPostRouter 注册长文帖子浏览路由（无需登录）
 func registerPostRouter(v1 *gin.RouterGroup) {
 	api := apis.Post{}
-	r := v1.Group("/app/novel").Use(middleware.Auth())
+	r := v1.Group("/app/novel")
 	{
 		r.GET("/post/page", api.GetPage)
 		r.GET("/post/:id", api.Get)
+	}
+}
+
+// registerPostWriteRouter 注册长文帖子写路由（需登录）
+func registerPostWriteRouter(v1 *gin.RouterGroup) {
+	api := apis.Post{}
+	r := v1.Group("/app/novel").Use(middleware.Auth())
+	{
 		r.POST("/post", api.Insert)
 		r.DELETE("/post", api.Delete)
 		r.POST("/post/:id/interact", api.Interact)
 		r.POST("/post/:id/comment", api.AddComment)
+		r.GET("/post-comment/mine", api.MyComments)
 		r.DELETE("/post-comment/:id", api.DeleteComment)
 	}
 }

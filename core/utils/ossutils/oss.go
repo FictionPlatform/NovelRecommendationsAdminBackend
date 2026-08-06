@@ -25,12 +25,12 @@ func (e *ALiYunOSS) InitOssClient(key, secret, endpoint, bucketName string) erro
 
 	client, err := oss.New(e.Endpoint, e.AccessKeyId, e.AccessKeySecret)
 	if err != nil {
-		return errors.New(fmt.Sprintf("初始化Oss客户端异常：%s", err.Error()))
+		return fmt.Errorf("init OSS client error: %s", err.Error())
 	}
 	// 获取存储空间
 	bucket, err := client.Bucket(bucketName)
 	if err != nil {
-		return errors.New(fmt.Sprintf("初始化Oss Bucket异常：%s", err.Error()))
+		return fmt.Errorf("init OSS bucket error: %s", err.Error())
 	}
 	e.Client = client
 	e.Bucket = bucket
@@ -49,7 +49,7 @@ func (e *ALiYunOSS) GeneratePresignedUrl(key string) (string, error) {
 	}
 	path, err := e.Bucket.SignURL(key, oss.HTTPGet, 86400)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("general oss url err：%s", err.Error()))
+		return "", fmt.Errorf("generate oss url error: %s", err.Error())
 	}
 	return path, nil
 }
@@ -79,7 +79,7 @@ func (e *ALiYunOSS) UploadWithSpace(objectKey, localPath string) error {
 	}
 	fd, err := os.Open(localPath)
 	if err != nil {
-		return errors.New(fmt.Sprintf("open local file err：%s", err.Error()))
+		return fmt.Errorf("open local file error: %s", err.Error())
 	}
 	defer fd.Close()
 
@@ -103,7 +103,7 @@ func (e *ALiYunOSS) UploadWithSpace(objectKey, localPath string) error {
 	// 步骤1：初始化一个分片上传事件，并指定存储类型为标准存储。
 	imur, err := e.Bucket.InitiateMultipartUpload(objectKey, options...)
 	if err != nil {
-		return errors.New(fmt.Sprintf("init multipart upload err：%s", err.Error()))
+		return fmt.Errorf("init multipart upload error: %s", err.Error())
 	}
 	// 步骤2：上传分片。
 	var parts []oss.UploadPart
@@ -114,7 +114,7 @@ func (e *ALiYunOSS) UploadWithSpace(objectKey, localPath string) error {
 		if err != nil {
 			// 任一分片失败即中止分片上传，避免孤儿分片长期占用存储
 			_ = e.Bucket.AbortMultipartUpload(imur)
-			return errors.New(fmt.Sprintf("upload part err：%s", err.Error()))
+			return fmt.Errorf("upload part error: %s", err.Error())
 		}
 		parts = append(parts, part)
 	}
@@ -123,7 +123,7 @@ func (e *ALiYunOSS) UploadWithSpace(objectKey, localPath string) error {
 	_, err = e.Bucket.CompleteMultipartUpload(imur, parts, objectAcl)
 	if err != nil {
 		_ = e.Bucket.AbortMultipartUpload(imur)
-		return errors.New(fmt.Sprintf("complete multipart upload err：%s", err.Error()))
+		return fmt.Errorf("complete multipart upload error: %s", err.Error())
 	}
 	return nil
 }

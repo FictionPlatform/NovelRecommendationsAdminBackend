@@ -162,10 +162,10 @@ var weakPasswords = map[string]bool{
 func validateDSNPassword(source string) error {
 	pw := extractDSNPassword(source)
 	if pw == "" {
-		return errors.New("database.source 未配置密码，禁止空密码连接数据库，请通过环境变量注入（如 password=${DB_PASSWORD}）")
+		return errors.New("database.source has no password; empty database password is prohibited, inject it via environment variable (e.g. password=${DB_PASSWORD})")
 	}
 	if len(pw) < 8 || weakPasswords[strings.ToLower(pw)] {
-		return fmt.Errorf("database.source 使用弱口令（长度<8位或常见弱口令），请配置强密码或通过环境变量注入（如 password=${DB_PASSWORD}）")
+		return fmt.Errorf("database.source uses a weak password (less than 8 chars or common weak password); configure a strong password or inject via environment variable (e.g. password=${DB_PASSWORD})")
 	}
 	return nil
 }

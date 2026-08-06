@@ -78,7 +78,7 @@ func (e *Api) Bind(d interface{}, bindings ...binding.Binding) *Api {
 func (e *Api) GetOrm() (*gorm.DB, error) {
 	db, err := ginutils.GetOrm(e.Context)
 	if err != nil {
-		e.Logger.Error(http.StatusInternalServerError, err, "数据库连接获取失败")
+		e.Logger.Error(http.StatusInternalServerError, err, "get database connection failed")
 		return nil, err
 	}
 	return db, nil
@@ -94,7 +94,7 @@ func (e *Api) MakeOrm() *Api {
 	}
 	db, err := ginutils.GetOrm(e.Context)
 	if err != nil {
-		e.Logger.Error(http.StatusInternalServerError, err, "数据库连接获取失败")
+		e.Logger.Error(http.StatusInternalServerError, err, "get database connection failed")
 		e.AddError(err)
 	}
 	e.Orm = db

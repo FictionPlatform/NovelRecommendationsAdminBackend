@@ -15,7 +15,10 @@ import (
 	"github.com/ulule/limiter/v3"
 	"github.com/ulule/limiter/v3/drivers/store/memory"
 	redisStore "github.com/ulule/limiter/v3/drivers/store/redis"
+	baseLang "go-admin/config/base/lang"
 	"go-admin/core/config"
+	"go-admin/core/dto/response"
+	"go-admin/core/lang"
 	"go-admin/core/utils/iputils"
 	"go-admin/core/utils/log"
 )
@@ -87,19 +90,15 @@ func RateLimiter() gin.HandlerFunc {
 		lctx, err := st.limiter.Get(ctx, iputils.GetClientIP(c))
 		if err != nil {
 			log.Errorf("limiter error: %v", err)
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"code": http.StatusInternalServerError,
-				"msg":  "限流服务异常",
-			})
+			response.ErrorByHttpCode(c, http.StatusInternalServerError, baseLang.RateLimitServerErrCode,
+				lang.MsgByCode(baseLang.RateLimitServerErrCode, lang.GetAcceptLanguage(c)))
 			return
 		}
 		if lctx.Reached {
 			// Retry-After 使用配置的实际周期（秒），与限流窗口保持一致
 			c.Header("Retry-After", strconv.FormatInt(int64(st.period.Seconds()), 10))
-			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
-				"code": http.StatusTooManyRequests,
-				"msg":  "请求过于频繁，请稍后再试",
-			})
+			response.ErrorByHttpCode(c, http.StatusTooManyRequests, baseLang.RateLimitErrCode,
+				lang.MsgByCode(baseLang.RateLimitErrCode, lang.GetAcceptLanguage(c)))
 			return
 		}
 		c.Next()
@@ -123,10 +122,8 @@ func IPBlacklist() gin.HandlerFunc {
 		for _, blackIP := range *list {
 			if blackIP.Contains(clientIP) {
 				log.Warnf("IP %s 命中黑名单，已拒绝访问 %s", ip, c.Request.URL.Path)
-				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-					"code": http.StatusForbidden,
-					"msg":  "禁止访问",
-				})
+				response.ErrorByHttpCode(c, http.StatusForbidden, baseLang.IpBlacklistCode,
+					lang.MsgByCode(baseLang.IpBlacklistCode, lang.GetAcceptLanguage(c)))
 				return
 			}
 		}

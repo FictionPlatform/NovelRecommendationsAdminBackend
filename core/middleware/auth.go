@@ -5,6 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go-admin/config/base/constant"
+	baseLang "go-admin/config/base/lang"
+	"go-admin/core/dto/response"
+	"go-admin/core/lang"
 	"go-admin/core/middleware/auth"
 	"go-admin/core/middleware/auth/authdto"
 )
@@ -21,10 +24,8 @@ func AuthCheckRole() gin.HandlerFunc {
 func AdminOnly() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetString(authdto.RoleKey) != constant.RoleKeyAdmin {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"code": http.StatusForbidden,
-				"msg":  "仅超级管理员可访问",
-			})
+			response.ErrorByHttpCode(c, http.StatusForbidden, baseLang.AdminOnlyErrCode,
+				lang.MsgByCode(baseLang.AdminOnlyErrCode, lang.GetAcceptLanguage(c)))
 			return
 		}
 		c.Next()

@@ -9,6 +9,8 @@ type NovelPostQueryReq struct {
 	TopicTag       string `form:"topicTag" search:"type:exact;column:topic_tag;table:app_novel_post" comment:"话题标签"`
 	Sort           string `form:"sort" search:"-" comment:"latest-最新 hot-热门"`
 	RefBookId      int64  `form:"refBookId" search:"type:exact;column:ref_book_id;table:app_novel_post" comment:"关联小说编号"`
+	Mine           int    `form:"mine" search:"-" comment:"1-只看我的帖子"`
+	IsCollected    int    `form:"isCollected" search:"-" comment:"1-只看我收藏的帖子"`
 	CurrUserId     int64  `form:"-" search:"-" comment:"当前登录用户"`
 }
 
@@ -49,11 +51,12 @@ type NovelPostCommentInsertReq struct {
 	CurrUserId       int64  `json:"-" comment:"当前登录用户"`
 }
 
-type NovelPostCommentGetReq struct {
-	Id int64 `uri:"id"`
-}
-
 type NovelPostCommentDeleteReq struct {
 	Id         int64 `uri:"id"`
 	CurrUserId int64 `json:"-" comment:"当前登录用户"`
+}
+
+type NovelCommentQueryReq struct {
+	dto.Pagination `search:"-"`
+	CurrUserId     int64 `form:"-" search:"-" comment:"当前登录用户（限本人评论）"`
 }

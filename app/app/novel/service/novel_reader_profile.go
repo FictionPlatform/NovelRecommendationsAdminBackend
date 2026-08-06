@@ -11,6 +11,7 @@ import (
 	"go-admin/core/config"
 	"go-admin/core/dto/service"
 	"go-admin/core/lang"
+	"go-admin/core/utils/dberr"
 	"go-admin/core/utils/encrypt"
 	"gorm.io/gorm"
 )
@@ -50,7 +51,18 @@ func (e *NovelReaderProfile) Get(userId int64) (*models.NovelReaderProfile, int,
 		data.UpdatedAt = &now
 		err = e.Orm.Create(data).Error
 		if err != nil {
-			return nil, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
+			// 并发下唯一索引兜底：重查已存在资料，幂等返回
+			if dberr.IsDuplicateKey(err) {
+				existing := &models.NovelReaderProfile{}
+				if qErr := e.Orm.Where("user_id = ?", userId).First(existing).Error; qErr == nil {
+					data = existing
+					err = nil
+				} else {
+					return nil, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
+				}
+			} else {
+				return nil, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
+			}
 		}
 	} else if err != nil {
 		return nil, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
@@ -85,20 +97,34 @@ func (e *NovelReaderProfile) Update(c *dto.NovelProfileUpdateReq) (bool, int, er
 
 	updates := map[string]interface{}{}
 	if c.Nickname != "" && data.Nickname != c.Nickname {
+		if len([]rune(c.Nickname)) > 64 {
+			return false, baseLang.NovelNicknameTooLongCode, lang.MsgErr(baseLang.NovelNicknameTooLongCode, e.Lang)
+		}
 		updates["nickname"] = c.Nickname
 	}
 	if c.Avatar != "" && data.Avatar != c.Avatar {
 		updates["avatar"] = c.Avatar
 	}
 	if c.Bio != "" && data.Bio != c.Bio {
+		if len([]rune(c.Bio)) > 500 {
+			return false, baseLang.NovelBioTooLongCode, lang.MsgErr(baseLang.NovelBioTooLongCode, e.Lang)
+		}
 		updates["bio"] = c.Bio
 	}
-	if c.Email != "" && data.EmailValue != c.Email {
-		email, err := encrypt.AesEncrypt(c.Email, []byte(config.AuthConfig.SecretAes))
-		if err != nil {
-			return false, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
+	if c.Email != data.EmailValue {
+		if len([]rune(c.Email)) > 128 {
+			return false, baseLang.NovelEmailTooLongCode, lang.MsgErr(baseLang.NovelEmailTooLongCode, e.Lang)
 		}
-		updates["email"] = email
+		if c.Email == "" {
+			// 支持清空邮箱
+			updates["email"] = ""
+		} else {
+			email, err := encrypt.AesEncrypt(c.Email, []byte(config.AuthConfig.SecretAes))
+			if err != nil {
+				return false, baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
+			}
+			updates["email"] = email
+		}
 	}
 	if c.PreferredCategories != nil {
 		categories, _ := json.Marshal(c.PreferredCategories)

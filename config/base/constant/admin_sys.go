@@ -2,8 +2,9 @@ package constant
 
 const (
 	//app下载方式
-	SysConfIsFrontend = "1"     //前台显示
-	RoleKeyAdmin      = "admin" //角色类型，超级管理员
+	SysConfIsFrontend = "1"      //前台显示
+	RoleKeyAdmin      = "admin"  //角色类型，超级管理员
+	RoleKeyReader     = "reader" //角色类型，读者（小说平台 app 端）
 
 	//角色状态
 	//RoleStatusStart = "1" //启用

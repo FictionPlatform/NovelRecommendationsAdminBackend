@@ -27,8 +27,8 @@ func registerBookRouter(v1 *gin.RouterGroup) {
 		reader.GET("/rank", api.Rank)
 		reader.GET("/:id", api.Get)
 	}
-	// 内容管理（登录+角色校验，按钮权限 novel:book:add/edit/del）
-	manager := v1.Group("/app/novel/book").Use(middleware.Auth()).Use(middleware.AuthCheckRole())
+	// 内容管理（仅需登录，所有注册读者可发布书籍）
+	manager := v1.Group("/app/novel/book").Use(middleware.Auth())
 	{
 		manager.POST("", api.Insert)
 		manager.PUT("/:id", api.Update)

@@ -2,9 +2,13 @@ package middleware
 
 import (
 	"errors"
+	"net/http"
+
 	"go-admin/config/base/constant"
+	baseLang "go-admin/config/base/lang"
 	"go-admin/core/config"
 	"go-admin/core/dto/response"
+	"go-admin/core/lang"
 	"go-admin/core/middleware/auth"
 	"go-admin/core/utils/ginutils"
 	"go-admin/core/utils/log"
@@ -40,7 +44,8 @@ func PermissionAction() gin.HandlerFunc {
 			p, err = newDataPermission(db, userId)
 			if err != nil {
 				log.Errorf("MsgID[%s] PermissionAction error: %s", msgID, err)
-				response.Error(c, 500, "PermissionAction error")
+				response.ErrorByHttpCode(c, http.StatusInternalServerError, baseLang.PermissionErrCode,
+					lang.MsgByCode(baseLang.PermissionErrCode, lang.GetAcceptLanguage(c)))
 				c.Abort()
 				return
 			}

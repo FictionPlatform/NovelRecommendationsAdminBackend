@@ -10,6 +10,7 @@ import (
 	cDto "go-admin/core/dto"
 	"go-admin/core/dto/service"
 	"go-admin/core/lang"
+	"go-admin/core/utils/dberr"
 	"gorm.io/gorm"
 )
 
@@ -69,6 +70,13 @@ func (e *NovelBookshelf) Insert(c *dto.NovelShelfInsertReq) (int64, int, error) 
 	data.CreatedAt = &now
 	err = e.Orm.Create(&data).Error
 	if err != nil {
+		// 并发下唯一索引兜底：转为幂等成功返回既有记录
+		if dberr.IsDuplicateKey(err) {
+			old := &models.NovelBookshelf{}
+			if qErr := e.Orm.Where("user_id = ? and book_id = ?", c.CurrUserId, c.BookId).First(old).Error; qErr == nil {
+				return old.Id, baseLang.NovelShelfAlreadyExistCode, lang.MsgErr(baseLang.NovelShelfAlreadyExistCode, e.Lang)
+			}
+		}
 		return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
 	}
 	return data.Id, baseLang.SuccessCode, nil

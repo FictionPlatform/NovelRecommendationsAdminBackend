@@ -19,10 +19,6 @@ type NovelShelfInsertReq struct {
 	CurrUserId int64 `json:"-" comment:"当前登录用户"`
 }
 
-type NovelShelfGetReq struct {
-	Id int64 `form:"id"`
-}
-
 type NovelShelfDeleteReq struct {
 	Id         int64 `uri:"id"`
 	CurrUserId int64 `form:"-" search:"-" comment:"当前登录用户"`

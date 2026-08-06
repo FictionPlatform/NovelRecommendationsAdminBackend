@@ -2,14 +2,16 @@ package ws
 
 import (
 	"context"
-	"go-admin/core/config"
-	"go-admin/core/utils/log"
 	"net/http"
 	"strings"
 	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	baseLang "go-admin/config/base/lang"
+	"go-admin/core/config"
+	"go-admin/core/lang"
+	"go-admin/core/utils/log"
 )
 
 // Manager 所有 websocket 信息
@@ -370,7 +372,7 @@ func (manager *Manager) UnWsClient(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,
 		"data": "ws close success",
-		"msg":  "success",
+		"msg":  lang.MsgByCode(baseLang.SuccessCode, lang.GetAcceptLanguage(c)),
 	})
 }
 

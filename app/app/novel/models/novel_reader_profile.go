@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type NovelReaderProfile struct {
 	Id                   int64      `json:"id" gorm:"primaryKey;autoIncrement;comment:主键编码"`
@@ -20,4 +24,20 @@ type NovelReaderProfile struct {
 
 func (NovelReaderProfile) TableName() string {
 	return "app_novel_reader_profile"
+}
+
+// BeforeCreate 空 JSON 列兜底：Postgres 的 JSON 类型不接受空字符串，插入前统一转为 []。
+func (e *NovelReaderProfile) BeforeCreate(_ *gorm.DB) error {
+	if e.PreferredCategories == "" {
+		e.PreferredCategories = "[]"
+	}
+	return nil
+}
+
+// BeforeUpdate 同上，避免 map update 误写空字符串
+func (e *NovelReaderProfile) BeforeUpdate(_ *gorm.DB) error {
+	if e.PreferredCategories == "" {
+		e.PreferredCategories = "[]"
+	}
+	return nil
 }

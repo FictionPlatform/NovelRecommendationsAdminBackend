@@ -18,7 +18,8 @@ type NovelPostComment struct {
 	CreatedAt        *time.Time `json:"createdAt" gorm:"column:created_at;type:datetime;comment:创建时间"`
 
 	// 扩展
-	Replies []NovelPostComment `json:"replies,omitempty" gorm:"-"`
+	Replies   []NovelPostComment `json:"replies,omitempty" gorm:"-"`
+	PostTitle string             `json:"postTitle" gorm:"-"`
 }
 
 func (NovelPostComment) TableName() string {
