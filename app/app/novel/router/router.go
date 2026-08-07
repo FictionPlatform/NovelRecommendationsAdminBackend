@@ -1,6 +1,7 @@
 package router
 
 import (
+	"go-admin/core/global"
 	"go-admin/core/runtime"
 
 	"github.com/gin-gonic/gin"
@@ -32,6 +33,8 @@ func InitRouter() {
 	noCheckRoleRouter(r)
 	// 需登录（读者操作/内容管理）
 	checkRoleRouter(r)
+	// 后台管理（/admin-api 前缀，公告与反馈管理）
+	adminCheckRoleRouter(r)
 }
 
 // noCheckRoleRouter 无需登录路由
@@ -46,6 +49,14 @@ func noCheckRoleRouter(r *gin.Engine) {
 func checkRoleRouter(r *gin.Engine) {
 	v1 := r.Group(NovelRouteRootPath + "/v1")
 	for _, f := range routerCheckRole {
+		f(v1)
+	}
+}
+
+// adminCheckRoleRouter 后台管理路由（管理后台 /admin-api 前缀，需登录 + 角色校验）
+func adminCheckRoleRouter(r *gin.Engine) {
+	v1 := r.Group(global.RouteRootPath + "/v1")
+	for _, f := range adminRouterCheckRole {
 		f(v1)
 	}
 }

@@ -18,6 +18,8 @@ type NovelReaderProfile struct {
 	PreferredCategoriesL []string   `json:"preferredCategories" gorm:"-"`
 	NotifyComment        int        `json:"notifyComment" gorm:"column:notify_comment;type:tinyint;comment:评论消息通知"`
 	NotifyBookUpdate     int        `json:"notifyBookUpdate" gorm:"column:notify_book_update;type:tinyint;comment:书籍更新通知"`
+	BanPostUntil         *time.Time `json:"banPostUntil" gorm:"column:ban_post_until;type:datetime;comment:禁止发帖截止时间(空=未禁言)"`
+	BanReason            string     `json:"banReason" gorm:"column:ban_reason;type:varchar(255);comment:禁言原因"`
 	CreatedAt            *time.Time `json:"createdAt" gorm:"column:created_at;type:datetime;comment:创建时间"`
 	UpdatedAt            *time.Time `json:"updatedAt" gorm:"column:updated_at;type:datetime;comment:更新时间"`
 }

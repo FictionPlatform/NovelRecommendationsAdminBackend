@@ -21,7 +21,7 @@ type Follow struct {
 // @Tags 书友关注
 // @Accept json
 // @Produce json
-// @Param body body dto.NovelFollowInsertReq "请求参数"
+// @Param body body dto.NovelFollowInsertReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"

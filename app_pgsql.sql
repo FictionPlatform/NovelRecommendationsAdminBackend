@@ -1167,6 +1167,21 @@ INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element",
 INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (132, '表管理删�?, 'AppstoreOutlined', '', '', '', 'admin:sys-gen:del', 7, 48, '0,1,54,48,', '3', ' ', ' ', ' ', ' ', 1, 1, '2024-12-14 03:44:46', '2024-12-23 22:07:21');
 INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (133, '新增表管�?, 'AppstoreOutlined', '', '', '', 'admin:sys-gen:import-table', 1, 48, '0,1,54,48,', '3', ' ', ' ', ' ', ' ', 1, 1, '2024-12-14 14:50:46', '2024-12-23 22:07:21');
 INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (134, '导出岗位管理', 'AppstoreOutlined', '', '', '', 'admin:sys-post:export', 0, 10, '0,1,10,', '3', ' ', ' ', ' ', ' ', 1, 1, '2024-12-15 22:23:26', '2024-12-15 22:23:26');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (135, '小说平台', 'ReadOutlined', '/app/novel', '', '/app/novel/novel-user', '', 50, 58, '0,58,', '1', ' ', ' ', '2', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (136, '读者管理', 'TeamOutlined', '/app/novel/novel-user', '/app/novel/novel-user/index', '', '', 10, 135, '0,58,135,', '2', '1', '2', '2', '1', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (137, '读者分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-user:query', 0, 136, '0,58,135,136,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (138, '启用/禁用读者', 'AppstoreOutlined', '', '', '', 'app:novel-user:status', 0, 136, '0,58,135,136,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (139, '禁止读者发帖', 'AppstoreOutlined', '', '', '', 'app:novel-user:ban-post', 0, 136, '0,58,135,136,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (140, '帖子管理', 'FileTextOutlined', '/app/novel/novel-post', '/app/novel/novel-post/index', '', '', 20, 135, '0,58,135,', '2', '1', '2', '2', '1', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (141, '帖子分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-post:query', 0, 140, '0,58,135,140,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (142, '帖子状态管理', 'AppstoreOutlined', '', '', '', 'app:novel-post:status', 0, 140, '0,58,135,140,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (143, '反馈/投诉管理', 'MessageOutlined', '/app/novel/novel-feedback', '/app/novel/novel-feedback/index', '', '', 30, 135, '0,58,135,', '2', '1', '2', '2', '1', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (144, '反馈分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-feedback:query', 0, 143, '0,58,135,143,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (145, '删除反馈/投诉', 'AppstoreOutlined', '', '', '', 'app:novel-feedback:del', 0, 143, '0,58,135,143,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (146, '公告管理', 'NotificationOutlined', '/app/novel/novel-notice', '/app/novel/novel-notice/index', '', '', 40, 135, '0,58,135,', '2', '1', '2', '2', '1', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (147, '公告分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-notice:query', 0, 146, '0,58,135,146,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (148, '发布公告', 'AppstoreOutlined', '', '', '', 'app:novel-notice:add', 0, 146, '0,58,135,146,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (149, '删除公告', 'AppstoreOutlined', '', '', '', 'app:novel-notice:del', 0, 146, '0,58,135,146,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
 COMMIT;
 
 -- ----------------------------
@@ -2321,12 +2336,18 @@ CREATE TABLE "public"."app_novel_reader_profile" (
   "preferred_categories" JSON,
   "notify_comment" SMALLINT NOT NULL DEFAULT 1,
   "notify_book_update" SMALLINT NOT NULL DEFAULT 1,
+  "ban_post_until" timestamptz(0),
+  "ban_reason" varchar(255) NOT NULL DEFAULT '',
   "created_at" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE ("user_id")
 );
 ALTER TABLE "public"."app_novel_reader_profile" OWNER TO "postgres";
 COMMENT ON TABLE "public"."app_novel_reader_profile" IS '读者扩展资料';
+
+-- 已有库迁移：读者禁言字段（2026-08-07 新增）
+ALTER TABLE "public"."app_novel_reader_profile" ADD COLUMN IF NOT EXISTS "ban_post_until" timestamptz(0);
+ALTER TABLE "public"."app_novel_reader_profile" ADD COLUMN IF NOT EXISTS "ban_reason" varchar(255) NOT NULL DEFAULT '';
 
 -- ----------------------------
 -- Table structure for app_novel_follow 书友关注关系
@@ -2341,6 +2362,59 @@ CREATE TABLE "public"."app_novel_follow" (
 );
 ALTER TABLE "public"."app_novel_follow" OWNER TO "postgres";
 COMMENT ON TABLE "public"."app_novel_follow" IS '书友关注关系';
+
+-- ----------------------------
+-- Table structure for app_novel_feedback 意见反馈/投诉
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."app_novel_feedback";
+CREATE TABLE "public"."app_novel_feedback" (
+  "id" BIGINT PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+  "user_id" BIGINT NOT NULL,
+  "user_name" varchar(64) NOT NULL DEFAULT '',
+  "type" CHAR(1) NOT NULL,
+  "kind" CHAR(16) NOT NULL DEFAULT 'feedback',
+  "content" TEXT NOT NULL,
+  "status" CHAR(1) NOT NULL DEFAULT '1',
+  "created_at" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE "public"."app_novel_feedback" OWNER TO "postgres";
+COMMENT ON TABLE "public"."app_novel_feedback" IS '意见反馈/投诉';
+CREATE INDEX "idx_feedback_user" ON "public"."app_novel_feedback" USING btree ("user_id");
+CREATE INDEX "idx_feedback_kind" ON "public"."app_novel_feedback" USING btree ("kind");
+
+-- ----------------------------
+-- Table structure for app_novel_notification 用户系统通知
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."app_novel_notification";
+CREATE TABLE "public"."app_novel_notification" (
+  "id" BIGINT PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+  "user_id" BIGINT NOT NULL,
+  "title" varchar(100) NOT NULL,
+  "content" TEXT NOT NULL,
+  "is_read" CHAR(1) NOT NULL DEFAULT '0',
+  "source" CHAR(16) NOT NULL DEFAULT 'system',
+  "notice_id" BIGINT,
+  "created_at" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE "public"."app_novel_notification" OWNER TO "postgres";
+COMMENT ON TABLE "public"."app_novel_notification" IS '用户系统通知';
+CREATE INDEX "idx_notification_user" ON "public"."app_novel_notification" USING btree ("user_id");
+CREATE INDEX "idx_notification_source" ON "public"."app_novel_notification" USING btree ("source", "notice_id");
+
+-- ----------------------------
+-- Table structure for app_novel_notice 后台系统公告
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."app_novel_notice";
+CREATE TABLE "public"."app_novel_notice" (
+  "id" BIGINT PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+  "title" varchar(100) NOT NULL,
+  "content" TEXT NOT NULL,
+  "create_by" BIGINT NOT NULL DEFAULT 0,
+  "created_at" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE "public"."app_novel_notice" OWNER TO "postgres";
+COMMENT ON TABLE "public"."app_novel_notice" IS '后台系统公告';
 
 -- ----------------------------
 -- Records of app_novel 字典（admin_sys_dict_type + admin_sys_dict_data）
@@ -2762,9 +2836,27 @@ INSERT INTO "public"."app_novel_follow" ("user_id", "follow_user_id") VALUES
 (6, 7);
 COMMIT;
 
+-- ----------------------------
+-- 11. 系统通知种子（app_novel_notification，id 4~7 读者各 3 条）
+-- ----------------------------
+BEGIN;
+INSERT INTO "public"."app_novel_notification" ("user_id", "title", "content", "is_read", "source", "created_at") VALUES
+(4, '欢迎来到墨读', '欢迎加入墨读·小说引力场！在这里你可以浏览书库、点评书籍、发布长文、结识书友。祝你阅读愉快！', '0', 'system', '2026-08-06 10:00:00'),
+(4, '新功能上线', '书友关注、书架收藏、楼中楼评论现已上线。快去书库发现你的下一本心头好吧！', '0', 'system', '2026-08-06 10:00:01'),
+(4, '社区规范', '请文明发言，尊重每一位书友。抄袭、辱骂、广告等违规内容将被处理，共建友好阅读社区。', '1', 'system', '2026-08-06 10:00:02'),
+(5, '欢迎来到墨读', '欢迎加入墨读·小说引力场！在这里你可以浏览书库、点评书籍、发布长文、结识书友。祝你阅读愉快！', '0', 'system', '2026-08-06 10:00:00'),
+(5, '新功能上线', '书友关注、书架收藏、楼中楼评论现已上线。快去书库发现你的下一本心头好吧！', '0', 'system', '2026-08-06 10:00:01'),
+(5, '社区规范', '请文明发言，尊重每一位书友。抄袭、辱骂、广告等违规内容将被处理，共建友好阅读社区。', '1', 'system', '2026-08-06 10:00:02'),
+(6, '欢迎来到墨读', '欢迎加入墨读·小说引力场！在这里你可以浏览书库、点评书籍、发布长文、结识书友。祝你阅读愉快！', '0', 'system', '2026-08-06 10:00:00'),
+(6, '新功能上线', '书友关注、书架收藏、楼中楼评论现已上线。快去书库发现你的下一本心头好吧！', '0', 'system', '2026-08-06 10:00:01'),
+(6, '社区规范', '请文明发言，尊重每一位书友。抄袭、辱骂、广告等违规内容将被处理，共建友好阅读社区。', '1', 'system', '2026-08-06 10:00:02'),
+(7, '欢迎来到墨读', '欢迎加入墨读·小说引力场！在这里你可以浏览书库、点评书籍、发布长文、结识书友。祝你阅读愉快！', '0', 'system', '2026-08-06 10:00:00'),
+(7, '新功能上线', '书友关注、书架收藏、楼中楼评论现已上线。快去书库发现你的下一本心头好吧！', '0', 'system', '2026-08-06 10:00:01'),
+(7, '社区规范', '请文明发言，尊重每一位书友。抄袭、辱骂、广告等违规内容将被处理，共建友好阅读社区。', '1', 'system', '2026-08-06 10:00:02');
+COMMIT;
 
 -- ----------------------------
--- 11. 重置自增序列
+-- 12. 重置自增序列
 -- ----------------------------
 SELECT setval(pg_get_serial_sequence('public.app_user', 'id'),(SELECT COALESCE(MAX(id), 0) + 1 FROM public.app_user),false);
 SELECT setval(pg_get_serial_sequence('public.app_novel_reader_profile', 'id'),(SELECT COALESCE(MAX(id), 0) + 1 FROM public.app_novel_reader_profile),false);
@@ -2776,3 +2868,4 @@ SELECT setval(pg_get_serial_sequence('public.app_novel_post_like', 'id'),(SELECT
 SELECT setval(pg_get_serial_sequence('public.app_novel_post_collect', 'id'),(SELECT COALESCE(MAX(id), 0) + 1 FROM public.app_novel_post_collect),false);
 SELECT setval(pg_get_serial_sequence('public.app_novel_bookshelf', 'id'),(SELECT COALESCE(MAX(id), 0) + 1 FROM public.app_novel_bookshelf),false);
 SELECT setval(pg_get_serial_sequence('public.app_novel_follow', 'id'),(SELECT COALESCE(MAX(id), 0) + 1 FROM public.app_novel_follow),false);
+SELECT setval(pg_get_serial_sequence('public.app_novel_notification', 'id'),(SELECT COALESCE(MAX(id), 0) + 1 FROM public.app_novel_notification),false);

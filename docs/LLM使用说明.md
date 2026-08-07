@@ -48,7 +48,7 @@ go build -a -o go-admin-api main.go
 go test ./...
 ```
 
-**重要**：`go generate`（触发 `app/admin/sys/models/parseapi/gen_api_desc.go`，扫描各 `apis/` 目录的注释生成接口常量映射）在每次**打包前和运行前**都必须执行，否则新增接口无法在后台「接口数据同步」中被录入。
+**重要**：`go generate`（触发 `app/admin/sys/models/parseapi/gen_api_desc.go`，扫描各 `apis/` 目录的注释生成接口常量映射；并重生成两份 swagger spec——`docs/` 管理后台全量 + `docs/webapi/` 读者侧独立 spec，入口 `gen/webapidoc/main.go`）在每次**打包前和运行前**都必须执行，否则新增接口无法在后台「接口数据同步」中被录入、接口文档缺失。
 
 ## 4. 目录结构（后端）
 
@@ -62,9 +62,14 @@ adminserver/
 │   │   ├── apis/                #   Gin 处理器（薄层）
 │   │   ├── router/              #   路由注册（init() 自动挂载）
 │   │   └── service/             #   业务逻辑 + service/dto/ 请求体
-│   ├── app/                     # 个性化业务层（表前缀 app_*），目前仅 user 子业务
+│   ├── app/                     # 个性化业务层（表前缀 app_*），含 user 与 novel 子业务
 │   │   ├── common/dto/join.go   #   跨表联查 DTO
-│   │   └── user/                #   用户、等级、账变、区号、配置、操作日志
+│   │   ├── user/                #   用户、等级、账变、区号、配置、操作日志
+│   │   └── novel/               #   小说推荐平台（读者端 /web-api/v1/app/novel/** + 后台 /admin-api/v1/app/novel/**）
+│   │       ├── apis/            #     Gin 处理器（薄层）；admin/ 子包为后台管理 handler（公告/反馈管理）
+│   │       ├── router/          #     路由注册（routerNoCheckRole / routerCheckRole / adminRouterCheckRole）
+│   │       ├── service/         #     业务逻辑 + service/dto/ 请求体
+│   │       └── models/          #     GORM 模型（表前缀 app_novel_*）
 │   └── plugins/                 # 插件层（表前缀 plugins_*）
 │       ├── content/             #   CMS：文章/分类/公告
 │       ├── filemgr/             #   App 安装包管理（含 OSS 上传）
@@ -81,6 +86,7 @@ adminserver/
 │   ├── utils/                   #   工具包（encrypt/excel/oss/cache/queue/tree/...）
 │   ├── global/                  #   常量（RouteRootPath 等）
 │   └── ws/                      #   WebSocket 管理器
+├── gen/webapidoc/main.go        # 读者端独立 swagger spec 扫描入口（go generate 用，见 main.go 指令）
 ├── config/
 │   ├── settings.yml             # ★ 运行配置
 │   ├── base/constant/           #   业务常量 + 代码生成模板名映射
@@ -154,6 +160,7 @@ app/<app|admin|plugins>/<业务名>/
 3. **按钮权限命名**：`业务名:包名:作用`，如 `app:user_level:add` / `del` / `edit` / `query`，需与前端页面 `permission` 属性一致
 4. **菜单路由路径**：必须满足「目录/菜单」层级逻辑
 5. 新业务模块接入：把生成的 `router.go.bk` 去掉 `.bk`，然后在 `app/init.go` 对应层 `init.go` 中 `append` 该模块的 `InitRouter`
+6. **swagger 双 spec 归属**（novel 等对外模块）：读者端接口放 `apis/` 包并用读者侧 `@Tags`（读者认证/读者资料/书友关注/我的读者资料/我的书架/系统通知/小说书库/小说书评/小说长文/意见反馈）→ 进 `docs/webapi/` 独立 spec；后台管理接口放 `apis/admin/` 子包（任意 `@Tags`）→ 只进 `docs/` 主 spec。`@Router` 均写 `/app/novel/*`，勿带前缀。
 
 ### 7.4 DTO 搜索标签（核心能力）
 `core/dto/search` 通过反射解析 `search:"type:...;column:...;table:...;on:...;join:..."` 标签自动生成查询条件。支持类型：`exact/iexact、contains/icontains、gt/gte/lt/lte、startswith/endswith、in、isnull、order`，以及 `left/inner` 联表（`on:a:b`）。零值字段自动跳过。分页上限 100（导出可经 `PageSizeLimit` 提升，硬上限 10000）。
@@ -241,14 +248,16 @@ app/<app|admin|plugins>/<业务名>/
 | 业务常量 | `config/base/constant/*.go` |
 | 数据库脚本 | `app_mysql.sql` / `app_pgsql.sql` |
 | 已知问题 | `docs/code-review-report.md` |
-| 接口文档 | `docs/swagger.yaml`（dev 模式可访问 `/swagger/index.html`） |
+| 接口文档 | 管理后台：`docs/swagger.yaml`（dev 访问 `/swagger/index.html`）；读者侧（小说平台）：`docs/webapi/`（dev 访问 `/webapi/swagger/index.html`，入口 `gen/webapidoc/main.go`，`go generate` 生成两份 spec） |
 
-## 14. 现有业务模块清单（路由前缀均为 /admin-api/v1）
+## 14. 现有业务模块清单（admin 前缀 /admin-api/v1；对外业务前缀 /web-api/v1）
 
 | 模块 | 前缀 | 说明 |
 |---|---|---|
 | 系统管理 | `/admin/sys/sys-{user,role,post,dept,menu,dict,config,api,oper-log,login-log,monitor,table}` | 基础 RBAC + 日志 + 监控 + 代码生成 |
 | app 用户 | `/app/user/{user,user-level,user-conf,user-account-log,user-country-code,user-oper-log}` | 业务用户（AES 加密手机号/邮箱、邀请树）、等级、账变、区号 |
+| 小说平台（读者端） | `/web-api/v1/app/novel/**` | 小说书库/书评/长文/书架/关注/反馈/系统通知/读者认证，见 `docs/小说推荐平台需求文档.md` |
+| 小说平台（后台） | `/admin-api/v1/app/novel/{notice,feedback}` | 后台公告发布/分页/删除 + 反馈/投诉管理（handler 在 `app/app/novel/apis/admin`） |
 | CMS | `/plugins/content/content-{article,category,announcement}` | 文章/分类/公告 |
 | 安装包 | `/plugins/filemgr/filemgr-app` | App 包管理（本地/外链/阿里云 OSS） |
 | 消息 | `/plugins/msg/msg-code` | 验证码发送记录（只读） |

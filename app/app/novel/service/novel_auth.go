@@ -86,5 +86,7 @@ func (e *NovelAuth) Register(req *dto.NovelAuthRegisterReq) (*userModels.User, i
 		_ = e.Orm.Delete(&userModels.User{}, user.Id)
 		return nil, baseLang.NovelRegisterFailCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.NovelRegisterFailCode, baseLang.DataInsertLogCode, err)
 	}
+	// 播种 3 条种子系统公告（欢迎/新功能/社区规范）
+	NewNovelNotificationService(&e.Service).Seed(user.Id)
 	return user, baseLang.SuccessCode, nil
 }

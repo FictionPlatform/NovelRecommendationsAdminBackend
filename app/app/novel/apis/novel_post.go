@@ -87,7 +87,7 @@ func (e Post) Get(c *gin.Context) {
 // @Tags 小说长文
 // @Accept json
 // @Produce json
-// @Param body body dto.NovelPostInsertReq "请求参数"
+// @Param body body dto.NovelPostInsertReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
@@ -124,7 +124,7 @@ func (e Post) Insert(c *gin.Context) {
 // @Tags 小说长文
 // @Accept json
 // @Produce json
-// @Param body body dto.NovelPostDeleteReq "请求参数"
+// @Param body body dto.NovelPostDeleteReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
@@ -161,7 +161,7 @@ func (e Post) Delete(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "帖子编号"
-// @Param body body dto.NovelPostInteractReq "请求参数"
+// @Param body body dto.NovelPostInteractReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
@@ -199,7 +199,7 @@ func (e Post) Interact(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "帖子编号"
-// @Param body body dto.NovelPostCommentInsertReq "请求参数"
+// @Param body body dto.NovelPostCommentInsertReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"

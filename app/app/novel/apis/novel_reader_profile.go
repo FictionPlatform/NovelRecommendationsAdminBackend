@@ -51,7 +51,7 @@ func (e ReaderProfile) Get(c *gin.Context) {
 // @Tags 我的读者资料
 // @Accept json
 // @Produce json
-// @Param body body dto.NovelProfileUpdateReq "请求参数"
+// @Param body body dto.NovelProfileUpdateReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"

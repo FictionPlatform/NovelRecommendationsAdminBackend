@@ -99,7 +99,7 @@ func (e Book) Get(c *gin.Context) {
 // @Tags 小说书库
 // @Accept json
 // @Produce json
-// @Param body body dto.NovelBookInsertReq "请求参数"
+// @Param body body dto.NovelBookInsertReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
@@ -136,8 +136,8 @@ func (e Book) Insert(c *gin.Context) {
 // @Tags 小说书库
 // @Accept json
 // @Produce json
-// @Param id path int "书籍编号"
-// @Param body body dto.NovelBookUpdateReq "请求参数"
+// @Param id path int true "书籍编号"
+// @Param body body dto.NovelBookUpdateReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
@@ -178,7 +178,7 @@ func (e Book) Update(c *gin.Context) {
 // @Tags 小说书库
 // @Accept json
 // @Produce json
-// @Param body body dto.NovelBookDeleteReq "请求参数"
+// @Param body body dto.NovelBookDeleteReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
@@ -209,7 +209,7 @@ func (e Book) Delete(c *gin.Context) {
 // @Tags 小说书库
 // @Accept json
 // @Produce json
-// @Param type query string "rating|click"
+// @Param type query string false "rating|click"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"

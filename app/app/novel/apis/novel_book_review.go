@@ -56,7 +56,7 @@ func (e BookReview) GetPage(c *gin.Context) {
 // @Tags 小说书评
 // @Accept json
 // @Produce json
-// @Param body body dto.NovelReviewInsertReq "请求参数"
+// @Param body body dto.NovelReviewInsertReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
@@ -93,7 +93,7 @@ func (e BookReview) Insert(c *gin.Context) {
 // @Tags 小说书评
 // @Accept json
 // @Produce json
-// @Param body body dto.NovelReviewDeleteReq "请求参数"
+// @Param body body dto.NovelReviewDeleteReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"

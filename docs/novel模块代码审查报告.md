@@ -71,7 +71,7 @@
 1. **删书评不回回溯书籍聚合**：`rating/review_count` 在删除书评后保持旧值。此为需求 §2.3 `handleDeleteUserReview`"不回溯聚合"的明确约定，属设计行为；但会导致评分与书评数失真，生产期可评估是否纳入"后台校正任务"。
 2. **物理删除 vs 软删除**：帖子/书评/互动采用物理删除（需求 §2.4-6 允许软删除选项）。若需审计还原，可迁移至 `status=2` 软删除。
 3. **Token 体系**：读者与 admin 共用同一套 JWT 签发（`app_user` 登录沿用 admin jwt-secret）。需求 §8 建议读者独立签发避免泄漏，当前 admin 侧均有 `AuthCheckRole`+Casbin 兜底（无角色 claim 的读者 token 无法访问 admin 业务接口），风险可控但建议评估独立 JWT。
-4. **swagger 文档**：`@Router` 均用 `/app/novel/*` 且 `@BasePath` 为 `/admin-api/v1`，new 接口会落在管理后台 spec 下；需求 §8 预留「独立 web 平台 swag 注解组或第二份 spec」，尚未落地。
+4. **swagger 文档（已修复）**：原 `@Router` 均用 `/app/novel/*` 且 `@BasePath` 为 `/admin-api/v1`，new 接口落在管理后台 spec 下。现按需求 §8 落地「第二份独立 spec」：`gen/webapidoc/main.go` 作为扫描入口（`swag init -g main.go -d ./gen/webapidoc,./ -t <读者侧tags> -o docs/webapi --instanceName webapi`），`@BasePath /web-api/v1`，仅含读者侧接口；`core/cmd/api/server.go` dev 模式注册 `/webapi/swagger/doc.json`（`swag.ReadDoc("webapi")`）+ `/webapi/swagger/*any`。后台管理接口（公告/反馈管理）移至 `apis/admin` 包，只进主 spec（`/swagger/index.html`）。
 5. **接口同步（已复核，非缺陷）**：`go generate` 生成的 `ApiDescMap` 已收录全部 novel handler（`go-admin.Book.GetPage-fm` 等）；`SaveSysApi`（`app/admin/sys/models/sys_api.go`）在服务启动时遍历 **gin 全部路由**（`core/runtime` 的 `GetRouter`），`/web-api/v1/app/novel/**` 会以 `apiType=app` 落入 `admin_sys_api`，无需手工 SQL。遗留仅为运行期操作：在后台「角色管理」给非 admin 角色绑定这些 app 接口（生成 casbin `p` 策略）后即可授权访问。
 
 ---
@@ -93,5 +93,20 @@
 
 1. ✅ 已修复 1-1~1-4（补 `cDto.Paginate` + `GetHome` 限 5 条）；建议补一条针对列表分页的单元测试（`pageSize/pageIndex` 生效断言）。
 2. ✅ 已补 2-2 帖子存在性校验（事务内 `FOR UPDATE` 锁定）。
-3. 联调验证：在 admin 后台给「编辑/读者」角色绑 `/web-api/v1/app/novel/**` 的 `sys_api` 数据（启动后已自动收录），确认 Casbin 通过。
+3. ✅ 联调验证：在 admin 后台给「编辑/读者」角色绑 `/web-api/v1/app/novel/**` 的 `sys_api` 数据（启动后已自动收录），确认 Casbin 通过（2026-08-07 复核：`go generate` 已收录新 handler `Feedback`/`Notification`/`Notice`/`FeedbackAdmin` 描述键）。
 4. ✅ 已逐项处理 3-1~3-8 并清理死代码；`go build ./...`、`go vet ./app/app/novel/...` 通过。
+
+---
+
+## 五、2026-08-07 补充变更（免登录 + 反馈/通知/公告 + 双 swagger spec）
+
+| 项 | 变更 |
+|---|---|
+| 免登录读接口 | `GET /app/novel/post/page`、`GET /app/novel/post/:id`、`GET /app/novel/book-review/page` 由「需登录」改为公开（`routerNoCheckRole`）；读 handler 内 `uid, _, _ := auth.GetUserId(c)` 匿名降级 |
+| 意见反馈/投诉 | 新表 `app_novel_feedback`，`POST /app/novel/feedback`（kind=feedback/complaint，type A~H）+ `GET /app/novel/feedback/page`；错误码 41036~41038 |
+| 系统通知 | 新表 `app_novel_notification`（user_id 索引 + source+notice_id 复合索引），`GET /notification/page`、`GET /notification/unread-count`、`POST /notification/read`；注册时播种 3 条种子通知；错误码 41039~41041 |
+| 后台公告广播 | 新表 `app_novel_notice`，`POST/GET/DELETE /admin-api/v1/app/novel/notice`（发布/分页/删除，事务广播每批 500 条，级联删读者通知）；错误码 41042 |
+| 后台反馈管理 | `GET/DELETE /admin-api/v1/app/novel/feedback` |
+| 包结构调整 | 后台 handler（`Notice`/`FeedbackAdmin`）移入 `apis/admin` 子包，路由挂 `adminRouterCheckRole`（`Auth+AuthCheckRole`） |
+| 双 swagger spec | 读者侧独立 spec（`docs/webapi/`，`@BasePath /web-api/v1`）+ 管理后台主 spec；生成入口 `gen/webapidoc/main.go`（`swag init -d ./gen/webapidoc,./ -t <读者tags>`）；dev 模式 `/webapi/swagger/index.html` |
+| 验证 | `go build ./...`、`go vet`、`gofmt`、`go generate ./...` 全通过；webapi spec 27 条纯读者路径、主 spec 28 条 novel 路径（含后台管理接口） |

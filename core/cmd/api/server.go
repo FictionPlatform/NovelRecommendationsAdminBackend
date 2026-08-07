@@ -36,8 +36,10 @@ import (
 	"github.com/spf13/cobra"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/swag"
 
 	_ "go-admin/docs"
+	_ "go-admin/docs/webapi"
 )
 
 var (
@@ -201,6 +203,18 @@ func initRouter() {
 	// swagger 文档仅开发模式（settings.yml mode: dev）开放，避免生产暴露接口文档
 	if config.ApplicationConfig.Mode == global.ModeDev {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+		// 墨读·小说引力场 读者端独立 spec（docs/webapi，instanceName=webapi，@BasePath /web-api/v1）
+		r.GET("/webapi/swagger/doc.json", func(c *gin.Context) {
+			doc, err := swag.ReadDoc("webapi")
+			if err != nil {
+				c.String(500, err.Error())
+				return
+			}
+			c.Writer.WriteString(doc)
+		})
+		r.GET("/webapi/swagger/*any", ginSwagger.CustomWrapHandler(&ginSwagger.Config{
+			URL: "doc.json",
+		}, swaggerFiles.Handler))
 	}
 
 	middleware.InitMiddleware(r)

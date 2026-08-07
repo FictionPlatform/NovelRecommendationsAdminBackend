@@ -11,14 +11,13 @@ import (
 	"go-admin/core/middleware/auth"
 )
 
-type BookShelf struct {
+type Notification struct {
 	api.Api
 }
 
-// GetPage app-分页查询我的书架
-// @Summary 分页查询我的书架
-// @Description 当前登录用户书架
-// @Tags 我的书架
+// GetPage app-分页查询我的系统通知
+// @Summary 分页查询我的系统通知
+// @Tags 系统通知
 // @Accept json
 // @Produce json
 // @Param pageIndex query int false "页码"
@@ -26,10 +25,10 @@ type BookShelf struct {
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
-// @Router /app/novel/bookshelf [get]
-func (e BookShelf) GetPage(c *gin.Context) {
-	req := dto.NovelShelfQueryReq{}
-	s := service.NovelBookshelf{}
+// @Router /app/novel/notification/page [get]
+func (e Notification) GetPage(c *gin.Context) {
+	req := dto.NovelNotificationQueryReq{}
+	s := service.NovelNotification{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -53,23 +52,19 @@ func (e BookShelf) GetPage(c *gin.Context) {
 	e.PageOK(list, nil, count, req.GetPageIndex(), req.GetPageSize(), lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
-// Insert app-加入书架
-// @Summary 加入书架
-// @Description 重复加入幂等返回
-// @Tags 我的书架
+// UnreadCount app-查询我的未读通知数
+// @Summary 查询我的未读通知数
+// @Tags 系统通知
 // @Accept json
 // @Produce json
-// @Param body body dto.NovelShelfInsertReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
-// @Router /app/novel/bookshelf [post]
-func (e BookShelf) Insert(c *gin.Context) {
-	req := dto.NovelShelfInsertReq{}
-	s := service.NovelBookshelf{}
+// @Router /app/novel/notification/unread-count [get]
+func (e Notification) UnreadCount(c *gin.Context) {
+	s := service.NovelNotification{}
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
@@ -81,29 +76,28 @@ func (e BookShelf) Insert(c *gin.Context) {
 		e.Error(rCode, err.Error())
 		return
 	}
-	req.CurrUserId = uid
-	id, respCode, err := s.Insert(&req)
+	count, respCode, err := s.UnreadCount(uid)
 	if err != nil {
 		e.Error(respCode, err.Error())
 		return
 	}
-	e.OK(id, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
+	e.OK(count, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
-// Delete app-移除书架
-// @Summary 移除书架
-// @Description 仅本人可移除
-// @Tags 我的书架
+// Read app-标记通知已读
+// @Summary 标记通知已读
+// @Description 传 ids 标记指定通知，ids 为空则全部标为已读
+// @Tags 系统通知
 // @Accept json
 // @Produce json
-// @Param id path int true "书架记录编号"
+// @Param body body dto.NovelNotificationReadReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
-// @Router /app/novel/bookshelf/{id} [delete]
-func (e BookShelf) Delete(c *gin.Context) {
-	req := dto.NovelShelfDeleteReq{}
-	s := service.NovelBookshelf{}
+// @Router /app/novel/notification/read [post]
+func (e Notification) Read(c *gin.Context) {
+	req := dto.NovelNotificationReadReq{}
+	s := service.NovelNotification{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -119,7 +113,7 @@ func (e BookShelf) Delete(c *gin.Context) {
 		return
 	}
 	req.CurrUserId = uid
-	respCode, err := s.Delete(&req)
+	respCode, err := s.Read(&req)
 	if err != nil {
 		e.Error(respCode, err.Error())
 		return

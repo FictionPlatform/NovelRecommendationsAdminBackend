@@ -131,6 +131,240 @@ definitions:
         default: RHbvb4rDODsX2Ak869kz
         type: string
     type: object
+  dto.NovelAuthLoginReq:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dto.NovelAuthRegisterReq:
+    properties:
+      avatar:
+        type: string
+      password:
+        maxLength: 64
+        minLength: 6
+        type: string
+      username:
+        maxLength: 64
+        minLength: 2
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dto.NovelBanPostReq:
+    properties:
+      banUntil:
+        type: string
+      reason:
+        type: string
+    type: object
+  dto.NovelBookDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.NovelBookInsertReq:
+    properties:
+      author:
+        type: string
+      category:
+        type: string
+      chapters:
+        type: integer
+      cover:
+        type: string
+      description:
+        type: string
+      isFeatured:
+        type: integer
+      publishDate:
+        type: string
+      readUrl:
+        type: string
+      serialStatus:
+        type: string
+      slogan:
+        type: string
+      status:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      wordCount:
+        type: integer
+    type: object
+  dto.NovelBookUpdateReq:
+    properties:
+      author:
+        type: string
+      category:
+        type: string
+      chapters:
+        type: integer
+      cover:
+        type: string
+      description:
+        type: string
+      isFeatured:
+        type: integer
+      publishDate:
+        type: string
+      readUrl:
+        type: string
+      serialStatus:
+        type: string
+      slogan:
+        type: string
+      status:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      wordCount:
+        type: integer
+    type: object
+  dto.NovelFeedbackDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.NovelFeedbackInsertReq:
+    properties:
+      content:
+        type: string
+      kind:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.NovelFollowInsertReq:
+    properties:
+      targetUserId:
+        type: integer
+    type: object
+  dto.NovelNoticeDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.NovelNoticeInsertReq:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.NovelNotificationReadReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.NovelPostAdminStatusReq:
+    properties:
+      status:
+        type: string
+    type: object
+  dto.NovelPostCommentInsertReq:
+    properties:
+      content:
+        type: string
+      parentId:
+        type: integer
+      replyToCommentId:
+        type: integer
+      replyToUser:
+        type: string
+    type: object
+  dto.NovelPostDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.NovelPostInsertReq:
+    properties:
+      content:
+        type: string
+      refBookId:
+        type: integer
+      title:
+        type: string
+      topicTag:
+        type: string
+    type: object
+  dto.NovelPostInteractReq:
+    properties:
+      action:
+        type: string
+      type:
+        type: string
+    type: object
+  dto.NovelProfileUpdateReq:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      email:
+        type: string
+      nickname:
+        type: string
+      notifyBookUpdate:
+        type: integer
+      notifyComment:
+        type: integer
+      preferredCategories:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.NovelReviewDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.NovelReviewInsertReq:
+    properties:
+      bookId:
+        type: integer
+      content:
+        type: string
+      rating:
+        type: integer
+    type: object
+  dto.NovelShelfInsertReq:
+    properties:
+      bookId:
+        type: integer
+    type: object
+  dto.NovelUserStatusReq:
+    properties:
+      status:
+        type: string
+    type: object
   dto.ResetSysUserPwdReq:
     properties:
       password:
@@ -3697,6 +3931,1316 @@ paths:
       summary: 更新系统用户状态
       tags:
       - 系统用户管理
+  /app/novel/book:
+    delete:
+      consumes:
+      - application/json
+      description: 删除小说（级联书评/书架，帖子关联置空；权限 novel:book:del）
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelBookDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除小说
+      tags:
+      - 小说书库
+    get:
+      consumes:
+      - application/json
+      description: 分页查询小说书库（分类/连载状态/字数区间/关键字/排序）
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 分类
+        in: query
+        name: category
+        type: string
+      - description: 连载状态
+        in: query
+        name: serialStatus
+        type: string
+      - description: 上架状态
+        in: query
+        name: status
+        type: string
+      - description: 首页精选
+        in: query
+        name: isFeatured
+        type: integer
+      - description: 字数下限
+        in: query
+        name: wordCountMin
+        type: integer
+      - description: 字数上限
+        in: query
+        name: wordCountMax
+        type: integer
+      - description: 关键字（书名/作者/标签）
+        in: query
+        name: keyword
+        type: string
+      - description: 排序 rating|click|latest
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 分页查询小说书库
+      tags:
+      - 小说书库
+    post:
+      consumes:
+      - application/json
+      description: 新增小说（内容管理，权限 novel:book:add）
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelBookInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增小说
+      tags:
+      - 小说书库
+  /app/novel/book-review:
+    delete:
+      consumes:
+      - application/json
+      description: 仅本人可删除
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelReviewDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除我的书评
+      tags:
+      - 小说书评
+    post:
+      consumes:
+      - application/json
+      description: 新增书评并联动书籍评分（事务聚合）
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelReviewInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增书评
+      tags:
+      - 小说书评
+  /app/novel/book-review/page:
+    get:
+      consumes:
+      - application/json
+      description: filter=all 全部 five 5星 hot 热门
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 书籍编号
+        in: query
+        name: bookId
+        type: integer
+      - description: all|five|hot
+        in: query
+        name: filter
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 书评圈分页查询
+      tags:
+      - 小说书评
+  /app/novel/book/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 查询小说详情（含最新书评，点击+1）
+      parameters:
+      - description: 书籍编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 查询小说详情
+      tags:
+      - 小说书库
+    put:
+      consumes:
+      - application/json
+      description: 更新小说（内容管理，权限 novel:book:edit）
+      parameters:
+      - description: 书籍编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelBookUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 更新小说
+      tags:
+      - 小说书库
+  /app/novel/book/rank:
+    get:
+      consumes:
+      - application/json
+      description: type=rating 综合评分榜 type=click 点击热度榜
+      parameters:
+      - description: rating|click
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 查询小说榜单
+      tags:
+      - 小说书库
+  /app/novel/bookshelf:
+    get:
+      consumes:
+      - application/json
+      description: 当前登录用户书架
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 分页查询我的书架
+      tags:
+      - 我的书架
+    post:
+      consumes:
+      - application/json
+      description: 重复加入幂等返回
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelShelfInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 加入书架
+      tags:
+      - 我的书架
+  /app/novel/bookshelf/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 仅本人可移除
+      parameters:
+      - description: 书架记录编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 移除书架
+      tags:
+      - 我的书架
+  /app/novel/feedback:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelFeedbackDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 后台删除反馈/投诉
+      tags:
+      - 小说平台反馈
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: feedback|complaint
+        in: query
+        name: kind
+        type: string
+      - description: 反馈类型 A~H
+        in: query
+        name: type
+        type: string
+      - description: 内容关键字
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 后台分页查询反馈/投诉
+      tags:
+      - 小说平台反馈
+    post:
+      consumes:
+      - application/json
+      description: type=A~H；kind=feedback 反馈 / complaint 投诉；提交成功自动生成系统通知
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelFeedbackInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 提交意见反馈/投诉
+      tags:
+      - 意见反馈
+  /app/novel/feedback/page:
+    get:
+      consumes:
+      - application/json
+      description: kind=feedback 我的反馈 / complaint 我的投诉，为空查全部
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: feedback|complaint
+        in: query
+        name: kind
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 分页查询我的反馈/投诉
+      tags:
+      - 意见反馈
+  /app/novel/follow:
+    post:
+      consumes:
+      - application/json
+      description: 关注目标用户（幂等，已关注返回提示码）
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelFollowInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 关注书友
+      tags:
+      - 书友关注
+  /app/novel/follow/{targetUserId}:
+    delete:
+      consumes:
+      - application/json
+      description: 取消对目标用户的关注
+      parameters:
+      - description: 被关注用户编号
+        in: path
+        name: targetUserId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 取消关注
+      tags:
+      - 书友关注
+  /app/novel/following:
+    get:
+      consumes:
+      - application/json
+      description: 当前登录用户已关注的书友（含画像）
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 分页查询我的关注列表
+      tags:
+      - 书友关注
+  /app/novel/home:
+    get:
+      consumes:
+      - application/json
+      description: 首页聚合
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 首页聚合：精选+热门TOP+最新/热门帖子（无需登录）
+      tags:
+      - 小说书库
+  /app/novel/notice:
+    delete:
+      consumes:
+      - application/json
+      description: 删除公告并级联删除广播生成的读者通知
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelNoticeDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 后台删除系统公告
+      tags:
+      - 小说平台公告
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 标题关键字
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 后台分页查询系统公告
+      tags:
+      - 小说平台公告
+    post:
+      consumes:
+      - application/json
+      description: 发布后广播到全部注册读者，读者端生成系统通知
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelNoticeInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 后台发布系统公告
+      tags:
+      - 小说平台公告
+  /app/novel/notification/page:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 分页查询我的系统通知
+      tags:
+      - 系统通知
+  /app/novel/notification/read:
+    post:
+      consumes:
+      - application/json
+      description: 传 ids 标记指定通知，ids 为空则全部标为已读
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelNotificationReadReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 标记通知已读
+      tags:
+      - 系统通知
+  /app/novel/notification/unread-count:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 查询我的未读通知数
+      tags:
+      - 系统通知
+  /app/novel/post:
+    delete:
+      consumes:
+      - application/json
+      description: 仅本人可删除（级联清理互动与评论）
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelPostDeleteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除我的帖子
+      tags:
+      - 小说长文
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 标题关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 状态 1-正常 2-禁止访问
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 后台分页查询帖子
+      tags:
+      - 小说平台帖子
+    post:
+      consumes:
+      - application/json
+      description: 正文 5000~10000 字
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelPostInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 发布长文帖子
+      tags:
+      - 小说长文
+  /app/novel/post-comment/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 评论编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 删除评论（仅本人）
+      tags:
+      - 小说长文
+  /app/novel/post-comment/mine:
+    get:
+      consumes:
+      - application/json
+      description: 当前登录用户的帖子评论（含原帖标题）
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 分页查询我的评论
+      tags:
+      - 小说长文
+  /app/novel/post/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 帖子详情（含楼中楼评论与当前用户互动状态）
+      parameters:
+      - description: 帖子编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 查询帖子详情
+      tags:
+      - 小说长文
+  /app/novel/post/{id}/comment:
+    post:
+      consumes:
+      - application/json
+      description: 支持楼中楼（parentId）与 @昵称（replyToUser）
+      parameters:
+      - description: 帖子编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelPostCommentInsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 新增帖子评论/回复
+      tags:
+      - 小说长文
+  /app/novel/post/{id}/interact:
+    post:
+      consumes:
+      - application/json
+      description: type=like|dislike|collect action=add|cancel（赞踩互斥）
+      parameters:
+      - description: 帖子编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelPostInteractReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 帖子点赞/踩/收藏
+      tags:
+      - 小说长文
+  /app/novel/post/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: 禁止（status=2）后读者端列表与详情均不可见
+      parameters:
+      - description: 帖子编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelPostAdminStatusReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 后台禁止访问/恢复帖子
+      tags:
+      - 小说平台帖子
+  /app/novel/post/page:
+    get:
+      consumes:
+      - application/json
+      description: sort=latest 最新 hot 热门；topicTag 话题标签筛选
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 话题标签
+        in: query
+        name: topicTag
+        type: string
+      - description: latest|hot
+        in: query
+        name: sort
+        type: string
+      - description: 关联小说
+        in: query
+        name: refBookId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 分页查询长文帖子
+      tags:
+      - 小说长文
+  /app/novel/profile/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: 目标用户帖子/书评/评论/收藏/关注聚合
+      parameters:
+      - description: 目标用户编号
+        in: path
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 书友名片聚合
+      tags:
+      - 书友关注
+  /app/novel/reader-profile:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 查询我的读者资料
+      tags:
+      - 读者资料
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelProfileUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      tags:
+      - 我的读者资料
+  /app/novel/user:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      - description: 每页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 用户名关键字
+        in: query
+        name: keyword
+        type: string
+      - description: 状态 1-正常 2-异常
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 后台分页查询读者
+      tags:
+      - 小说平台读者
+  /app/novel/user/{id}/ban-post:
+    put:
+      consumes:
+      - application/json
+      description: banUntil 为空表示解除禁止；禁止期间发帖接口返回 41043
+      parameters:
+      - description: 读者用户编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelBanPostReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 后台禁止/解除禁止读者发帖
+      tags:
+      - 小说平台读者
+  /app/novel/user/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: 禁用（status=2）后该读者全部接口实时拒绝访问（token 立即失效）
+      parameters:
+      - description: 读者用户编号
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelUserStatusReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - Bearer: []
+      summary: 后台启用/禁用读者账户
+      tags:
+      - 小说平台读者
+  /app/novel/user/login:
+    post:
+      consumes:
+      - application/json
+      description: 读者账号密码登录（返回 JWT，RoleKey=reader）
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelAuthLoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 读者登录
+      tags:
+      - 读者认证
+  /app/novel/user/register:
+    post:
+      consumes:
+      - application/json
+      description: 注册读者账号（自动创建读者资料，注册成功即签发 token）
+      parameters:
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.NovelAuthRegisterReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 请求成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 读者注册
+      tags:
+      - 读者认证
   /app/user/user:
     get:
       consumes:

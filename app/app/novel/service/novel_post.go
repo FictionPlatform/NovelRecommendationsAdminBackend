@@ -160,6 +160,16 @@ func (e *NovelPost) Insert(c *dto.NovelPostInsertReq) (int64, int, error) {
 		return 0, respCode, err
 	}
 
+	// 禁言校验：管理员设置 ban_post_until 未到期时拒绝发帖
+	profile := &models.NovelReaderProfile{}
+	perr := e.Orm.Where("user_id = ?", c.CurrUserId).First(profile).Error
+	if perr == nil && profile.BanPostUntil != nil && profile.BanPostUntil.After(time.Now()) {
+		return 0, baseLang.NovelPostBannedCode, lang.MsgErr(baseLang.NovelPostBannedCode, e.Lang)
+	}
+	if perr != nil && !errors.Is(perr, gorm.ErrRecordNotFound) {
+		return 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, perr)
+	}
+
 	now := time.Now()
 	data := models.NovelPost{}
 	data.UserId = c.CurrUserId
