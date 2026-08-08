@@ -564,7 +564,7 @@ func (e SysUser) Login(c *gin.Context) {
 		return
 	}
 
-	if config.ApplicationConfig.Mode != "dev" {
+	if config.ApplicationConfig.Mode != global.ModeDev || !config.ApplicationConfig.SkipCaptcha {
 		if !captchautils.Verify(req.UUID, req.Code, true) {
 			loginlock.RecordFail(req.Username, clientIP)
 			s.LoginFailToDB(c, req.Username, lang.MsgByCode(baseLang.SysUseCapErrLogCode, e.Lang))

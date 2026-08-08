@@ -16,6 +16,7 @@ type AuthInter interface {
 	GetRoleKey(c *gin.Context) string
 	AuthMiddlewareFunc() gin.HandlerFunc
 	AuthCheckRoleMiddlewareFunc() gin.HandlerFunc
+	AuthOptionalMiddlewareFunc() gin.HandlerFunc
 }
 
 // InitAuth

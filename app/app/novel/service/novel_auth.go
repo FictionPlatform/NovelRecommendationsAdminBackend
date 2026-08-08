@@ -12,6 +12,7 @@ import (
 	"go-admin/core/dto/service"
 	"go-admin/core/global"
 	"go-admin/core/lang"
+	"go-admin/core/utils/idgen"
 	"gorm.io/gorm"
 )
 
@@ -59,6 +60,7 @@ func (e *NovelAuth) Register(req *dto.NovelAuthRegisterReq) (*userModels.User, i
 		UserName:  req.Username,
 		TrueName:  "- -",
 		Money:     decimal.NewFromInt(0),
+		RefCode:   idgen.InviteId(),
 		Pwd:       req.Password,
 		Status:    global.SysStatusOk,
 		TreeLeaf:  global.SysStatusOk,
@@ -67,7 +69,8 @@ func (e *NovelAuth) Register(req *dto.NovelAuthRegisterReq) (*userModels.User, i
 		CreatedAt: &now,
 		UpdatedAt: &now,
 	}
-	err := e.Orm.Create(user).Error
+	// email/mobile/mobile_title 未提供时保持 NULL（唯一索引下多个空串会互相冲突），ref_code 已生成随机邀请码
+	err := e.Orm.Omit("email", "mobile", "mobile_title").Create(user).Error
 	if err != nil {
 		return nil, baseLang.NovelRegisterFailCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.NovelRegisterFailCode, baseLang.DataInsertLogCode, err)
 	}

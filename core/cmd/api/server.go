@@ -204,17 +204,21 @@ func initRouter() {
 	if config.ApplicationConfig.Mode == global.ModeDev {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 		// 墨读·小说引力场 读者端独立 spec（docs/webapi，instanceName=webapi，@BasePath /web-api/v1）
-		r.GET("/webapi/swagger/doc.json", func(c *gin.Context) {
-			doc, err := swag.ReadDoc("webapi")
-			if err != nil {
-				c.String(500, err.Error())
+		// gin 不允许同一前缀下静态路径与 catch-all 共存，故 doc.json 在 *any 内自行分发
+		r.GET("/webapi/swagger/*any", func(c *gin.Context) {
+			if c.Param("any") == "/doc.json" {
+				doc, err := swag.ReadDoc("webapi")
+				if err != nil {
+					c.String(500, err.Error())
+					return
+				}
+				c.Writer.WriteString(doc)
 				return
 			}
-			c.Writer.WriteString(doc)
+			ginSwagger.CustomWrapHandler(&ginSwagger.Config{
+				URL: "doc.json",
+			}, swaggerFiles.Handler)(c)
 		})
-		r.GET("/webapi/swagger/*any", ginSwagger.CustomWrapHandler(&ginSwagger.Config{
-			URL: "doc.json",
-		}, swaggerFiles.Handler))
 	}
 
 	middleware.InitMiddleware(r)

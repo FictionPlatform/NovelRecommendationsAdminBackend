@@ -241,6 +241,37 @@ func (j *JwtAuth) AuthCheckRoleMiddlewareFunc() gin.HandlerFunc {
 	}
 }
 
+// AuthOptionalMiddlewareFunc 可选登录中间件：与 Auth 相同的身份注入与校验强度（状态/角色/密码变更/黑名单/设备），
+// 但无 token 或 token 无效时不拒绝请求，按匿名继续（LoginUserId 保持 0）。
+// 公开读接口（如 book-review/page?mine=1、post/page?mine=1）借此在登录态下正确返回"我的"维度数据。
+func (j *JwtAuth) AuthOptionalMiddlewareFunc() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token, err := j.mw.ParseToken(c)
+		if err != nil || token == nil {
+			// 无 token / 解析失败：匿名访问
+			c.Next()
+			return
+		}
+		claims := jwt.ExtractClaimsFromToken(token)
+		userId, ok := claims[authdto.LoginUserId].(float64)
+		if !ok || int64(userId) <= 0 {
+			c.Next()
+			return
+		}
+		c.Set(authdto.LoginUserId, int64(userId))
+		c.Set(authdto.RoleKey, claims[authdto.RoleKey])
+		// token 有效则执行完整校验（用户停用/密码变更/黑名单/设备/单点登录等）
+		if j.authCheck(c) {
+			c.Next()
+			return
+		}
+		// 校验不通过（如用户已停用）：不拦截请求，清空身份按匿名处理
+		c.Set(authdto.LoginUserId, int64(0))
+		c.Set(authdto.RoleKey, "")
+		c.Next()
+	}
+}
+
 func (j *JwtAuth) Login(c *gin.Context) {
 	j.mw.LoginHandler(c)
 }

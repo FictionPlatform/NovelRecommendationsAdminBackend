@@ -10,6 +10,7 @@ type Application struct {
 	FileRootPath   string
 	AmpKey         string
 	IsSingleLogin  bool
+	SkipCaptcha    bool
 	Author         string
 	TrustedProxies []string
 	CorsOrigins    []string

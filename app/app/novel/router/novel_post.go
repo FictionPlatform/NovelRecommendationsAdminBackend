@@ -11,10 +11,10 @@ func init() {
 	routerCheckRole = append(routerCheckRole, registerPostWriteRouter)
 }
 
-// registerPostRouter 注册长文帖子浏览路由（无需登录）
+// registerPostRouter 注册长文帖子浏览路由（无需登录；带 token 时可选注入身份以支持 mine=1/isCollected=1 与互动状态）
 func registerPostRouter(v1 *gin.RouterGroup) {
 	api := apis.Post{}
-	r := v1.Group("/app/novel")
+	r := v1.Group("/app/novel").Use(middleware.AuthOptional())
 	{
 		r.GET("/post/page", api.GetPage)
 		r.GET("/post/:id", api.Get)

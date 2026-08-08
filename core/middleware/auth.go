@@ -16,6 +16,12 @@ func Auth() gin.HandlerFunc {
 	return auth.Auth.AuthMiddlewareFunc()
 }
 
+// AuthOptional 可选登录：携带有效 token 时注入用户身份（同 Auth 的校验强度），
+// 无 token 或 token 无效时放行为匿名访问。用于"游客可浏览、登录可看我的数据"的公开读接口。
+func AuthOptional() gin.HandlerFunc {
+	return auth.Auth.AuthOptionalMiddlewareFunc()
+}
+
 func AuthCheckRole() gin.HandlerFunc {
 	return auth.Auth.AuthCheckRoleMiddlewareFunc()
 }
