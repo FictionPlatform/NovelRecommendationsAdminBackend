@@ -37,6 +37,10 @@ func (e *NovelFollow) Follow(c *dto.NovelFollowInsertReq) (int64, int, error) {
 	if c.CurrUserId == c.TargetUserId {
 		return 0, baseLang.NovelFollowSelfCode, lang.MsgErr(baseLang.NovelFollowSelfCode, e.Lang)
 	}
+	// 写操作权限校验（注销/禁言拦截，禁言到期惰性恢复）
+	if respCode, err := CheckReaderWritePermission(&e.Service, c.CurrUserId); err != nil {
+		return 0, respCode, err
+	}
 	// 目标用户存在性校验
 	u := &userModels.User{}
 	err := e.Orm.First(u, c.TargetUserId).Error
@@ -45,6 +49,10 @@ func (e *NovelFollow) Follow(c *dto.NovelFollowInsertReq) (int64, int, error) {
 			return 0, baseLang.NovelUserNotExistCode, lang.MsgErr(baseLang.NovelUserNotExistCode, e.Lang)
 		}
 		return 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+	// 已注销用户不可被关注（已关注的可取消关注）
+	if u.Status == global.SysStatusCancelled {
+		return 0, baseLang.NovelUserCancelledCode, lang.MsgErr(baseLang.NovelUserCancelledCode, e.Lang)
 	}
 	// 已关注 → 幂等返回既有记录
 	old := &models.NovelFollow{}
@@ -99,19 +107,26 @@ func (e *NovelFollow) GetFollowingPage(c *dto.NovelFollowQueryReq) ([]dto.NovelF
 	}
 	items := make([]dto.NovelFollowingItem, 0, len(list))
 	for _, f := range list {
-		name, avatar, bio := getReaderUserInfo(&e.Service, f.FollowUserId)
+		name, avatar, bio, status := getReaderUserInfo(&e.Service, f.FollowUserId)
+		// 已注销用户仅显示「已注销」
+		if status == global.SysStatusCancelled {
+			name = NovelCancelledUserName
+			avatar = ""
+			bio = ""
+		}
 		items = append(items, dto.NovelFollowingItem{
 			UserId:     f.FollowUserId,
 			Name:       name,
 			Avatar:     avatar,
 			Bio:        bio,
+			Status:     status,
 			IsFollowed: true,
 		})
 	}
 	return items, count, baseLang.SuccessCode, nil
 }
 
-// GetProfile app-书友名片聚合（帖子/书评/评论/收藏/关注）
+// GetProfile app-书友名片聚合（话题/书评/评论/收藏/关注）
 func (e *NovelFollow) GetProfile(c *dto.NovelProfileReq) (*dto.NovelProfileResp, int, error) {
 	if c.UserId <= 0 {
 		return nil, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
@@ -125,14 +140,26 @@ func (e *NovelFollow) GetProfile(c *dto.NovelProfileReq) (*dto.NovelProfileResp,
 		return nil, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
 	}
 
-	name, avatar, bio := getReaderUserInfo(&e.Service, c.UserId)
+	name, avatar, bio, status := getReaderUserInfo(&e.Service, c.UserId)
 	resp := &dto.NovelProfileResp{
 		UserId: c.UserId,
 		Name:   name,
 		Avatar: avatar,
 		Bio:    bio,
+		Status: status,
 	}
 	resp.IsSelf = c.UserId == c.CurrUserId
+	// 唯一9位数字ID仅本人可见
+	if resp.IsSelf {
+		resp.UniqueId = u.UniqueId
+	}
+	// 已注销用户：详情仅显示已注销标识，不返回其他信息
+	if status == global.SysStatusCancelled {
+		resp.Name = NovelCancelledUserName
+		resp.Avatar = ""
+		resp.Bio = ""
+		return resp, baseLang.SuccessCode, nil
+	}
 	// 当前用户对目标用户的关注状态
 	if c.CurrUserId > 0 && !resp.IsSelf {
 		var cnt int64
@@ -141,7 +168,7 @@ func (e *NovelFollow) GetProfile(c *dto.NovelProfileReq) (*dto.NovelProfileResp,
 		resp.IsFollowed = cnt > 0
 	}
 
-	// 帖子（最新 5 条 + 总数）
+	// 话题（最新 5 条 + 总数）
 	postSvc := NewNovelPostService(&e.Service)
 	_ = e.Orm.Where("user_id = ? and status = ?", c.UserId, global.SysStatusOk).
 		Order("created_at desc, id desc").Limit(5).Find(&resp.Posts).Error
@@ -156,14 +183,14 @@ func (e *NovelFollow) GetProfile(c *dto.NovelProfileReq) (*dto.NovelProfileResp,
 		Where("user_id = ?", c.UserId).Count(&resp.ReviewCount).Error
 	e.fillReviewBooks(resp.Reviews)
 
-	// 评论（最新 5 条 + 总数，含帖子标题）
+	// 评论（最新 5 条 + 总数，含话题标题）
 	_ = e.Orm.Where("user_id = ?", c.UserId).
 		Order("created_at desc, id desc").Limit(5).Find(&resp.Comments).Error
 	_ = e.Orm.Model(&models.NovelPostComment{}).
 		Where("user_id = ?", c.UserId).Count(&resp.CommentCount).Error
 	postSvc.fillCommentExt(resp.Comments)
 
-	// 收藏的帖子（最新 5 条 + 总数）
+	// 收藏的话题（最新 5 条 + 总数）
 	_ = e.Orm.Where("id in (select post_id from app_novel_post_collect where user_id = ?) and status = ?", c.UserId, global.SysStatusOk).
 		Order("created_at desc, id desc").Limit(5).Find(&resp.CollectPosts).Error
 	_ = e.Orm.Model(&models.NovelPostCollect{}).
@@ -185,9 +212,14 @@ func (e *NovelFollow) GetProfile(c *dto.NovelProfileReq) (*dto.NovelProfileResp,
 }
 
 // getReaderUserInfo app-内部方法，读取用户公开画像（优先读者资料，回退 app_user 快照）
-func getReaderUserInfo(e *service.Service, userId int64) (string, string, string) {
+func getReaderUserInfo(e *service.Service, userId int64) (string, string, string, string) {
 	userName, userAvatar, _, _ := getUserSnapshot(e, userId)
 	name, avatar, bio := userName, userAvatar, ""
+	status := ""
+	u := &userModels.User{}
+	if uErr := e.Orm.First(u, userId).Error; uErr == nil {
+		status = u.Status
+	}
 	profile := &models.NovelReaderProfile{}
 	pErr := e.Orm.Where("user_id = ?", userId).First(profile).Error
 	if pErr == nil {
@@ -199,7 +231,7 @@ func getReaderUserInfo(e *service.Service, userId int64) (string, string, string
 		}
 		bio = profile.Bio
 	}
-	return name, avatar, bio
+	return name, avatar, bio, status
 }
 
 // fillReviewBooks app-内部方法，批量填充书评关联书籍

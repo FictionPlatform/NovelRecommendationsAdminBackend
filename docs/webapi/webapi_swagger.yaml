@@ -217,7 +217,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: 删除小说（级联书评/书架，帖子关联置空；权限 novel:book:del）
+      description: 删除小说（级联书评/书架，话题关联置空；权限 novel:book:del）
       parameters:
       - description: 请求参数
         in: body
@@ -752,7 +752,7 @@ paths:
           description: 请求失败
           schema:
             $ref: '#/definitions/response.Response'
-      summary: 首页聚合：精选+热门TOP+最新/热门帖子（无需登录）
+      summary: 首页聚合：精选+热门TOP+最新/热门话题（无需登录）
       tags:
       - 小说书库
   /app/novel/notification/page:
@@ -857,7 +857,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - Bearer: []
-      summary: 删除我的帖子
+      summary: 删除我的话题
       tags:
       - 小说长文
     post:
@@ -884,7 +884,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - Bearer: []
-      summary: 发布长文帖子
+      summary: 发布长文话题
       tags:
       - 小说长文
   /app/novel/post-comment/{id}:
@@ -917,7 +917,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 当前登录用户的帖子评论（含原帖标题）
+      description: 当前登录用户的话题评论（含原帖标题）
       parameters:
       - description: 页码
         in: query
@@ -947,9 +947,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: 帖子详情（含楼中楼评论与当前用户互动状态）
+      description: 话题详情（含楼中楼评论与当前用户互动状态）
       parameters:
-      - description: 帖子编号
+      - description: 话题编号
         in: path
         name: id
         required: true
@@ -965,7 +965,7 @@ paths:
           description: 请求失败
           schema:
             $ref: '#/definitions/response.Response'
-      summary: 查询帖子详情
+      summary: 查询话题详情
       tags:
       - 小说长文
   /app/novel/post/{id}/comment:
@@ -974,7 +974,7 @@ paths:
       - application/json
       description: 支持楼中楼（parentId）与 @昵称（replyToUser）
       parameters:
-      - description: 帖子编号
+      - description: 话题编号
         in: path
         name: id
         required: true
@@ -998,7 +998,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - Bearer: []
-      summary: 新增帖子评论/回复
+      summary: 新增话题评论/回复
       tags:
       - 小说长文
   /app/novel/post/{id}/interact:
@@ -1007,7 +1007,7 @@ paths:
       - application/json
       description: type=like|dislike|collect action=add|cancel（赞踩互斥）
       parameters:
-      - description: 帖子编号
+      - description: 话题编号
         in: path
         name: id
         required: true
@@ -1031,7 +1031,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - Bearer: []
-      summary: 帖子点赞/踩/收藏
+      summary: 话题点赞/踩/收藏
       tags:
       - 小说长文
   /app/novel/post/page:
@@ -1071,14 +1071,14 @@ paths:
           description: 请求失败
           schema:
             $ref: '#/definitions/response.Response'
-      summary: 分页查询长文帖子
+      summary: 分页查询长文话题
       tags:
       - 小说长文
   /app/novel/profile/{userId}:
     get:
       consumes:
       - application/json
-      description: 目标用户帖子/书评/评论/收藏/关注聚合
+      description: 目标用户话题/书评/评论/收藏/关注聚合
       parameters:
       - description: 目标用户编号
         in: path

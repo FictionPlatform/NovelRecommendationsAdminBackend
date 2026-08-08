@@ -249,6 +249,7 @@ INSERT INTO `admin_sys_config` (`id`, `config_name`, `config_key`, `config_value
 INSERT INTO `admin_sys_config` (`id`, `config_name`, `config_key`, `config_value`, `config_type`, `is_frontend`, `remark`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (10, '插件-文件管理-App OSS Endpoint', 'plugin_filemgr_app_oss_endpoint', '请自行配�?, '2', '2', '', 0, 1, '2021-08-13 14:38:50', '2023-03-11 23:14:28');
 INSERT INTO `admin_sys_config` (`id`, `config_name`, `config_key`, `config_value`, `config_type`, `is_frontend`, `remark`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (11, '插件-文件管理-App OSS 根目�?, 'plugin_filemgr_app_oss_root_path', 'testfile/', '2', '2', '', 0, 1, '2021-08-13 14:39:31', '2023-03-11 23:14:22');
 INSERT INTO `admin_sys_config` (`id`, `config_name`, `config_key`, `config_value`, `config_type`, `is_frontend`, `remark`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (12, '管理-用户-默认头像', 'admin_sys_user_default_avatar', 'http://www.bitxx.top/images/my_head-touch-icon-next.png', '3', '2', '', 1, 1, '2023-03-10 18:07:03', '2023-03-10 18:07:03');
+INSERT INTO `admin_sys_config` (`id`, `config_name`, `config_key`, `config_value`, `config_type`, `is_frontend`, `remark`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (13, 'App-用户唯一ID序列', 'app_user_unique_id_seq', '100000101', '3', '2', 'app读者注册唯一9位数字ID：当前已分配的最高值，每次注册时+1', 0, 0, '2026-08-08 21:00:00', '2026-08-08 21:00:00');
 COMMIT;
 
 -- ----------------------------
@@ -1032,9 +1033,9 @@ INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirec
 INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (137, '读者分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-user:query', 0, 136, '0,58,135,136,', '3', '', '', '', '', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
 INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (138, '启用/禁用读者', 'AppstoreOutlined', '', '', '', 'app:novel-user:status', 0, 136, '0,58,135,136,', '3', '', '', '', '', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
 INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (139, '禁止读者发帖', 'AppstoreOutlined', '', '', '', 'app:novel-user:ban-post', 0, 136, '0,58,135,136,', '3', '', '', '', '', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
-INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (140, '帖子管理', 'FileTextOutlined', '/app/novel/novel-post', '/app/novel/novel-post/index', '', '', 20, 135, '0,58,135,', '2', '1', '2', '2', '1', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
-INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (141, '帖子分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-post:query', 0, 140, '0,58,135,140,', '3', '', '', '', '', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
-INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (142, '帖子状态管理', 'AppstoreOutlined', '', '', '', 'app:novel-post:status', 0, 140, '0,58,135,140,', '3', '', '', '', '', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (140, '话题管理', 'FileTextOutlined', '/app/novel/novel-post', '/app/novel/novel-post/index', '', '', 20, 135, '0,58,135,', '2', '1', '2', '2', '1', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (141, '话题分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-post:query', 0, 140, '0,58,135,140,', '3', '', '', '', '', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (142, '话题状态管理', 'AppstoreOutlined', '', '', '', 'app:novel-post:status', 0, 140, '0,58,135,140,', '3', '', '', '', '', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
 INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (143, '反馈/投诉管理', 'MessageOutlined', '/app/novel/novel-feedback', '/app/novel/novel-feedback/index', '', '', 30, 135, '0,58,135,', '2', '1', '2', '2', '1', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
 INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (144, '反馈分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-feedback:query', 0, 143, '0,58,135,143,', '3', '', '', '', '', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
 INSERT INTO `admin_sys_menu` (`id`, `title`, `icon`, `path`, `element`, `redirect`, `permission`, `sort`, `parent_id`, `parent_ids`, `menu_type`, `is_keep_alive`, `is_affix`, `is_hidden`, `is_frame`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (145, '删除反馈/投诉', 'AppstoreOutlined', '', '', '', 'app:novel-feedback:del', 0, 143, '0,58,135,143,', '3', '', '', '', '', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
@@ -1402,7 +1403,8 @@ CREATE TABLE `app_user` (
   `tree_sorts` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '0' COMMENT '所有级别排序号',
   `tree_leaf` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '0' COMMENT '是否最末级',
   `tree_level` int NOT NULL DEFAULT '0' COMMENT '层次级别',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '1' COMMENT '状�?1-正常 2-异常)',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '1' COMMENT '状态(1-正常 2-禁言 3-注销)',
+  `unique_id` bigint DEFAULT NULL COMMENT '唯一9位数字ID',
   `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT '备注信息',
   `create_by` int NOT NULL DEFAULT '0' COMMENT '创建�?,
   `update_by` int NOT NULL DEFAULT '0' COMMENT '更新�?,
@@ -1417,6 +1419,8 @@ ALTER TABLE `app_user` ADD INDEX `idx_app_user_parent_id` (`parent_id`);
 ALTER TABLE `app_user` ADD UNIQUE INDEX `uniq_app_user_mobile_title` (`mobile`, `mobile_title`);
 ALTER TABLE `app_user` ADD UNIQUE INDEX `uniq_app_user_email` (`email`);
 ALTER TABLE `app_user` ADD UNIQUE INDEX `uniq_app_user_ref_code` (`ref_code`);
+-- 唯一9位数字ID（NULL 允许多个，兼容历史数据）
+ALTER TABLE `app_user` ADD UNIQUE INDEX `uniq_app_user_unique_id` (`unique_id`);
 
 -- ----------------------------
 -- Records of app_user
@@ -1782,7 +1786,7 @@ CREATE TABLE `app_novel_book_review` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='书评';
 
 -- ----------------------------
--- Table structure for app_novel_post 长文帖子
+-- Table structure for app_novel_post 长文话题
 -- ----------------------------
 DROP TABLE IF EXISTS `app_novel_post`;
 CREATE TABLE `app_novel_post` (
@@ -1809,15 +1813,15 @@ CREATE TABLE `app_novel_post` (
   KEY `idx_post_topic` (`topic_tag`),
   KEY `idx_post_created` (`created_at` DESC),
   KEY `idx_post_likes` (`likes` DESC)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='长文帖子';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='长文话题';
 
 -- ----------------------------
--- Table structure for app_novel_post_comment 帖子评论
+-- Table structure for app_novel_post_comment 话题评论
 -- ----------------------------
 DROP TABLE IF EXISTS `app_novel_post_comment`;
 CREATE TABLE `app_novel_post_comment` (
   `id`                  BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `post_id`             BIGINT UNSIGNED NOT NULL COMMENT '帖子 id',
+  `post_id`             BIGINT UNSIGNED NOT NULL COMMENT '话题 id',
   `user_id`             BIGINT UNSIGNED NOT NULL COMMENT '评论者',
   `user_name`           VARCHAR(64)     NOT NULL COMMENT '昵称快照',
   `user_avatar`         VARCHAR(500)    NOT NULL DEFAULT '',
@@ -1831,10 +1835,10 @@ CREATE TABLE `app_novel_post_comment` (
   KEY `idx_pc_post` (`post_id`),
   KEY `idx_pc_parent` (`parent_id`),
   KEY `idx_pc_user` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='帖子评论';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='话题评论';
 
 -- ----------------------------
--- Table structure for app_novel_post_like 帖子赞/踩记录
+-- Table structure for app_novel_post_like 话题赞/踩记录
 -- ----------------------------
 DROP TABLE IF EXISTS `app_novel_post_like`;
 CREATE TABLE `app_novel_post_like` (
@@ -1845,10 +1849,10 @@ CREATE TABLE `app_novel_post_like` (
   `created_at` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_like_user_post` (`user_id`,`post_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='帖子赞/踩记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='话题赞/踩记录';
 
 -- ----------------------------
--- Table structure for app_novel_post_collect 帖子收藏记录
+-- Table structure for app_novel_post_collect 话题收藏记录
 -- ----------------------------
 DROP TABLE IF EXISTS `app_novel_post_collect`;
 CREATE TABLE `app_novel_post_collect` (
@@ -1858,7 +1862,7 @@ CREATE TABLE `app_novel_post_collect` (
   `created_at` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_collect_user_post` (`user_id`,`post_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='帖子收藏记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='话题收藏记录';
 
 -- ----------------------------
 -- Table structure for app_novel_bookshelf 用户书架
@@ -1906,7 +1910,7 @@ ALTER TABLE `app_novel_reader_profile`
 -- ----------------------------
 INSERT INTO `admin_sys_dict_type` (`id`, `dict_name`, `dict_type`, `status`, `remark`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (101, '小说-书籍分类', 'app_novel_category', '0', '小说平台分类', 1, 1, NOW(), NOW());
 INSERT INTO `admin_sys_dict_type` (`id`, `dict_name`, `dict_type`, `status`, `remark`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (102, '小说-连载状态', 'app_novel_serial_status', '0', '小说平台连载状态', 1, 1, NOW(), NOW());
-INSERT INTO `admin_sys_dict_type` (`id`, `dict_name`, `dict_type`, `status`, `remark`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (103, '小说-话题标签', 'app_novel_topic', '0', '小说平台帖子话题', 1, 1, NOW(), NOW());
+INSERT INTO `admin_sys_dict_type` (`id`, `dict_name`, `dict_type`, `status`, `remark`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (103, '小说-话题标签', 'app_novel_topic', '0', '小说平台话题话题', 1, 1, NOW(), NOW());
 INSERT INTO `admin_sys_dict_type` (`id`, `dict_name`, `dict_type`, `status`, `remark`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (104, '小说-上架状态', 'app_novel_book_status', '0', '小说平台上架状态', 1, 1, NOW(), NOW());
 
 INSERT INTO `admin_sys_dict_data` (`dict_sort`, `dict_label`, `dict_value`, `dict_type`, `css_class`, `list_class`, `is_default`, `status`, `default_val`, `remark`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (1, '玄幻仙侠', '01', 'app_novel_category', '', 'success', 'Y', '0', '01', '', 1, 1, NOW(), NOW());
@@ -2058,7 +2062,7 @@ INSERT INTO `app_novel_book_review` (`book_id`, `user_id`, `user_name`, `user_av
 COMMIT;
 --
 -- ----------------------------
--- 5. 长文帖子种子（app_novel_post，id 1~3）
+-- 5. 长文话题种子（app_novel_post，id 1~3）
 -- ----------------------------
 BEGIN;
 INSERT INTO `app_novel_post` (`id`, `user_id`, `user_name`, `user_avatar`, `title`, `content`, `summary`, `word_count`, `read_time`, `topic_tag`, `ref_book_id`, `likes`, `dislikes`, `collections`, `comment_count`, `status`, `created_at`, `updated_at`) VALUES
@@ -2329,7 +2333,7 @@ GREATEST(1, CEIL(CHAR_LENGTH('一、 经典范式回顾：暴风雪山庄的魅�
 COMMIT;
 --
 -- ----------------------------
--- 6. 帖子评论（app_novel_post_comment，与 mockPosts.ts 对齐）
+-- 6. 话题评论（app_novel_post_comment，与 mockPosts.ts 对齐）
 -- ----------------------------
 BEGIN;
 INSERT INTO `app_novel_post_comment` (`id`, `post_id`, `user_id`, `user_name`, `user_avatar`, `parent_id`, `reply_to_user`, `reply_to_comment_id`, `content`, `likes`, `created_at`) VALUES
@@ -2341,7 +2345,7 @@ INSERT INTO `app_novel_post_comment` (`id`, `post_id`, `user_id`, `user_name`, `
 COMMIT;
 
 -- ----------------------------
--- 7. 帖子点赞（app_novel_post_like）
+-- 7. 话题点赞（app_novel_post_like）
 -- ----------------------------
 BEGIN;
 INSERT INTO `app_novel_post_like` (`post_id`, `user_id`, `type`) VALUES
@@ -2354,7 +2358,7 @@ INSERT INTO `app_novel_post_like` (`post_id`, `user_id`, `type`) VALUES
 COMMIT;
 
 -- ----------------------------
--- 8. 帖子收藏（app_novel_post_collect）
+-- 8. 话题收藏（app_novel_post_collect）
 -- ----------------------------
 BEGIN;
 INSERT INTO `app_novel_post_collect` (`post_id`, `user_id`) VALUES

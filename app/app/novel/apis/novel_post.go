@@ -15,8 +15,8 @@ type Post struct {
 	api.Api
 }
 
-// GetPage app-分页查询长文帖子
-// @Summary 分页查询长文帖子
+// GetPage app-分页查询长文话题
+// @Summary 分页查询长文话题
 // @Description sort=latest 最新 hot 热门；topicTag 话题标签筛选
 // @Tags 小说长文
 // @Accept json
@@ -50,13 +50,13 @@ func (e Post) GetPage(c *gin.Context) {
 	e.PageOK(list, nil, count, req.GetPageIndex(), req.GetPageSize(), lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
-// Get app-查询帖子详情
-// @Summary 查询帖子详情
-// @Description 帖子详情（含楼中楼评论与当前用户互动状态）
+// Get app-查询话题详情
+// @Summary 查询话题详情
+// @Description 话题详情（含楼中楼评论与当前用户互动状态）
 // @Tags 小说长文
 // @Accept json
 // @Produce json
-// @Param id path int true "帖子编号"
+// @Param id path int true "话题编号"
 // @Success 200 {object} response.Response "请求成功"
 // @Failure 400 {object} response.Response "请求失败"
 // @Router /app/novel/post/{id} [get]
@@ -81,8 +81,8 @@ func (e Post) Get(c *gin.Context) {
 	e.OK(result, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
-// Insert app-发布长文帖子
-// @Summary 发布长文帖子
+// Insert app-发布长文话题
+// @Summary 发布长文话题
 // @Description 正文 5000~10000 字
 // @Tags 小说长文
 // @Accept json
@@ -118,8 +118,8 @@ func (e Post) Insert(c *gin.Context) {
 	e.OK(id, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
-// Delete app-删除我的帖子
-// @Summary 删除我的帖子
+// Delete app-删除我的话题
+// @Summary 删除我的话题
 // @Description 仅本人可删除（级联清理互动与评论）
 // @Tags 小说长文
 // @Accept json
@@ -154,13 +154,13 @@ func (e Post) Delete(c *gin.Context) {
 	e.OK(nil, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
-// Interact app-帖子互动
-// @Summary 帖子点赞/踩/收藏
+// Interact app-话题互动
+// @Summary 话题点赞/踩/收藏
 // @Description type=like|dislike|collect action=add|cancel（赞踩互斥）
 // @Tags 小说长文
 // @Accept json
 // @Produce json
-// @Param id path int true "帖子编号"
+// @Param id path int true "话题编号"
 // @Param body body dto.NovelPostInteractReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
@@ -192,13 +192,13 @@ func (e Post) Interact(c *gin.Context) {
 	e.OK(nil, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
-// AddComment app-新增帖子评论/回复
-// @Summary 新增帖子评论/回复
+// AddComment app-新增话题评论/回复
+// @Summary 新增话题评论/回复
 // @Description 支持楼中楼（parentId）与 @昵称（replyToUser）
 // @Tags 小说长文
 // @Accept json
 // @Produce json
-// @Param id path int true "帖子编号"
+// @Param id path int true "话题编号"
 // @Param body body dto.NovelPostCommentInsertReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"
@@ -232,7 +232,7 @@ func (e Post) AddComment(c *gin.Context) {
 
 // MyComments app-分页查询我的评论
 // @Summary 分页查询我的评论
-// @Description 当前登录用户的帖子评论（含原帖标题）
+// @Description 当前登录用户的话题评论（含原帖标题）
 // @Tags 小说长文
 // @Accept json
 // @Produce json

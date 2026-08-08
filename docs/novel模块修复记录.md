@@ -6,10 +6,10 @@
 
 ---
 
-# novel 模块变更记录（第四轮：后台读者/帖子管理）
+# novel 模块变更记录（第四轮：后台读者/话题管理）
 
 - **时间**：2026-08-07
-- **范围**：后台读者管理（禁用账户、限时禁发帖）+ 帖子管理（禁止访问/恢复）；配套前端页面与菜单种子
+- **范围**：后台读者管理（禁用账户、限时禁发帖）+ 话题管理（禁止访问/恢复）；配套前端页面与菜单种子
 - **验证**：`go build ./...` ✅、`go generate ./...`（双 spec 重生成）✅、前端 `npx tsc --noEmit` ✅
 - **相关前端文档**：`admin/docs/02-views-and-apis.md` §2.4 / §3.4（页面与 API 清单）
 
@@ -35,7 +35,7 @@
 | GET | `/app/novel/user` | 读者分页：query `keyword`（用户名包含搜索，映射 app_user.user_name）、`status`（1-正常 2-禁用） |
 | PUT | `/app/novel/user/{id}/status` | 启用/禁用账户：body `{status: "1"\|"2"}`；禁用后 `jwtauth` 实时校验拒绝该读者全部请求 |
 | PUT | `/app/novel/user/{id}/ban-post` | 禁止发帖：body `{banUntil: RFC3339 或 null, reason≤255}`；资料不存在自动创建；`banUntil` 为空即解除 |
-| GET | `/app/novel/post` | 帖子分页（含全部状态）：query `keyword`（标题包含搜索）、`status` |
+| GET | `/app/novel/post` | 话题分页（含全部状态）：query `keyword`（标题包含搜索）、`status` |
 | PUT | `/app/novel/post/{id}/status` | 禁止访问/恢复：body `{status: "1"\|"2"}`；禁止后读者端列表与详情均不可见（读者端仅查 status=正常） |
 
 ## 三、错误码变更清单（`config/base/lang/app_novel.go`）
@@ -45,7 +45,7 @@
 | 41043 | `NovelPostBannedCode` | 您已被禁止发帖，请于解禁时间后再试 |
 | 41044 | `NovelUserStatusErrCode` | 用户状态无效 |
 | 41045 | `NovelBanTimeErrCode` | 禁言截止时间必须晚于当前时间 |
-| 41046 | `NovelPostStatusErrCode` | 帖子状态无效 |
+| 41046 | `NovelPostStatusErrCode` | 话题状态无效 |
 
 ## 四、菜单种子（id 135~149，MySQL/PostgreSQL 已同步）
 
@@ -56,9 +56,9 @@
 | 137 | 读者查询 | 按钮 | `app:novel-user:query` |
 | 138 | 启禁用账户 | 按钮 | `app:novel-user:status` |
 | 139 | 禁/解禁发帖 | 按钮 | `app:novel-user:ban-post` |
-| 140 | 帖子管理 | 菜单 | `/app/novel/novel-post` |
-| 141 | 帖子查询 | 按钮 | `app:novel-post:query` |
-| 142 | 帖子状态 | 按钮 | `app:novel-post:status` |
+| 140 | 话题管理 | 菜单 | `/app/novel/novel-post` |
+| 141 | 话题查询 | 按钮 | `app:novel-post:query` |
+| 142 | 话题状态 | 按钮 | `app:novel-post:status` |
 | 143 | 反馈/投诉管理 | 菜单 | `/app/novel/novel-feedback` |
 | 144 | 反馈查询 | 按钮 | `app:novel-feedback:query` |
 | 145 | 反馈删除 | 按钮 | `app:novel-feedback:del` |
@@ -155,7 +155,7 @@
 
 | 文件 | 修改内容 |
 |---|---|
-| `service/novel_book.go` | ①`GetPage` 补 `cDto.Paginate`；②关键字搜索拆驱动分支（PG `CAST(tags AS TEXT)`）；③`GetHome` 帖子 `Pagination{PageSize:5}`；④`Get` 点击当日去重；⑤`Insert/Update` 长度前置校验 |
+| `service/novel_book.go` | ①`GetPage` 补 `cDto.Paginate`；②关键字搜索拆驱动分支（PG `CAST(tags AS TEXT)`）；③`GetHome` 话题 `Pagination{PageSize:5}`；④`Get` 点击当日去重；⑤`Insert/Update` 长度前置校验 |
 | `service/novel_post.go` | ①`GetPage` 补 `cDto.Paginate`；②`Insert` 帖题长 200 校验；③`AddComment` 重构为事务（锁帖校验 + 父评论同帖校验 + 内容长度） |
 | `service/novel_book_review.go` | ①`GetPage` 补 `cDto.Paginate`；②`Insert` 参数错误码 `DataQueryCode→ParamErrCode`；③书评长 1000 校验 |
 | `service/novel_bookshelf.go` | `Insert` 并发唯一冲突转 `NovelShelfAlreadyExistCode`（幂等） |
@@ -174,16 +174,16 @@
 ### P1 严重
 
 1. **书库列表分页失效**：`novel_book.go GetPage` 挂上 `Scopes(MakeCondition, Paginate(GetPageSize,GetPageIndex))`。
-2. **帖子列表分页失效**：`novel_post.go GetPage` 同上。
+2. **话题列表分页失效**：`novel_post.go GetPage` 同上。
 3. **书评圈列表分页失效**：`novel_book_review.go GetPage` 同上。
-4. **首页聚合全表返回**：`GetHome` 用 `cDto.Pagination{PageSize:5}` 限定首页 latest/hot 帖子各 5 条（`Pagination` 定义于 `core/dto`，别名为 `cDto`）。
+4. **首页聚合全表返回**：`GetHome` 用 `cDto.Pagination{PageSize:5}` 限定首页 latest/hot 话题各 5 条（`Pagination` 定义于 `core/dto`，别名为 `cDto`）。
 
 ### P2 应修复
 
 - **2-1 PG 兼容**：关键字 `like` 中受 `tags`（JSON）影响，改为按驱动分支：
   - `postgres` → `CAST(tags AS TEXT) like`
   - 其它（MySQL/SQLite）→ `tags like`
-- **2-2 帖子补充校验**：`AddComment` 重构为事务——
+- **2-2 话题补充校验**：`AddComment` 重构为事务——
   `FOR UPDATE` 锁帖 → 校验存在且 `status=正常`（防孤儿评论与 `comment_count` 空增）→ 建评论 → `comment_count+1` 同事务提交。
 - **2-3 复核「非缺陷」**：`gen_api_desc` 扫描所有含 `apis` 目录，已生成 `go-admin.Book.GetPage-fm` 等描述键；`SaveSysApi`（`app/admin/sys/models/sys_api.go`）启动时同步全部 gin 路由（含 `/web-api/v1/app/novel/**`，`apiType=app`）。仅剩后台角色绑定为运行期操作。
 
@@ -193,7 +193,7 @@
 - **3-2** 读者资料邮箱置空：判定改 `c.Email != data.EmailValue`，`c.Email==""` 时写入空串。
 - **3-3** 新增长度前置校验（校验 `len([]rune(...))`）：
   - 书名 100、作者 64、推荐语 30、封面/简介 500（`novel_book.go` Insert/Update）
-  - 帖子标题 200（`novel_post.go` Insert）
+  - 话题标题 200（`novel_post.go` Insert）
   - 评论与书评内容 1000
   - 昵称 64、简介 500、邮箱 128（`novel_reader_profile.go` Update）
 - **3-4** 楼中楼回复校验父评论存在且 `parent.PostId == post.Id`（新增码 41017）。
@@ -214,13 +214,13 @@
 | 41011 | `NovelProfileNotExistCode` | 读者资料不存在 | 删除 |
 | 41015 | `NovelCommentDeleteErrCode` | 评论删除失败 | 删除 |
 | 41014 | `NovelShelfAlreadyExistCode` | 该书已在书架上 | 保留并转正复用（3-5） |
-| 41017 | `NovelParentNotSamePostCode` | 父评论不属于该帖子 | 新增（3-4） |
+| 41017 | `NovelParentNotSamePostCode` | 父评论不属于该话题 | 新增（3-4） |
 | 41018 | `NovelBookTitleTooLongCode` | 书名不能超过 100 字 | 新增（3-3） |
 | 41019 | `NovelBookAuthorTooLongCode` | 作者名不能超过 64 字 | 新增 |
 | 41020 | `NovelBookSloganTooLongCode` | 推荐语不能超过 30 字 | 新增 |
 | 41021 | `NovelBookCoverTooLongCode` | 封面地址不能超过 500 字 | 新增 |
 | 41022 | `NovelBookDescTooLongCode` | 简介不能超过 500 字 | 新增 |
-| 41023 | `NovelPostTitleTooLongCode` | 帖子标题不能超过 200 字 | 新增 |
+| 41023 | `NovelPostTitleTooLongCode` | 话题标题不能超过 200 字 | 新增 |
 | 41024 | `NovelContentTooLongCode` | 评论/书评内容不能超过 1000 字 | 新增 |
 | 41025 | `NovelNicknameTooLongCode` | 昵称不能超过 64 字 | 新增 |
 | 41026 | `NovelBioTooLongCode` | 简介不能超过 500 字 | 新增 |

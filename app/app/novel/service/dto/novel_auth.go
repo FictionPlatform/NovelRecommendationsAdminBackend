@@ -12,3 +12,9 @@ type NovelAuthRegisterReq struct {
 	Password string `json:"password" binding:"required,min=6,max=64"`
 	Avatar   string `json:"avatar"`
 }
+
+// NovelCancelAccountReq app-读者主动注销请求
+type NovelCancelAccountReq struct {
+	Password   string `json:"password" binding:"required"`
+	CurrUserId int64  `json:"-" comment:"当前登录用户"`
+}

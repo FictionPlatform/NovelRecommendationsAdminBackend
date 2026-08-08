@@ -47,7 +47,7 @@ func registerNovelUserRouter(v1 *gin.RouterGroup) {
 	}
 }
 
-// registerNovelPostAdminRouter 注册后台帖子管理路由（/admin-api/v1/app/novel/post）
+// registerNovelPostAdminRouter 注册后台话题管理路由（/admin-api/v1/app/novel/post）
 func registerNovelPostAdminRouter(v1 *gin.RouterGroup) {
 	api := admin.NovelPostAdmin{}
 	r := v1.Group("/app/novel/post").Use(middleware.Auth()).Use(middleware.AuthCheckRole())

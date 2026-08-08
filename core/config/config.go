@@ -163,6 +163,9 @@ func (e *Settings) relinkGlobals() {
 	if e.Settings.LoginLock == nil {
 		e.Settings.LoginLock = LoginLockConfig
 	}
+	if e.Settings.RegLimit == nil {
+		e.Settings.RegLimit = RegLimitConfig
+	}
 }
 
 // Config 配置集合
@@ -178,6 +181,7 @@ type Config struct {
 	Locker      *Locker               `yaml:"locker"`
 	RateLimiter *RateLimiter          `yaml:"rateLimiter"`
 	LoginLock   *LoginLock            `yaml:"loginLock"`
+	RegLimit    *RegLimit             `yaml:"regLimit"`
 }
 
 // 多db改造
@@ -206,6 +210,7 @@ func Setup(s source.Source,
 			Locker:      LockerConfig,
 			RateLimiter: RateLimiterConfig,
 			LoginLock:   LoginLockConfig,
+			RegLimit:    RegLimitConfig,
 		},
 		handlers: handlers,
 	}

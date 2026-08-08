@@ -765,14 +765,13 @@ func (j *JwtAuth) checkUserStatus(c *gin.Context, userID int64, tokenRoleKey str
 		return false
 	}
 	// 读者角色（小说平台 app 端）：校验 app_user 表（与 admin_sys_user 分离，登录/状态均走读者体系）
+	// 禁言(status=2)可正常读接口，仅写操作由 service 层拦截；注销(status=3)为终态，拒绝全部请求
 	if tokenRoleKey == constant.RoleKeyReader {
-		var count int64
-		if err := db.Table("app_user").
-			Where("id = ? AND status = ?", userID, global.SysStatusOk).
-			Count(&count).Error; err != nil {
+		var status string
+		if err := db.Table("app_user").Select("status").Where("id = ?", userID).Scan(&status).Error; err != nil {
 			return false
 		}
-		return count > 0
+		return status == global.SysStatusOk || status == global.SysStatusBanned
 	}
 	var user struct {
 		RoleKey string

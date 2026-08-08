@@ -15,6 +15,7 @@ import (
 	"go-admin/core/middleware/auth/authdto"
 	"go-admin/core/utils/iputils"
 	"go-admin/core/utils/loginlock"
+	"go-admin/core/utils/reglimit"
 )
 
 type Auth struct {
@@ -96,13 +97,60 @@ func (e Auth) Register(c *gin.Context) {
 		e.Error(baseLang.ParamErrCode, lang.MsgByCode(baseLang.ParamErrCode, e.Lang))
 		return
 	}
+	// IP 注册频率限制（每天每 IP 最多 N 次，settings.yml 可配置）
+	clientIP := iputils.GetClientIP(c)
+	if reglimit.Check(clientIP) {
+		e.Error(baseLang.NovelRegLimitCode, lang.MsgByCode(baseLang.NovelRegLimitCode, e.Lang))
+		return
+	}
 	user, respCode, err := s.Register(&req)
 	if err != nil {
 		e.Error(respCode, err.Error())
 		return
 	}
+	reglimit.Record(clientIP)
 	c.Set(authdto.LoginUserId, user.Id)
 	c.Set(authdto.UserName, user.UserName)
 	c.Set(authdto.RoleKey, constant.RoleKeyReader)
 	auth.Auth.Login(c)
+}
+
+// CancelAccount app-读者主动注销（终态，需验证登录密码）
+// @Summary 读者主动注销
+// @Description 验证登录密码后注销当前账号（置为已注销，立即拒绝一切请求）
+// @Tags 读者认证
+// @Accept json
+// @Produce json
+// @Param body body dto.NovelCancelAccountReq true "请求参数"
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/novel/user/cancel [post]
+func (e Auth) CancelAccount(c *gin.Context) {
+	req := dto.NovelCancelAccountReq{}
+	s := service.NovelAuth{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
+		return
+	}
+	uid, rCode, err := auth.Auth.GetUserId(c)
+	if err != nil {
+		e.Error(rCode, err.Error())
+		return
+	}
+	req.CurrUserId = uid
+	if req.Password == "" {
+		e.Error(baseLang.ParamErrCode, lang.MsgByCode(baseLang.ParamErrCode, e.Lang))
+		return
+	}
+	respCode, err := s.CancelAccount(&req)
+	if err != nil {
+		e.Error(respCode, err.Error())
+		return
+	}
+	e.OK(nil, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }

@@ -288,9 +288,9 @@ type NovelPostAdmin struct {
 	api.Api
 }
 
-// GetPage 后台分页查询帖子
-// @Summary 后台分页查询帖子
-// @Tags 小说平台帖子
+// GetPage 后台分页查询话题
+// @Summary 后台分页查询话题
+// @Tags 小说平台话题
 // @Accept json
 // @Produce json
 // @Param pageIndex query int false "页码"
@@ -321,13 +321,13 @@ func (e NovelPostAdmin) GetPage(c *gin.Context) {
 	e.PageOK(list, nil, count, req.GetPageIndex(), req.GetPageSize(), lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
 
-// ChangeStatus 后台禁止访问/恢复帖子
-// @Summary 后台禁止访问/恢复帖子
+// ChangeStatus 后台禁止访问/恢复话题
+// @Summary 后台禁止访问/恢复话题
 // @Description 禁止（status=2）后读者端列表与详情均不可见
-// @Tags 小说平台帖子
+// @Tags 小说平台话题
 // @Accept json
 // @Produce json
-// @Param id path int true "帖子编号"
+// @Param id path int true "话题编号"
 // @Param body body dto.NovelPostAdminStatusReq true "请求参数"
 // @Security Bearer
 // @Success 200 {object} response.Response "请求成功"

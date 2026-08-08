@@ -79,6 +79,6 @@ type NovelBookRankReq struct {
 type NovelHomeResp struct {
 	Featured    []models.NovelBook `json:"featured" comment:"精选轮播"`
 	HotBooks    []models.NovelBook `json:"hotBooks" comment:"热门TOP5"`
-	LatestPosts []models.NovelPost `json:"latestPosts" comment:"最新帖子"`
-	HotPosts    []models.NovelPost `json:"hotPosts" comment:"热门帖子"`
+	LatestPosts []models.NovelPost `json:"latestPosts" comment:"最新话题"`
+	HotPosts    []models.NovelPost `json:"hotPosts" comment:"热门话题"`
 }

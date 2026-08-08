@@ -28,7 +28,8 @@ type User struct {
 	TreeSorts   string          `json:"treeSorts" gorm:"column:tree_sorts;type:varchar(1000);comment:所有级别排序号"`
 	TreeLeaf    string          `json:"treeLeaf" gorm:"column:tree_leaf;type:char(1);comment:是否最末级"`
 	TreeLevel   int64           `json:"treeLevel" gorm:"column:tree_level;type:int;comment:层次级别"`
-	Status      string          `json:"status" gorm:"column:status;type:char(1);comment:状态(1-正常 2-异常)"`
+	Status      string          `json:"status" gorm:"column:status;type:char(1);comment:状态(1-正常 2-禁言 3-注销)"`
+	UniqueId    *int64          `json:"uniqueId" gorm:"column:unique_id;type:bigint;uniqueIndex;comment:唯一9位数字ID"`
 	Remark      string          `json:"remark" gorm:"column:remark;type:varchar(500);comment:备注信息"`
 	CreateBy    int64           `json:"createBy" gorm:"column:create_by;type:int;comment:创建者"`
 	UpdateBy    int64           `json:"updateBy" gorm:"column:update_by;type:int;comment:更新者"`

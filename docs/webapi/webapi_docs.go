@@ -159,7 +159,7 @@ const docTemplatewebapi = `{
                         "Bearer": []
                     }
                 ],
-                "description": "删除小说（级联书评/书架，帖子关联置空；权限 novel:book:del）",
+                "description": "删除小说（级联书评/书架，话题关联置空；权限 novel:book:del）",
                 "consumes": [
                     "application/json"
                 ],
@@ -856,7 +856,7 @@ const docTemplatewebapi = `{
                 "tags": [
                     "小说书库"
                 ],
-                "summary": "首页聚合：精选+热门TOP+最新/热门帖子（无需登录）",
+                "summary": "首页聚合：精选+热门TOP+最新/热门话题（无需登录）",
                 "responses": {
                     "200": {
                         "description": "请求成功",
@@ -1015,7 +1015,7 @@ const docTemplatewebapi = `{
                 "tags": [
                     "小说长文"
                 ],
-                "summary": "发布长文帖子",
+                "summary": "发布长文话题",
                 "parameters": [
                     {
                         "description": "请求参数",
@@ -1058,7 +1058,7 @@ const docTemplatewebapi = `{
                 "tags": [
                     "小说长文"
                 ],
-                "summary": "删除我的帖子",
+                "summary": "删除我的话题",
                 "parameters": [
                     {
                         "description": "请求参数",
@@ -1093,7 +1093,7 @@ const docTemplatewebapi = `{
                         "Bearer": []
                     }
                 ],
-                "description": "当前登录用户的帖子评论（含原帖标题）",
+                "description": "当前登录用户的话题评论（含原帖标题）",
                 "consumes": [
                     "application/json"
                 ],
@@ -1188,7 +1188,7 @@ const docTemplatewebapi = `{
                 "tags": [
                     "小说长文"
                 ],
-                "summary": "分页查询长文帖子",
+                "summary": "分页查询长文话题",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1239,7 +1239,7 @@ const docTemplatewebapi = `{
         },
         "/app/novel/post/{id}": {
             "get": {
-                "description": "帖子详情（含楼中楼评论与当前用户互动状态）",
+                "description": "话题详情（含楼中楼评论与当前用户互动状态）",
                 "consumes": [
                     "application/json"
                 ],
@@ -1249,11 +1249,11 @@ const docTemplatewebapi = `{
                 "tags": [
                     "小说长文"
                 ],
-                "summary": "查询帖子详情",
+                "summary": "查询话题详情",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "帖子编号",
+                        "description": "话题编号",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1292,11 +1292,11 @@ const docTemplatewebapi = `{
                 "tags": [
                     "小说长文"
                 ],
-                "summary": "新增帖子评论/回复",
+                "summary": "新增话题评论/回复",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "帖子编号",
+                        "description": "话题编号",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1344,11 +1344,11 @@ const docTemplatewebapi = `{
                 "tags": [
                     "小说长文"
                 ],
-                "summary": "帖子点赞/踩/收藏",
+                "summary": "话题点赞/踩/收藏",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "帖子编号",
+                        "description": "话题编号",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1386,7 +1386,7 @@ const docTemplatewebapi = `{
                         "Bearer": []
                     }
                 ],
-                "description": "目标用户帖子/书评/评论/收藏/关注聚合",
+                "description": "目标用户话题/书评/评论/收藏/关注聚合",
                 "consumes": [
                     "application/json"
                 ],

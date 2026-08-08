@@ -17,7 +17,7 @@ tmp/logs
 config/settings.dev.yml.log
 config/settings.b.dev.yml
 .DS_Store
-go-admin-api
+go-admin-api*
 *.log
 
 # L28: go.sum 必须提交（供应链完整性），已从忽略列表移除

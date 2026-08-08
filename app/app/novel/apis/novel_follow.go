@@ -129,7 +129,7 @@ func (e Follow) Following(c *gin.Context) {
 
 // Profile app-书友名片聚合
 // @Summary 书友名片聚合
-// @Description 目标用户帖子/书评/评论/收藏/关注聚合
+// @Description 目标用户话题/书评/评论/收藏/关注聚合
 // @Tags 书友关注
 // @Accept json
 // @Produce json

@@ -307,7 +307,7 @@ func (e *NovelBook) Update(c *dto.NovelBookUpdateReq) (bool, int, error) {
 	return false, baseLang.SuccessCode, nil
 }
 
-// Delete app-删除小说书库（级联清理书评/书架，帖子关联置空）
+// Delete app-删除小说书库（级联清理书评/书架，话题关联置空）
 func (e *NovelBook) Delete(ids []int64) (int, error) {
 	if len(ids) == 0 {
 		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
@@ -386,7 +386,7 @@ func (e *NovelBook) GetHome() (*dto.NovelHomeResp, int, error) {
 	e.fillBookExt(resp.Featured, 0)
 	e.fillBookExt(resp.HotBooks, 0)
 
-	// 最新/热门帖子（首页各取 5 条）
+	// 最新/热门话题（首页各取 5 条）
 	postService := NewNovelPostService(&e.Service)
 	latestPosts, _, respCode, err := postService.GetPage(&dto.NovelPostQueryReq{Pagination: cDto.Pagination{PageSize: 5}, Sort: "latest"}, 0)
 	if err != nil {

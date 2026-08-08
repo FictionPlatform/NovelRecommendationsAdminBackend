@@ -41,7 +41,7 @@ type NovelPost struct {
 	service.Service
 }
 
-// NewNovelPostService app-实例化小说长文帖子服务
+// NewNovelPostService app-实例化小说长文话题服务
 func NewNovelPostService(s *service.Service) *NovelPost {
 	var srv = new(NovelPost)
 	srv.Orm = s.Orm
@@ -49,21 +49,21 @@ func NewNovelPostService(s *service.Service) *NovelPost {
 	return srv
 }
 
-// GetPage app-分页查询小说长文帖子
+// GetPage app-分页查询小说长文话题
 func (e *NovelPost) GetPage(c *dto.NovelPostQueryReq, currUserId int64) ([]models.NovelPost, int64, int, error) {
 	var data models.NovelPost
 	var list []models.NovelPost
 	var count int64
 
 	db := e.Orm.Model(&data).Where("status = ?", global.SysStatusOk)
-	// 只看我的帖子
+	// 只看我的话题
 	if c.Mine == 1 {
 		if currUserId <= 0 {
 			return nil, 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 		}
 		db = db.Where("user_id = ?", currUserId)
 	}
-	// 只看我收藏的帖子
+	// 只看我收藏的话题
 	if c.IsCollected == 1 {
 		if currUserId <= 0 {
 			return nil, 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
@@ -90,7 +90,7 @@ func (e *NovelPost) GetPage(c *dto.NovelPostQueryReq, currUserId int64) ([]model
 	return list, count, baseLang.SuccessCode, nil
 }
 
-// Get app-查询帖子详情（含评论与我的互动状态）
+// Get app-查询话题详情（含评论与我的互动状态）
 func (e *NovelPost) Get(id int64, currUserId int64) (*models.NovelPost, int, error) {
 	if id <= 0 {
 		return nil, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
@@ -132,7 +132,7 @@ func (e *NovelPost) Get(id int64, currUserId int64) (*models.NovelPost, int, err
 	return data, baseLang.SuccessCode, nil
 }
 
-// Insert app-发布长文帖子（内容 5000~10000 字）
+// Insert app-发布长文话题（内容 5000~10000 字）
 func (e *NovelPost) Insert(c *dto.NovelPostInsertReq) (int64, int, error) {
 	if c.CurrUserId <= 0 {
 		return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
@@ -155,19 +155,14 @@ func (e *NovelPost) Insert(c *dto.NovelPostInsertReq) (int64, int, error) {
 		}
 	}
 
-	userName, userAvatar, respCode, err := getUserSnapshot(&e.Service, c.CurrUserId)
-	if err != nil {
+	// 写操作权限校验（注销/禁言拦截，禁言到期惰性恢复）
+	if respCode, err := CheckReaderWritePermission(&e.Service, c.CurrUserId); err != nil {
 		return 0, respCode, err
 	}
 
-	// 禁言校验：管理员设置 ban_post_until 未到期时拒绝发帖
-	profile := &models.NovelReaderProfile{}
-	perr := e.Orm.Where("user_id = ?", c.CurrUserId).First(profile).Error
-	if perr == nil && profile.BanPostUntil != nil && profile.BanPostUntil.After(time.Now()) {
-		return 0, baseLang.NovelPostBannedCode, lang.MsgErr(baseLang.NovelPostBannedCode, e.Lang)
-	}
-	if perr != nil && !errors.Is(perr, gorm.ErrRecordNotFound) {
-		return 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, perr)
+	userName, userAvatar, respCode, err := getUserSnapshot(&e.Service, c.CurrUserId)
+	if err != nil {
+		return 0, respCode, err
 	}
 
 	now := time.Now()
@@ -202,7 +197,7 @@ func (e *NovelPost) Insert(c *dto.NovelPostInsertReq) (int64, int, error) {
 	return data.Id, baseLang.SuccessCode, nil
 }
 
-// Delete app-删除帖子（本人，级联清理互动与评论）
+// Delete app-删除话题（本人，级联清理互动与评论）
 func (e *NovelPost) Delete(ids []int64, currUserId int64) (int, error) {
 	if len(ids) == 0 || currUserId <= 0 {
 		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
@@ -253,7 +248,7 @@ func (e *NovelPost) Delete(ids []int64, currUserId int64) (int, error) {
 	return baseLang.SuccessCode, nil
 }
 
-// Interact app-帖子互动（点赞/踩/收藏，事务内互斥）
+// Interact app-话题互动（点赞/踩/收藏，事务内互斥）
 func (e *NovelPost) Interact(c *dto.NovelPostInteractReq) (int, error) {
 	if c.CurrUserId <= 0 {
 		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
@@ -263,6 +258,10 @@ func (e *NovelPost) Interact(c *dto.NovelPostInteractReq) (int, error) {
 	}
 	if c.Action != NovelActionAdd && c.Action != NovelActionCancel {
 		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+	}
+	// 写操作权限校验（注销/禁言拦截，禁言到期惰性恢复）
+	if respCode, err := CheckReaderWritePermission(&e.Service, c.CurrUserId); err != nil {
+		return respCode, err
 	}
 
 	baseOrm := e.Orm
@@ -278,7 +277,7 @@ func (e *NovelPost) Interact(c *dto.NovelPostInteractReq) (int, error) {
 		e.Orm = baseOrm
 	}()
 
-	// 锁定帖子行，保证计数原子
+	// 锁定话题行，保证计数原子
 	post := &models.NovelPost{}
 	txErr = e.Orm.Clauses(clause.Locking{Strength: "UPDATE"}).First(post, c.Id).Error
 	if txErr != nil {
@@ -404,7 +403,7 @@ func (e *NovelPost) Interact(c *dto.NovelPostInteractReq) (int, error) {
 	return baseLang.SuccessCode, nil
 }
 
-// AddComment app-新增评论/回复（@昵称，事务内校验帖子并回写计数）
+// AddComment app-新增评论/回复（@昵称，事务内校验话题并回写计数）
 func (e *NovelPost) AddComment(c *dto.NovelPostCommentInsertReq) (int64, int, error) {
 	if c.CurrUserId <= 0 || c.PostId <= 0 {
 		return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
@@ -414,6 +413,10 @@ func (e *NovelPost) AddComment(c *dto.NovelPostCommentInsertReq) (int64, int, er
 	}
 	if len([]rune(c.Content)) > 1000 {
 		return 0, baseLang.NovelContentTooLongCode, lang.MsgErr(baseLang.NovelContentTooLongCode, e.Lang)
+	}
+	// 写操作权限校验（注销/禁言拦截，禁言到期惰性恢复）
+	if respCode, err := CheckReaderWritePermission(&e.Service, c.CurrUserId); err != nil {
+		return 0, respCode, err
 	}
 
 	baseOrm := e.Orm
@@ -429,7 +432,7 @@ func (e *NovelPost) AddComment(c *dto.NovelPostCommentInsertReq) (int64, int, er
 		e.Orm = baseOrm
 	}()
 
-	// 锁定帖子行，校验存在且状态正常（防孤儿评论 + comment_count 空增）
+	// 锁定话题行，校验存在且状态正常（防孤儿评论 + comment_count 空增）
 	post := &models.NovelPost{}
 	txErr = e.Orm.Clauses(clause.Locking{Strength: "UPDATE"}).First(post, c.PostId).Error
 	if txErr != nil {
@@ -443,7 +446,7 @@ func (e *NovelPost) AddComment(c *dto.NovelPostCommentInsertReq) (int64, int, er
 		return 0, baseLang.NovelPostNotExistCode, lang.MsgErr(baseLang.NovelPostNotExistCode, e.Lang)
 	}
 
-	// 父评论存在性 + 必须属于同一帖子（楼中楼结构一致）
+	// 父评论存在性 + 必须属于同一话题（楼中楼结构一致）
 	if c.ParentId != nil && *c.ParentId > 0 {
 		parent := &models.NovelPostComment{}
 		err := e.Orm.First(parent, *c.ParentId).Error
@@ -479,7 +482,7 @@ func (e *NovelPost) AddComment(c *dto.NovelPostCommentInsertReq) (int64, int, er
 		txErr = err
 		return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
 	}
-	// 评论数 +1（事务内与帖子行锁联动）
+	// 评论数 +1（事务内与话题行锁联动）
 	if err := e.Orm.Model(&models.NovelPost{}).Where("id = ?", c.PostId).
 		Update("comment_count", gorm.Expr("comment_count + 1")).Error; err != nil {
 		txErr = err
@@ -533,7 +536,7 @@ func (e *NovelPost) GetMyComments(c *dto.NovelCommentQueryReq) ([]models.NovelPo
 	return list, count, baseLang.SuccessCode, nil
 }
 
-// fillCommentExt app-内部方法，批量填充评论所属帖子标题
+// fillCommentExt app-内部方法，批量填充评论所属话题标题
 func (e *NovelPost) fillCommentExt(list []models.NovelPostComment) {
 	if len(list) == 0 {
 		return

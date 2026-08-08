@@ -6,7 +6,7 @@ import (
 
 type NovelPostComment struct {
 	Id               int64      `json:"id" gorm:"primaryKey;autoIncrement;comment:主键编码"`
-	PostId           int64      `json:"postId" gorm:"column:post_id;type:int;comment:帖子编号"`
+	PostId           int64      `json:"postId" gorm:"column:post_id;type:int;comment:话题编号"`
 	UserId           int64      `json:"userId" gorm:"column:user_id;type:int;comment:评论用户编号"`
 	UserName         string     `json:"userName" gorm:"column:user_name;type:varchar(64);comment:昵称快照"`
 	UserAvatar       string     `json:"userAvatar" gorm:"column:user_avatar;type:varchar(500);comment:头像快照"`

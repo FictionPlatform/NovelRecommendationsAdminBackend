@@ -9,8 +9,8 @@ type NovelPostQueryReq struct {
 	TopicTag       string `form:"topicTag" search:"type:exact;column:topic_tag;table:app_novel_post" comment:"话题标签"`
 	Sort           string `form:"sort" search:"-" comment:"latest-最新 hot-热门"`
 	RefBookId      int64  `form:"refBookId" search:"type:exact;column:ref_book_id;table:app_novel_post" comment:"关联小说编号"`
-	Mine           int    `form:"mine" search:"-" comment:"1-只看我的帖子"`
-	IsCollected    int    `form:"isCollected" search:"-" comment:"1-只看我收藏的帖子"`
+	Mine           int    `form:"mine" search:"-" comment:"1-只看我的话题"`
+	IsCollected    int    `form:"isCollected" search:"-" comment:"1-只看我收藏的话题"`
 	CurrUserId     int64  `form:"-" search:"-" comment:"当前登录用户"`
 }
 
@@ -36,14 +36,14 @@ type NovelPostDeleteReq struct {
 }
 
 type NovelPostInteractReq struct {
-	Id         int64  `json:"-" uri:"id" comment:"帖子编号"`
+	Id         int64  `json:"-" uri:"id" comment:"话题编号"`
 	Type       string `json:"type" comment:"like-点赞 dislike-踩 collect-收藏"`
 	Action     string `json:"action" comment:"add-增加 cancel-取消"`
 	CurrUserId int64  `json:"-" comment:"当前登录用户"`
 }
 
 type NovelPostCommentInsertReq struct {
-	PostId           int64  `json:"-" uri:"id" comment:"帖子编号"`
+	PostId           int64  `json:"-" uri:"id" comment:"话题编号"`
 	Content          string `json:"content" comment:"评论内容"`
 	ParentId         *int64 `json:"parentId" comment:"楼中楼父评论编号(可选)"`
 	ReplyToUser      string `json:"replyToUser" comment:"被回复人昵称"`

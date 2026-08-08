@@ -13,8 +13,10 @@ const (
 	LoggerKey     = "_go-admin-logger-request"
 
 	// SysStatusOk 通用-正常
-	SysStatusOk    = "1"
-	SysStatusNotOk = "2"
+	SysStatusOk      = "1"
+	SysStatusNotOk   = "2"
+	SysStatusBanned  = "2" // app 读者-禁言（可登录可读，禁止写操作）
+	SysStatusCancelled = "3" // app 读者-注销（终态，禁止登录与一切请求）
 )
 
 const (

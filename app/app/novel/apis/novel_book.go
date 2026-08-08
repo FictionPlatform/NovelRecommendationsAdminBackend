@@ -174,7 +174,7 @@ func (e Book) Update(c *gin.Context) {
 
 // Delete app-删除小说
 // @Summary 删除小说
-// @Description 删除小说（级联书评/书架，帖子关联置空；权限 novel:book:del）
+// @Description 删除小说（级联书评/书架，话题关联置空；权限 novel:book:del）
 // @Tags 小说书库
 // @Accept json
 // @Produce json
@@ -241,7 +241,7 @@ func (e Book) Rank(c *gin.Context) {
 }
 
 // Home app-查询首页聚合数据
-// @Summary 首页聚合：精选+热门TOP+最新/热门帖子（无需登录）
+// @Summary 首页聚合：精选+热门TOP+最新/热门话题（无需登录）
 // @Description 首页聚合
 // @Tags 小说书库
 // @Accept json

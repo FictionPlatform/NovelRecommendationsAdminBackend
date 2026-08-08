@@ -47,6 +47,9 @@ const (
 	NovelUserStatusErrCode        = 41044
 	NovelBanTimeErrCode           = 41045
 	NovelPostStatusErrCode        = 41046
+	NovelUserCancelledCode        = 41047
+	NovelUserPwdWrongCode         = 41048
+	NovelRegLimitCode             = 41049
 )
 
 func init() {
@@ -57,9 +60,9 @@ func init() {
 	lang.MsgInfo[NovelBookTitleEmptyCode] = "书名不得为空"
 	lang.MsgInfo[NovelBookTitleExistCode] = "已存在同名书籍"
 	lang.MsgInfo[NovelReviewRatingRangeCode] = "评分需在 1~5 之间"
-	lang.MsgInfo[NovelPostNotExistCode] = "帖子不存在或已删除"
-	lang.MsgInfo[NovelPostContentLenCode] = "帖子正文需在 5000~10000 字之间"
-	lang.MsgInfo[NovelPostTitleEmptyCode] = "帖子标题不得为空"
+	lang.MsgInfo[NovelPostNotExistCode] = "话题不存在或已删除"
+	lang.MsgInfo[NovelPostContentLenCode] = "话题正文需在 5000~10000 字之间"
+	lang.MsgInfo[NovelPostTitleEmptyCode] = "话题标题不得为空"
 	lang.MsgInfo[NovelPostCommentNotExistCode] = "评论不存在"
 	lang.MsgInfo[NovelShelfNotExistCode] = "书架记录不存在"
 	lang.MsgInfo[NovelNoPermissionCode] = "无权操作该数据"
@@ -67,13 +70,13 @@ func init() {
 	lang.MsgInfo[NovelPostRefBookNotExistCode] = "关联小说不存在"
 	lang.MsgInfo[NovelShelfAlreadyExistCode] = "该书已在书架上"
 	lang.MsgInfo[NovelBookCategoryEmptyCode] = "书籍分类不得为空"
-	lang.MsgInfo[NovelParentNotSamePostCode] = "父评论不属于该帖子"
+	lang.MsgInfo[NovelParentNotSamePostCode] = "父评论不属于该话题"
 	lang.MsgInfo[NovelBookTitleTooLongCode] = "书名不能超过 100 字"
 	lang.MsgInfo[NovelBookAuthorTooLongCode] = "作者名不能超过 64 字"
 	lang.MsgInfo[NovelBookSloganTooLongCode] = "推荐语不能超过 30 字"
 	lang.MsgInfo[NovelBookCoverTooLongCode] = "封面地址不能超过 500 字"
 	lang.MsgInfo[NovelBookDescTooLongCode] = "简介不能超过 500 字"
-	lang.MsgInfo[NovelPostTitleTooLongCode] = "帖子标题不能超过 200 字"
+	lang.MsgInfo[NovelPostTitleTooLongCode] = "话题标题不能超过 200 字"
 	lang.MsgInfo[NovelContentTooLongCode] = "评论/书评内容不能超过 1000 字"
 	lang.MsgInfo[NovelNicknameTooLongCode] = "昵称不能超过 64 字"
 	lang.MsgInfo[NovelBioTooLongCode] = "简介不能超过 500 字"
@@ -96,5 +99,8 @@ func init() {
 	lang.MsgInfo[NovelPostBannedCode] = "您已被禁止发帖，请于解禁时间后再试"
 	lang.MsgInfo[NovelUserStatusErrCode] = "用户状态无效"
 	lang.MsgInfo[NovelBanTimeErrCode] = "禁言截止时间必须晚于当前时间"
-	lang.MsgInfo[NovelPostStatusErrCode] = "帖子状态无效"
+	lang.MsgInfo[NovelPostStatusErrCode] = "话题状态无效"
+	lang.MsgInfo[NovelUserCancelledCode] = "该账号已注销"
+	lang.MsgInfo[NovelUserPwdWrongCode] = "密码错误"
+	lang.MsgInfo[NovelRegLimitCode] = "今日注册次数已达上限，请明天再试"
 }

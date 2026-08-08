@@ -92,6 +92,10 @@ func (e *NovelBookReview) Insert(c *dto.NovelReviewInsertReq) (int64, int, error
 	if len([]rune(c.Content)) > 1000 {
 		return 0, baseLang.NovelContentTooLongCode, lang.MsgErr(baseLang.NovelContentTooLongCode, e.Lang)
 	}
+	// 写操作权限校验（注销/禁言拦截，禁言到期惰性恢复）
+	if respCode, err := CheckReaderWritePermission(&e.Service, c.CurrUserId); err != nil {
+		return 0, respCode, err
+	}
 
 	userName, userAvatar, respCode, err := getUserSnapshot(&e.Service, c.CurrUserId)
 	if err != nil {

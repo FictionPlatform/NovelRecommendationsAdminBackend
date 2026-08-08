@@ -30,6 +30,7 @@ type NovelFollowingItem struct {
 	Name       string `json:"name" comment:"昵称"`
 	Avatar     string `json:"avatar" comment:"头像"`
 	Bio        string `json:"bio" comment:"简介"`
+	Status     string `json:"status" comment:"状态 1-正常 2-禁言 3-注销"`
 	IsFollowed bool   `json:"isFollowed" comment:"是否已关注"`
 }
 
@@ -42,9 +43,11 @@ type NovelProfileReq struct {
 // NovelProfileResp 书友名片聚合响应
 type NovelProfileResp struct {
 	UserId           int64                     `json:"userId"`
+	UniqueId         *int64                    `json:"uniqueId,omitempty" comment:"唯一9位数字ID（仅本人可见）"`
 	Name             string                    `json:"name"`
 	Avatar           string                    `json:"avatar"`
 	Bio              string                    `json:"bio"`
+	Status           string                    `json:"status"`
 	IsSelf           bool                      `json:"isSelf"`
 	IsFollowed       bool                      `json:"isFollowed"`
 	PostCount        int64                     `json:"postCount"`
