@@ -14,6 +14,7 @@ import (
 	"go-admin/core/global"
 	"go-admin/core/lang"
 	"go-admin/core/utils/dberr"
+
 	"gorm.io/gorm"
 )
 
@@ -121,6 +122,57 @@ func (e *NovelFollow) GetFollowingPage(c *dto.NovelFollowQueryReq) ([]dto.NovelF
 			Bio:        bio,
 			Status:     status,
 			IsFollowed: true,
+		})
+	}
+	return items, count, baseLang.SuccessCode, nil
+}
+
+// GetFansPage app-分页查询我的粉丝列表
+func (e *NovelFollow) GetFansPage(c *dto.NovelFollowQueryReq) ([]dto.NovelFollowingItem, int64, int, error) {
+	if c.CurrUserId <= 0 {
+		return nil, 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+	}
+	var data models.NovelFollow
+	var list []models.NovelFollow
+	var count int64
+	err := e.Orm.Model(&data).Where("follow_user_id = ?", c.CurrUserId).
+		Order("created_at desc, id desc").
+		Scopes(cDto.Paginate(c.GetPageSize(), c.GetPageIndex())).
+		Find(&list).Limit(-1).Offset(-1).Count(&count).Error
+	if err != nil {
+		return nil, 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+	items := make([]dto.NovelFollowingItem, 0, len(list))
+	if len(list) == 0 {
+		return items, count, baseLang.SuccessCode, nil
+	}
+	// 粉丝用户集合 + 是否回关（我关注的粉丝）
+	fanIds := make([]int64, 0, len(list))
+	for _, f := range list {
+		fanIds = append(fanIds, f.UserId)
+	}
+	backFollowed := map[int64]bool{}
+	var backRows []models.NovelFollow
+	if err := e.Orm.Where("user_id = ? and follow_user_id in (?)", c.CurrUserId, fanIds).Find(&backRows).Error; err == nil {
+		for _, b := range backRows {
+			backFollowed[b.FollowUserId] = true
+		}
+	}
+	for _, f := range list {
+		name, avatar, bio, status := getReaderUserInfo(&e.Service, f.UserId)
+		// 已注销用户仅显示「已注销」
+		if status == global.SysStatusCancelled {
+			name = NovelCancelledUserName
+			avatar = ""
+			bio = ""
+		}
+		items = append(items, dto.NovelFollowingItem{
+			UserId:     f.UserId,
+			Name:       name,
+			Avatar:     avatar,
+			Bio:        bio,
+			Status:     status,
+			IsFollowed: backFollowed[f.UserId],
 		})
 	}
 	return items, count, baseLang.SuccessCode, nil

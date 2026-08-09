@@ -1,14 +1,25 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-admin/app/app/novel/apis"
 	"go-admin/core/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
 	routerNoCheckRole = append(routerNoCheckRole, registerHomeRouter)
 	routerCheckRole = append(routerCheckRole, registerBookRouter)
+	routerCheckRole = append(routerCheckRole, registerCategoryRouter)
+}
+
+// registerCategoryRouter 注册小说分类路由（读者端，需登录）
+func registerCategoryRouter(v1 *gin.RouterGroup) {
+	api := apis.NovelCategory{}
+	r := v1.Group("/app/novel/category").Use(middleware.Auth())
+	{
+		r.GET("/list", api.List)
+	}
 }
 
 // registerHomeRouter 注册首页聚合（无需登录）

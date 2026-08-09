@@ -14,6 +14,7 @@ type NovelBookQueryReq struct {
 	WordCountMin   int    `form:"wordCountMin" search:"type:gte;column:word_count;table:app_novel_book" comment:"字数下限"`
 	WordCountMax   int    `form:"wordCountMax" search:"type:lte;column:word_count;table:app_novel_book" comment:"字数上限"`
 	Keyword        string `form:"keyword" search:"-" comment:"关键字(书名/作者/标签不区分大小写)"`
+	Tag            string `form:"tag" search:"-" comment:"标签筛选(标签名精确匹配)"`
 	Sort           string `form:"sort" search:"-" comment:"排序 rating|click|latest"`
 	AllStatus      bool   `form:"allStatus" search:"-" comment:"查询全部上架状态（管理端）"`
 	CategoryLabel  string `form:"categoryLabel" search:"-" comment:"分类标签"`
@@ -68,6 +69,13 @@ type NovelBookGetReq struct {
 
 type NovelBookDeleteReq struct {
 	Ids []int64 `json:"ids"`
+}
+
+// NovelBookMergeReq 后台合并书籍请求
+type NovelBookMergeReq struct {
+	SourceBookId int64 `json:"sourceBookId" comment:"源书编号（被合并）"`
+	TargetBookId int64 `json:"targetBookId" comment:"目标书编号（保留）"`
+	CurrUserId   int64 `json:"-" comment:"当前操作管理员"`
 }
 
 type NovelBookRankReq struct {

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,7 +18,9 @@ import (
 	"go-admin/core/global"
 	"go-admin/core/lang"
 	"go-admin/core/runtime"
+
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type NovelBook struct {
@@ -55,6 +58,16 @@ func (e *NovelBook) GetPage(c *dto.NovelBookQueryReq) ([]models.NovelBook, int64
 			db = db.Where("LOWER(title) like ? or LOWER(author) like ? or CAST(tags AS TEXT) like ?", "%"+kw+"%", "%"+kw+"%", "%"+kw+"%")
 		} else {
 			db = db.Where("LOWER(title) like ? or LOWER(author) like ? or tags like ?", "%"+kw+"%", "%"+kw+"%", "%"+kw+"%")
+		}
+	}
+
+	// 标签筛选：tags JSON 中包含该标签（精确匹配 JSON 字符串元素）
+	if c.Tag != "" {
+		tagJSON := `"` + c.Tag + `"`
+		if e.Orm.Dialector.Name() == "postgres" {
+			db = db.Where("CAST(tags AS TEXT) like ?", "%"+tagJSON+"%")
+		} else {
+			db = db.Where("tags like ?", "%"+tagJSON+"%")
 		}
 	}
 
@@ -169,11 +182,23 @@ func (e *NovelBook) Insert(c *dto.NovelBookInsertReq) (int64, int, error) {
 		data.SerialStatus = "1"
 	}
 	data.Category = c.Category
+	// 分类存在性校验 + 取分类名（默认标签首个用分类名）
+	categoryName := ""
+	if id, err := strconv.ParseInt(c.Category, 10, 64); err == nil && id > 0 {
+		var cat models.NovelCategory
+		if err := e.Orm.First(&cat, id).Error; err == nil {
+			categoryName = cat.Name
+		} else {
+			return 0, baseLang.NovelCategoryNotExistCode, lang.MsgErr(baseLang.NovelCategoryNotExistCode, e.Lang)
+		}
+	} else {
+		return 0, baseLang.NovelBookCategoryEmptyCode, lang.MsgErr(baseLang.NovelBookCategoryEmptyCode, e.Lang)
+	}
 	if len(c.Tags) > 0 {
 		tagJSON, _ := json.Marshal(c.Tags)
 		data.Tags = string(tagJSON)
 	} else {
-		tagJSON, _ := json.Marshal([]string{"#" + c.Category, "#新书热推", "#精彩必读"})
+		tagJSON, _ := json.Marshal([]string{"#" + categoryName, "#新书热推", "#精彩必读"})
 		data.Tags = string(tagJSON)
 	}
 	data.Slogan = c.Slogan
@@ -263,6 +288,18 @@ func (e *NovelBook) Update(c *dto.NovelBookUpdateReq) (bool, int, error) {
 		updates["serial_status"] = c.SerialStatus
 	}
 	if c.Category != "" && data.Category != c.Category {
+		// 分类存在性校验
+		if id, err := strconv.ParseInt(c.Category, 10, 64); err == nil && id > 0 {
+			var cnt int64
+			if err := e.Orm.Model(&models.NovelCategory{}).Where("id = ?", id).Count(&cnt).Error; err != nil {
+				return false, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+			}
+			if cnt == 0 {
+				return false, baseLang.NovelCategoryNotExistCode, lang.MsgErr(baseLang.NovelCategoryNotExistCode, e.Lang)
+			}
+		} else {
+			return false, baseLang.NovelBookCategoryEmptyCode, lang.MsgErr(baseLang.NovelBookCategoryEmptyCode, e.Lang)
+		}
 		updates["category"] = c.Category
 	}
 	if c.Tags != nil {
@@ -411,7 +448,7 @@ func (e *NovelBook) countByTitle(title string) (int64, int, error) {
 	return count, baseLang.SuccessCode, nil
 }
 
-// fillBookExt app-内部方法，填充标签/字典标签/收藏状态
+// fillBookExt app-内部方法，填充标签/分类名/字典标签/收藏状态
 func (e *NovelBook) fillBookExt(list []models.NovelBook, currUserId int64) {
 	if len(list) == 0 {
 		return
@@ -422,10 +459,31 @@ func (e *NovelBook) fillBookExt(list []models.NovelBook, currUserId int64) {
 			_ = json.Unmarshal([]byte(list[i].Tags), &list[i].TagList)
 		}
 	}
-	// 字典标签
+	// 分类名联查（app_novel_category）
+	catIds := make([]int64, 0, len(list))
+	for i := range list {
+		if list[i].Category != "" {
+			if id, err := strconv.ParseInt(list[i].Category, 10, 64); err == nil {
+				catIds = append(catIds, id)
+			}
+		}
+	}
+	catNameMap := map[int64]string{}
+	if len(catIds) > 0 {
+		var cats []models.NovelCategory
+		if err := e.Orm.Where("id in (?)", catIds).Find(&cats).Error; err == nil {
+			for _, c := range cats {
+				catNameMap[c.Id] = c.Name
+			}
+		}
+	}
+	// 字典标签（连载状态）
 	dictService := adminService.NewSysDictDataService(&e.Service)
 	for i := range list {
-		list[i].CategoryLabel = dictService.GetLabel("app_novel_category", list[i].Category)
+		if id, err := strconv.ParseInt(list[i].Category, 10, 64); err == nil {
+			list[i].CategoryLabel = catNameMap[id]
+			list[i].CategoryName = catNameMap[id]
+		}
 		list[i].StatusLabel = dictService.GetLabel("app_novel_serial_status", list[i].SerialStatus)
 	}
 	// 收藏状态（当前用户）
@@ -455,4 +513,114 @@ func avgRating(oldRating float64, oldCount int, newScore int) float64 {
 	total := oldRating*float64(oldCount) + float64(newScore)
 	avg := total / float64(oldCount+1)
 	return math.Round(avg*10) / 10
+}
+
+// mergeBizErr 合并业务的错误码包装（事务内返回，事务外解包）
+type mergeBizErr struct {
+	code int
+}
+
+func (e *mergeBizErr) Error() string {
+	return fmt.Sprintf("merge biz error code=%d", e.code)
+}
+
+// MergeBooks 后台-合并书籍：源书（被合并）→ 目标书（保留）
+// 迁移：书评/书架收藏/话题引用；聚合：书评数/评分（加权）/点击；源书下架保留
+func (e *NovelBook) MergeBooks(c *dto.NovelBookMergeReq) (int, error) {
+	if c.SourceBookId <= 0 || c.TargetBookId <= 0 {
+		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+	}
+	if c.SourceBookId == c.TargetBookId {
+		return baseLang.NovelMergeSameBookCode, lang.MsgErr(baseLang.NovelMergeSameBookCode, e.Lang)
+	}
+	txErr := e.Orm.Transaction(func(tx *gorm.DB) error {
+		// 锁定源书与目标书（FOR UPDATE，防并发聚合错乱）
+		var source, target models.NovelBook
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&source, c.SourceBookId).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return &mergeBizErr{baseLang.NovelMergeSourceNotExistCode}
+			}
+			return err
+		}
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&target, c.TargetBookId).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return &mergeBizErr{baseLang.NovelMergeTargetNotExistCode}
+			}
+			return err
+		}
+		if target.Status != global.SysStatusOk {
+			return &mergeBizErr{baseLang.NovelMergeTargetOfflineCode}
+		}
+
+		// 1. 迁移书评：book_id 源→目标（保留全部书评）
+		if err := tx.Model(&models.NovelBookReview{}).
+			Where("book_id = ?", source.Id).
+			Update("book_id", target.Id).Error; err != nil {
+			return err
+		}
+
+		// 2. 迁移书架：先去重（已收藏目标书的用户，删除其源书收藏），再迁移
+		var dupUsers []int64
+		if err := tx.Model(&models.NovelBookshelf{}).
+			Where("book_id = ?", target.Id).Pluck("user_id", &dupUsers).Error; err != nil {
+			return err
+		}
+		if len(dupUsers) > 0 {
+			if err := tx.Where("book_id = ? and user_id in (?)", source.Id, dupUsers).
+				Delete(&models.NovelBookshelf{}).Error; err != nil {
+				return err
+			}
+		}
+		if err := tx.Model(&models.NovelBookshelf{}).
+			Where("book_id = ?", source.Id).
+			Update("book_id", target.Id).Error; err != nil {
+			return err
+		}
+
+		// 3. 迁移话题引用：ref_book_id 源→目标
+		if err := tx.Model(&models.NovelPost{}).
+			Where("ref_book_id = ?", source.Id).
+			Update("ref_book_id", target.Id).Error; err != nil {
+			return err
+		}
+
+		// 4. 聚合目标书：书评数（实际 count）+ 评分（加权平均）+ 点击（累加）
+		var reviewCount int64
+		if err := tx.Model(&models.NovelBookReview{}).
+			Where("book_id = ?", target.Id).Count(&reviewCount).Error; err != nil {
+			return err
+		}
+		newRating := 0.0
+		if reviewCount > 0 {
+			total := target.Rating*float64(target.ReviewCount) + source.Rating*float64(source.ReviewCount)
+			newRating = math.Round(total/float64(reviewCount)*10) / 10
+		}
+		if err := tx.Model(&models.NovelBook{}).Where("id = ?", target.Id).Updates(map[string]interface{}{
+			"review_count": reviewCount,
+			"rating":       newRating,
+			"clicks":       target.Clicks + source.Clicks,
+			"updated_at":   time.Now(),
+		}).Error; err != nil {
+			return err
+		}
+
+		// 5. 源书下架保留（status=2），清空书评数/评分
+		if err := tx.Model(&models.NovelBook{}).Where("id = ?", source.Id).Updates(map[string]interface{}{
+			"status":       global.SysStatusNotOk,
+			"review_count": 0,
+			"rating":       0,
+			"updated_at":   time.Now(),
+		}).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if txErr != nil {
+		var biz *mergeBizErr
+		if errors.As(txErr, &biz) {
+			return biz.code, lang.MsgErr(biz.code, e.Lang)
+		}
+		return baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, txErr)
+	}
+	return baseLang.SuccessCode, nil
 }

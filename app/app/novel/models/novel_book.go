@@ -12,7 +12,7 @@ type NovelBook struct {
 	Rating       float64    `json:"rating" gorm:"column:rating;type:decimal(3,1);comment:综合评分"`
 	ReviewCount  int        `json:"reviewCount" gorm:"column:review_count;type:int;comment:书评数"`
 	SerialStatus string     `json:"serialStatus" gorm:"column:serial_status;type:char(1);comment:连载状态(1-连载中 2-已完结)"`
-	Category     string     `json:"category" gorm:"column:category;type:char(2);comment:分类字典app_novel_category"`
+	Category     string     `json:"category" gorm:"column:category;type:bigint;comment:分类id(app_novel_category.id)"`
 	Tags         string     `json:"-" gorm:"column:tags;type:json;comment:标签数组"`
 	TagList      []string   `json:"tags" gorm:"-"`
 	Slogan       string     `json:"slogan" gorm:"column:slogan;type:varchar(30);comment:一句话推荐语"`
@@ -32,6 +32,7 @@ type NovelBook struct {
 	// 扩展
 	Reviews       []NovelBookReview `json:"reviews" gorm:"-"`
 	IsCollected   bool              `json:"isCollected" gorm:"-"`
+	CategoryName  string            `json:"categoryName" gorm:"-" comment:"分类名称(联查填充)"`
 	CategoryLabel string            `json:"categoryLabel" gorm:"-"`
 	StatusLabel   string            `json:"statusLabel" gorm:"-"`
 }

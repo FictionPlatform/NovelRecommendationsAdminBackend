@@ -1,9 +1,10 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-admin/app/app/novel/apis"
 	"go-admin/core/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
@@ -18,6 +19,7 @@ func registerFollowRouter(v1 *gin.RouterGroup) {
 		r.POST("/follow", api.Follow)
 		r.DELETE("/follow/:targetUserId", api.Unfollow)
 		r.GET("/following", api.Following)
+		r.GET("/fans", api.Fans)
 		r.GET("/profile/:userId", api.Profile)
 	}
 }

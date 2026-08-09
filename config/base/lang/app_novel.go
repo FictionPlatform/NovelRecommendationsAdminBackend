@@ -50,6 +50,20 @@ const (
 	NovelUserCancelledCode        = 41047
 	NovelUserPwdWrongCode         = 41048
 	NovelRegLimitCode             = 41049
+	NovelCategoryNotExistCode     = 41050
+	NovelCategoryNameEmptyCode    = 41051
+	NovelCategoryNameTooLongCode  = 41052
+	NovelCategoryNameExistCode    = 41053
+	NovelCategoryHasTagCode       = 41054
+	NovelCategoryHasBookCode      = 41055
+	NovelTagNotExistCode          = 41056
+	NovelTagNameEmptyCode         = 41057
+	NovelTagNameTooLongCode       = 41058
+	NovelTagNameExistCode         = 41059
+	NovelMergeSameBookCode        = 41060
+	NovelMergeSourceNotExistCode  = 41061
+	NovelMergeTargetNotExistCode  = 41062
+	NovelMergeTargetOfflineCode   = 41063
 )
 
 func init() {
@@ -103,4 +117,18 @@ func init() {
 	lang.MsgInfo[NovelUserCancelledCode] = "该账号已注销"
 	lang.MsgInfo[NovelUserPwdWrongCode] = "密码错误"
 	lang.MsgInfo[NovelRegLimitCode] = "今日注册次数已达上限，请明天再试"
+	lang.MsgInfo[NovelCategoryNotExistCode] = "分类不存在"
+	lang.MsgInfo[NovelCategoryNameEmptyCode] = "分类名称不得为空"
+	lang.MsgInfo[NovelCategoryNameTooLongCode] = "分类名称不能超过 32 字"
+	lang.MsgInfo[NovelCategoryNameExistCode] = "已存在同名分类"
+	lang.MsgInfo[NovelCategoryHasTagCode] = "该分类下存在标签，请先删除标签"
+	lang.MsgInfo[NovelCategoryHasBookCode] = "该分类下存在书籍，请先转移书籍"
+	lang.MsgInfo[NovelTagNotExistCode] = "标签不存在"
+	lang.MsgInfo[NovelTagNameEmptyCode] = "标签名称不得为空"
+	lang.MsgInfo[NovelTagNameTooLongCode] = "标签名称不能超过 32 字"
+	lang.MsgInfo[NovelTagNameExistCode] = "该分类下已存在同名标签"
+	lang.MsgInfo[NovelMergeSameBookCode] = "源书与目标书不能是同一本书"
+	lang.MsgInfo[NovelMergeSourceNotExistCode] = "源书不存在"
+	lang.MsgInfo[NovelMergeTargetNotExistCode] = "目标书不存在"
+	lang.MsgInfo[NovelMergeTargetOfflineCode] = "目标书已下架，不能作为合并目标"
 }

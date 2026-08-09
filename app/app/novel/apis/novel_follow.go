@@ -1,7 +1,6 @@
 package apis
 
 import (
-	"github.com/gin-gonic/gin"
 	"go-admin/app/app/novel/service"
 	"go-admin/app/app/novel/service/dto"
 	baseLang "go-admin/config/base/lang"
@@ -9,6 +8,8 @@ import (
 	_ "go-admin/core/dto/response"
 	"go-admin/core/lang"
 	"go-admin/core/middleware/auth"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Follow struct {
@@ -120,6 +121,44 @@ func (e Follow) Following(c *gin.Context) {
 	}
 	req.CurrUserId = uid
 	list, count, respCode, err := s.GetFollowingPage(&req)
+	if err != nil {
+		e.Error(respCode, err.Error())
+		return
+	}
+	e.PageOK(list, nil, count, req.GetPageIndex(), req.GetPageSize(), lang.MsgByCode(baseLang.SuccessCode, e.Lang))
+}
+
+// Fans app-分页查询我的粉丝列表
+// @Summary 分页查询我的粉丝列表
+// @Description 关注当前登录用户的书友（含画像与是否回关）
+// @Tags 书友关注
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/novel/fans [get]
+func (e Follow) Fans(c *gin.Context) {
+	req := dto.NovelFollowQueryReq{}
+	s := service.NovelFollow{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
+		return
+	}
+	uid, rCode, err := auth.Auth.GetUserId(c)
+	if err != nil {
+		e.Error(rCode, err.Error())
+		return
+	}
+	req.CurrUserId = uid
+	list, count, respCode, err := s.GetFansPage(&req)
 	if err != nil {
 		e.Error(respCode, err.Error())
 		return

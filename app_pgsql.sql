@@ -1184,6 +1184,19 @@ INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element",
 INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (147, '公告分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-notice:query', 0, 146, '0,58,135,146,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
 INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (148, '发布公告', 'AppstoreOutlined', '', '', '', 'app:novel-notice:add', 0, 146, '0,58,135,146,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
 INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (149, '删除公告', 'AppstoreOutlined', '', '', '', 'app:novel-notice:del', 0, 146, '0,58,135,146,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-07 10:00:00', '2026-08-07 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (150, '分类管理', 'AppstoreOutlined', '/app/novel/novel-category', '/app/novel/novel-category/index', '', '', 50, 135, '0,58,135,', '2', '1', '2', '2', '1', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (151, '分类分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-category:query', 0, 150, '0,58,135,150,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (152, '新增分类', 'AppstoreOutlined', '', '', '', 'app:novel-category:add', 0, 150, '0,58,135,150,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (153, '编辑分类', 'AppstoreOutlined', '', '', '', 'app:novel-category:edit', 0, 150, '0,58,135,150,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (154, '删除分类', 'AppstoreOutlined', '', '', '', 'app:novel-category:del', 0, 150, '0,58,135,150,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (155, '标签管理', 'TagsOutlined', '/app/novel/novel-tag', '/app/novel/novel-tag/index', '', '', 60, 135, '0,58,135,', '2', '1', '2', '2', '1', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (156, '标签分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-tag:query', 0, 155, '0,58,135,155,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (157, '新增标签', 'AppstoreOutlined', '', '', '', 'app:novel-tag:add', 0, 155, '0,58,135,155,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (158, '编辑标签', 'AppstoreOutlined', '', '', '', 'app:novel-tag:edit', 0, 155, '0,58,135,155,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (159, '删除标签', 'AppstoreOutlined', '', '', '', 'app:novel-tag:del', 0, 155, '0,58,135,155,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (160, '书籍管理', 'BookOutlined', '/app/novel/novel-book', '/app/novel/novel-book/index', '', '', 70, 135, '0,58,135,', '2', '1', '2', '2', '1', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (161, '书籍分页查询', 'AppstoreOutlined', '', '', '', 'app:novel-book:query', 0, 160, '0,58,135,160,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
+INSERT INTO "public"."admin_sys_menu" ("id", "title", "icon", "path", "element", "redirect", "permission", "sort", "parent_id", "parent_ids", "menu_type", "is_keep_alive", "is_affix", "is_hidden", "is_frame", "create_by", "update_by", "created_at", "updated_at") VALUES (162, '合并书籍', 'AppstoreOutlined', '', '', '', 'app:novel-book:merge', 0, 160, '0,58,135,160,', '3', ' ', ' ', ' ', ' ', 1, 1, '2026-08-09 10:00:00', '2026-08-09 10:00:00');
 COMMIT;
 
 -- ----------------------------
@@ -2174,6 +2187,225 @@ COMMIT;
 SELECT setval(pg_get_serial_sequence('public.plugins_msg_code', 'id'),(SELECT COALESCE(MAX(id), 0) + 1 FROM public.plugins_msg_code),false);
 
 -- ----------------------------
+-- Table structure for app_novel_category 小说一级分类（仅一级）
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."app_novel_category";
+CREATE TABLE "public"."app_novel_category" (
+  "id" BIGINT PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+  "name" varchar(32) NOT NULL,
+  "sort" INT NOT NULL DEFAULT 0,
+  "status" VARCHAR(1) NOT NULL DEFAULT '1',
+  "create_by" BIGINT NOT NULL DEFAULT 0,
+  "update_by" BIGINT,
+  "created_at" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+;
+ALTER TABLE "public"."app_novel_category" OWNER TO "postgres";
+COMMENT ON TABLE "public"."app_novel_category" IS '小说一级分类';
+CREATE UNIQUE INDEX "uniq_novel_category_name" ON "public"."app_novel_category" USING btree ("name");
+CREATE INDEX "idx_category_sort" ON "public"."app_novel_category" USING btree ("sort");
+
+-- Records of app_novel_category（分类.md：科幻/玄幻/奇幻/游戏/都市/灵异/异能/武侠/军事/历史/诸天无限/轻小说/其他）
+INSERT INTO "public"."app_novel_category" ("id", "name", "sort", "status", "create_by", "created_at", "updated_at") VALUES
+(1, '科幻', 1, '1', 1, NOW(), NOW()),
+(2, '玄幻', 2, '1', 1, NOW(), NOW()),
+(3, '奇幻', 3, '1', 1, NOW(), NOW()),
+(4, '游戏', 4, '1', 1, NOW(), NOW()),
+(5, '都市', 5, '1', 1, NOW(), NOW()),
+(6, '灵异', 6, '1', 1, NOW(), NOW()),
+(7, '异能', 7, '1', 1, NOW(), NOW()),
+(8, '武侠', 8, '1', 1, NOW(), NOW()),
+(9, '军事', 9, '1', 1, NOW(), NOW()),
+(10, '历史', 10, '1', 1, NOW(), NOW()),
+(11, '诸天无限', 11, '1', 1, NOW(), NOW()),
+(12, '轻小说', 12, '1', 1, NOW(), NOW()),
+(13, '其他', 99, '1', 1, NOW(), NOW());
+
+-- ----------------------------
+-- Table structure for app_novel_tag 小说标签（挂在分类下）
+-- ----------------------------
+DROP TABLE IF EXISTS "public"."app_novel_tag";
+CREATE TABLE "public"."app_novel_tag" (
+  "id" BIGINT PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+  "category_id" BIGINT NOT NULL,
+  "name" varchar(32) NOT NULL,
+  "sort" INT NOT NULL DEFAULT 0,
+  "status" VARCHAR(1) NOT NULL DEFAULT '1',
+  "create_by" BIGINT NOT NULL DEFAULT 0,
+  "update_by" BIGINT,
+  "created_at" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" timestamptz(0) NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+;
+ALTER TABLE "public"."app_novel_tag" OWNER TO "postgres";
+COMMENT ON TABLE "public"."app_novel_tag" IS '小说标签';
+CREATE UNIQUE INDEX "uniq_novel_tag_cat_name" ON "public"."app_novel_tag" USING btree ("category_id", "name");
+CREATE INDEX "idx_tag_category" ON "public"."app_novel_tag" USING btree ("category_id");
+CREATE INDEX "idx_tag_sort" ON "public"."app_novel_tag" USING btree ("sort");
+
+-- Records of app_novel_tag（分类.md 每个分类下的标签清单，去重）
+INSERT INTO "public"."app_novel_tag" ("id", "category_id", "name", "sort", "status", "create_by", "created_at", "updated_at") VALUES
+-- 科幻
+(1, 1, '进化变异', 1, '1', 1, NOW(), NOW()),
+(2, 1, '未来世界', 2, '1', 1, NOW(), NOW()),
+(3, 1, '超级科技', 3, '1', 1, NOW(), NOW()),
+(4, 1, '星际文明', 4, '1', 1, NOW(), NOW()),
+(5, 1, '时空穿梭', 5, '1', 1, NOW(), NOW()),
+(6, 1, '末世危机', 6, '1', 1, NOW(), NOW()),
+(7, 1, '人工智能', 7, '1', 1, NOW(), NOW()),
+(8, 1, '基因改造', 8, '1', 1, NOW(), NOW()),
+(9, 1, '星际探险', 9, '1', 1, NOW(), NOW()),
+(10, 1, '太空歌剧', 10, '1', 1, NOW(), NOW()),
+(11, 1, '赛博朋克', 11, '1', 1, NOW(), NOW()),
+(12, 1, '时间旅行', 12, '1', 1, NOW(), NOW()),
+(13, 1, '外星文明', 13, '1', 1, NOW(), NOW()),
+-- 玄幻
+(14, 2, '修真', 1, '1', 1, NOW(), NOW()),
+(15, 2, '仙侠', 2, '1', 1, NOW(), NOW()),
+(16, 2, '异世', 3, '1', 1, NOW(), NOW()),
+(17, 2, '神话', 4, '1', 1, NOW(), NOW()),
+(18, 2, '重生', 5, '1', 1, NOW(), NOW()),
+(19, 2, '穿越', 6, '1', 1, NOW(), NOW()),
+(20, 2, '古典', 7, '1', 1, NOW(), NOW()),
+(21, 2, '爽文', 8, '1', 1, NOW(), NOW()),
+(22, 2, '系统', 9, '1', 1, NOW(), NOW()),
+(23, 2, '升级', 10, '1', 1, NOW(), NOW()),
+(24, 2, '热血', 11, '1', 1, NOW(), NOW()),
+(25, 2, '打脸', 12, '1', 1, NOW(), NOW()),
+(26, 2, '天才', 13, '1', 1, NOW(), NOW()),
+(27, 2, '逆袭', 14, '1', 1, NOW(), NOW()),
+-- 奇幻
+(28, 3, '史诗', 1, '1', 1, NOW(), NOW()),
+(29, 3, '魔法', 2, '1', 1, NOW(), NOW()),
+(30, 3, '龙与地下城', 3, '1', 1, NOW(), NOW()),
+(31, 3, '异世界', 4, '1', 1, NOW(), NOW()),
+(32, 3, '学院', 5, '1', 1, NOW(), NOW()),
+(33, 3, '炼金术', 6, '1', 1, NOW(), NOW()),
+(34, 3, '亡灵', 7, '1', 1, NOW(), NOW()),
+(35, 3, '吸血鬼', 8, '1', 1, NOW(), NOW()),
+(36, 3, '魔兽', 9, '1', 1, NOW(), NOW()),
+(37, 3, '魔王勇者', 10, '1', 1, NOW(), NOW()),
+-- 游戏
+(38, 4, '虚拟', 1, '1', 1, NOW(), NOW()),
+(39, 4, '网游', 2, '1', 1, NOW(), NOW()),
+(40, 4, '异界', 3, '1', 1, NOW(), NOW()),
+(41, 4, '系统', 4, '1', 1, NOW(), NOW()),
+(42, 4, '副本', 5, '1', 1, NOW(), NOW()),
+-- 都市
+(43, 5, '日常', 1, '1', 1, NOW(), NOW()),
+(44, 5, '青春', 2, '1', 1, NOW(), NOW()),
+(45, 5, '校园', 3, '1', 1, NOW(), NOW()),
+(46, 5, '商战', 4, '1', 1, NOW(), NOW()),
+(47, 5, '百态', 5, '1', 1, NOW(), NOW()),
+(48, 5, '家庭', 6, '1', 1, NOW(), NOW()),
+(49, 5, '伦理', 7, '1', 1, NOW(), NOW()),
+(50, 5, '豪门', 8, '1', 1, NOW(), NOW()),
+(51, 5, '乡土', 9, '1', 1, NOW(), NOW()),
+(52, 5, '言情', 10, '1', 1, NOW(), NOW()),
+(53, 5, '恋爱', 11, '1', 1, NOW(), NOW()),
+(54, 5, '职场', 12, '1', 1, NOW(), NOW()),
+(55, 5, '婚姻', 13, '1', 1, NOW(), NOW()),
+(56, 5, '年代', 14, '1', 1, NOW(), NOW()),
+(57, 5, '时代', 15, '1', 1, NOW(), NOW()),
+(58, 5, '主播', 16, '1', 1, NOW(), NOW()),
+(59, 5, '竞技', 17, '1', 1, NOW(), NOW()),
+(60, 5, '运动', 18, '1', 1, NOW(), NOW()),
+(61, 5, '联赛', 19, '1', 1, NOW(), NOW()),
+(62, 5, '娱乐', 20, '1', 1, NOW(), NOW()),
+(63, 5, '明星', 21, '1', 1, NOW(), NOW()),
+(64, 5, '电竞', 22, '1', 1, NOW(), NOW()),
+(65, 5, '教练', 23, '1', 1, NOW(), NOW()),
+(66, 5, '黑客', 24, '1', 1, NOW(), NOW()),
+(67, 5, '后宫', 25, '1', 1, NOW(), NOW()),
+(68, 5, '励志', 26, '1', 1, NOW(), NOW()),
+(69, 5, '美食', 27, '1', 1, NOW(), NOW()),
+-- 灵异
+(70, 6, '悬疑', 1, '1', 1, NOW(), NOW()),
+(71, 6, '民俗', 2, '1', 1, NOW(), NOW()),
+(72, 6, '侦探', 3, '1', 1, NOW(), NOW()),
+(73, 6, '神秘', 4, '1', 1, NOW(), NOW()),
+(74, 6, '惊悚', 5, '1', 1, NOW(), NOW()),
+(75, 6, '推理', 6, '1', 1, NOW(), NOW()),
+(76, 6, '解谜', 7, '1', 1, NOW(), NOW()),
+(77, 6, '案件', 8, '1', 1, NOW(), NOW()),
+(78, 6, '鬼怪', 9, '1', 1, NOW(), NOW()),
+(79, 6, '恐怖', 10, '1', 1, NOW(), NOW()),
+(80, 6, '超自然', 11, '1', 1, NOW(), NOW()),
+(81, 6, '诡异', 12, '1', 1, NOW(), NOW()),
+(82, 6, '盗墓', 13, '1', 1, NOW(), NOW()),
+(83, 6, '鉴宝', 14, '1', 1, NOW(), NOW()),
+(84, 6, '猎奇', 15, '1', 1, NOW(), NOW()),
+(85, 6, '生存', 16, '1', 1, NOW(), NOW()),
+-- 异能
+(86, 7, '异能', 1, '1', 1, NOW(), NOW()),
+(87, 7, '系统', 2, '1', 1, NOW(), NOW()),
+(88, 7, '超能力', 3, '1', 1, NOW(), NOW()),
+(89, 7, '超凡', 4, '1', 1, NOW(), NOW()),
+(90, 7, '爽文', 5, '1', 1, NOW(), NOW()),
+(91, 7, '轻松', 6, '1', 1, NOW(), NOW()),
+(92, 7, '装逼', 7, '1', 1, NOW(), NOW()),
+(93, 7, '打脸', 8, '1', 1, NOW(), NOW()),
+(94, 7, '无厘头', 9, '1', 1, NOW(), NOW()),
+(95, 7, '升级', 10, '1', 1, NOW(), NOW()),
+-- 武侠
+(96, 8, '传统', 1, '1', 1, NOW(), NOW()),
+(97, 8, '国术', 2, '1', 1, NOW(), NOW()),
+(98, 8, '同人', 3, '1', 1, NOW(), NOW()),
+(99, 8, '江湖', 4, '1', 1, NOW(), NOW()),
+(100, 8, '门派', 5, '1', 1, NOW(), NOW()),
+(101, 8, '恩怨', 6, '1', 1, NOW(), NOW()),
+(102, 8, '秘籍', 7, '1', 1, NOW(), NOW()),
+(103, 8, '侠义', 8, '1', 1, NOW(), NOW()),
+-- 军事
+(104, 9, '战争', 1, '1', 1, NOW(), NOW()),
+(105, 9, '抗战', 2, '1', 1, NOW(), NOW()),
+(106, 9, '特工', 3, '1', 1, NOW(), NOW()),
+(107, 9, '军旅', 4, '1', 1, NOW(), NOW()),
+(108, 9, '特种兵', 5, '1', 1, NOW(), NOW()),
+(109, 9, '佣兵', 6, '1', 1, NOW(), NOW()),
+(110, 9, '战略', 7, '1', 1, NOW(), NOW()),
+(111, 9, '军备', 8, '1', 1, NOW(), NOW()),
+(112, 9, '间谍', 9, '1', 1, NOW(), NOW()),
+(113, 9, '热血', 10, '1', 1, NOW(), NOW()),
+-- 历史
+(114, 10, '架空', 1, '1', 1, NOW(), NOW()),
+(115, 10, '穿越', 2, '1', 1, NOW(), NOW()),
+(116, 10, '历史同人', 3, '1', 1, NOW(), NOW()),
+(117, 10, '朝代', 4, '1', 1, NOW(), NOW()),
+(118, 10, '宫廷', 5, '1', 1, NOW(), NOW()),
+(119, 10, '权谋', 6, '1', 1, NOW(), NOW()),
+(120, 10, '变革', 7, '1', 1, NOW(), NOW()),
+(121, 10, '演义', 8, '1', 1, NOW(), NOW()),
+-- 诸天无限
+(122, 11, '诸天', 1, '1', 1, NOW(), NOW()),
+(123, 11, '无限', 2, '1', 1, NOW(), NOW()),
+(124, 11, '综漫', 3, '1', 1, NOW(), NOW()),
+(125, 11, '同人', 4, '1', 1, NOW(), NOW()),
+(126, 11, '系统', 5, '1', 1, NOW(), NOW()),
+(127, 11, '穿越', 6, '1', 1, NOW(), NOW()),
+(128, 11, '位面', 7, '1', 1, NOW(), NOW()),
+(129, 11, '万界', 8, '1', 1, NOW(), NOW()),
+(130, 11, '时空穿梭', 9, '1', 1, NOW(), NOW()),
+(131, 11, '轮回', 10, '1', 1, NOW(), NOW()),
+-- 轻小说
+(132, 12, '衍生同人', 1, '1', 1, NOW(), NOW()),
+(133, 12, '原生幻想', 2, '1', 1, NOW(), NOW()),
+(134, 12, '日常', 3, '1', 1, NOW(), NOW()),
+(135, 12, '搞笑', 4, '1', 1, NOW(), NOW()),
+(136, 12, '恋爱', 5, '1', 1, NOW(), NOW()),
+(137, 12, '校园', 6, '1', 1, NOW(), NOW()),
+(138, 12, '奇幻', 7, '1', 1, NOW(), NOW()),
+(139, 12, '冒险', 8, '1', 1, NOW(), NOW()),
+(140, 12, '热血', 9, '1', 1, NOW(), NOW()),
+(141, 12, '治愈', 10, '1', 1, NOW(), NOW()),
+(142, 12, '青春', 11, '1', 1, NOW(), NOW()),
+(143, 12, '异世界', 12, '1', 1, NOW(), NOW()),
+(144, 12, '魔法', 13, '1', 1, NOW(), NOW()),
+(145, 12, '后宫', 14, '1', 1, NOW(), NOW()),
+(146, 12, '废萌', 15, '1', 1, NOW(), NOW());
+
+-- ----------------------------
 -- Table structure for app_novel_book 书库（小说推荐平台）
 -- ----------------------------
 DROP TABLE IF EXISTS "public"."app_novel_book";
@@ -2185,7 +2417,7 @@ CREATE TABLE "public"."app_novel_book" (
   "rating" numeric(3,1) NOT NULL DEFAULT 5.0,
   "review_count" BIGINT NOT NULL DEFAULT 0,
   "serial_status" VARCHAR(1) NOT NULL DEFAULT '1',
-  "category" VARCHAR(2) NOT NULL,
+  "category" BIGINT NOT NULL,
   "tags" JSON,
   "slogan" varchar(30) NOT NULL DEFAULT '',
   "description" varchar(500) NOT NULL DEFAULT '',
@@ -2491,18 +2723,18 @@ COMMIT;
 -- ----------------------------
 BEGIN;
 INSERT INTO "public"."app_novel_book" ("id", "title", "author", "cover", "rating", "review_count", "serial_status", "category", "tags", "slogan", "description", "clicks", "publish_date", "word_count", "chapters", "is_featured", "read_url", "status", "create_by", "update_by", "created_at", "updated_at") VALUES
-(1, '诡秘之海：序曲', '爱伦·珀', 'https://picsum.photos/seed/book_sea_99/300/400', 9.6, 4820, '1', '01', '["克苏鲁","蒸汽朋克","秘术升格"]', '迷雾散去之时，万物将在深渊之主前躬身听令。', '十九世纪蒸汽工业革命前夕，落魄贵族里奥在继承旧日法典后，无意中开启了通向克苏鲁远古深渊的大门。在理性与狂乱的边缘，他凭借禁忌的星象升格仪式，在风暴大海与魔神低语中建立起属于人类的秘教警局...', 142500, '2026-03-15', 2480000, 850, 1, '', '1', 4, 4, '2026-03-15 00:00:00', '2026-03-15 00:00:00'),
-(2, '重返2000大时代', '踏雪无痕', 'https://picsum.photos/seed/book_biz_88/300/400', 9.3, 3150, '2', '02', '["商战降维","重生年代","互联网巨鳄"]', '站在世纪交汇的浪尖，重新定义全球科技版图。', '顶级金融投资家陆商重生回2000年那个千禧之年的夏天。面对尚未崛起的互联网巨头与狂热的资本市场，他以领先20年的战略眼光，从一家小巧的软件工作室起家，一路操盘网游、社交平台与芯片产业链...', 189000, '2025-11-10', 3100000, 1020, 1, '', '1', 4, 4, '2025-11-10 00:00:00', '2025-11-10 00:00:00'),
-(3, '第十三位异客', '无名探员', 'https://picsum.photos/seed/book_detective_77/300/400', 9.5, 2980, '1', '03', '["暴风雪山庄","多重反转","逻辑推理"]', '当十三个人走进密室，只有十二个人拥有影子。', '暴风雪封锁的阿尔卑斯山顶古堡内，十三位来自全球不同领域的犯罪学专家应邀出席一场死刑法医的神秘遗嘱发布会。然而当夜钟声响起，第一位专家在密室中遇害，凶手留下的唯有一张刻有死者罪行的扑克牌...', 165400, '2026-05-01', 450000, 190, 1, '', '1', 4, 4, '2026-05-01 00:00:00', '2026-05-01 00:00:00'),
-(4, '赛博朋克：永夜狂想', '电离霓虹', 'https://picsum.photos/seed/book_cyber_66/300/400', 9.1, 1820, '1', '04', '["赛博朋克","义体改造","黑客崛起"]', '在霓虹灯无法照亮的暗巷，代码是最后的信仰。', '2099年，新新东京的底层街区黑客K在一次黑吃黑的行动中，意外盗取了三大跨国集团秘密研发的意识上传协议代码。在这个义体改造率高达百分之八十的冷酷都市里，他必须在义警追捕与智脑猎杀下找到生路...', 98000, '2026-04-12', 1550000, 520, 0, '', '1', 4, 4, '2026-04-12 00:00:00', '2026-04-12 00:00:00'),
-(5, '锦绣山河不如卿', '月下独酌', 'https://picsum.photos/seed/book_palace_55/300/400', 9.4, 3670, '2', '05', '["宫斗宅斗","大女主","权谋复仇"]', '重活一世，她不仅要保全家人，更要执掌朝堂权力。', '相府嫡女沈清辞前世遭亲妹陷害、夫君背叛，惨死在冷宫深处。重生回到及笄之年，她敛去怯懦，凭惊人医术与谋略一步步拆穿阴谋，在大乾朝堂掀起权谋风暴，更引来身负战功的九王爷倾心...', 210000, '2025-09-08', 1980000, 680, 0, '', '1', 4, 4, '2025-09-08 00:00:00', '2025-09-08 00:00:00'),
-(6, '我的超能力居然是做饭', '猫咪大厨', 'https://picsum.photos/seed/book_food_44/300/400', 8.9, 1540, '1', '06', '["治愈","美食","日常"]', '吃下一碗黄金炒饭，巨龙也会乖乖蹲下。', '高中生林小天穿越到魔物横行的异世界，觉醒的竟不是禁咒而是神级厨艺。一碗红烧肉能恢复全队法力，一道麻婆豆腐让魔王都想投降，靠美食与温暖称霸大陆的轻松日常。', 86400, '2026-06-01', 280000, 95, 0, '', '1', 4, 4, '2026-06-01 00:00:00', '2026-06-01 00:00:00'),
-(7, '剑来红尘三万里', '长空无忌', 'https://picsum.photos/seed/book_sword_33/300/400', 9.7, 5200, '1', '01', '["剑道独尊","传统仙侠","热血羁绊"]', '一剑可破九重天，一念能镇万古魔。', '小镇少年陈十一本是打铁铺学徒，因机缘巧合得见仙人遗落的一柄无锋铁剑。从此踏上浩瀚无垠的三千大千世界，以平实真挚之剑意，斩尽世间伪善仙佛，还天下众生一个朗朗乾坤...', 258000, '2025-12-01', 3400000, 1140, 0, '', '1', 4, 4, '2025-12-01 00:00:00', '2025-12-01 00:00:00'),
-(8, '神级投资人：从抄底开始', '华尔街之狼', 'https://picsum.photos/seed/book_invest_22/300/400', 9.0, 2100, '2', '02', '["金融风暴","投资高能","职场逆袭"]', '在众人恐惧时贪婪，在众人贪婪时离场。', '从月薪三千的实习分析师，到掌控万亿对冲基金的传奇大佬。看主角如何凭借敏锐的宏观经济洞察与果敢的交易决策，在多次全球金融海啸中精准抄底，建立跨国金融帝国...', 132000, '2026-01-15', 1680000, 580, 0, '', '1', 4, 4, '2026-01-15 00:00:00', '2026-01-15 00:00:00'),
-(9, '不可言说之证', '深渊观察者', 'https://picsum.photos/seed/book_horror_11/300/400', 9.3, 1980, '1', '03', '["法医解剖","犯罪心理","诡异凶案"]', '死人不会撒谎，尸体上的每一处伤痕都在诉说真相。', '天才法医学博士江舟调任特案组第一天，就接手了一宗没有被害人身份、死因极其蹊跷的无名连环案。随着解剖刀深入，他发现每一个受害者的骨骼内都刻着同一串神秘的古代密码...', 115000, '2026-04-20', 760000, 280, 0, '', '1', 4, 4, '2026-04-20 00:00:00', '2026-04-20 00:00:00'),
-(10, '末日废土庇护所', '钢筋混凝土', 'https://picsum.photos/seed/book_wasteland_00/300/400', 9.2, 2600, '1', '04', '["种田基建","末日求生","系统进化"]', '只要墙够厚，酸雨与异变体就伤不到我分毫！', '核冬天降临，地表沦为强辐射与变异兽的乐园。陈风绑定地下庇护所建设系统，从最初30平米的简陋地窖开始，一步步升级防核掩体、水循环农场、自动防空炮塔，最终打造出人类文明最后的绿洲...', 147000, '2026-02-18', 2100000, 710, 0, '', '1', 4, 4, '2026-02-18 00:00:00', '2026-02-18 00:00:00'),
-(11, '掌心娇宠：摄政王盛宠医妃', '微风袅袅', 'https://picsum.photos/seed/book_love_77/300/400', 8.8, 1430, '2', '05', '["甜宠爽文","双强携手","神医救世"]', '天下苍生归你管，而你，归我管。', '现代国医圣手穿越成落魄国公府三小姐，面对继母的刻薄与退婚的耻辱，她手握银针救死扶伤，名动京华。而权倾朝野、冷酷嗜血的摄政王却唯独在她面前化身护妻狂魔...', 79000, '2025-10-05', 1420000, 490, 0, '', '1', 4, 4, '2025-10-05 00:00:00', '2025-10-05 00:00:00'),
-(12, '学姐请留步，我的超能力泄露了', '二次元橘子', 'https://picsum.photos/seed/book_light_66/300/400', 9.0, 1650, '1', '06', '["校园恋爱","日常超能","甜到发昏"]', '谁能想到学校高冷的第一学姐，秘密身份居然是暗黑异能组组长？', '高中生苏星原以为自己只是个能读取动物想法的平凡宅男，直到有一天在图书室偶遇高冷校花学姐，脑海中突然响起了学姐内心深处无比呆萌反差的碎碎念...', 94000, '2026-05-19', 880000, 290, 0, '', '1', 4, 4, '2026-05-19 00:00:00', '2026-05-19 00:00:00');
+(1, '诡秘之海：序曲', '爱伦·珀', 'https://picsum.photos/seed/book_sea_99/300/400', 9.6, 4820, '1', '3', '["史诗","魔法","异世界"]', '迷雾散去之时，万物将在深渊之主前躬身听令。', '十九世纪蒸汽工业革命前夕，落魄贵族里奥在继承旧日法典后，无意中开启了通向克苏鲁远古深渊的大门。在理性与狂乱的边缘，他凭借禁忌的星象升格仪式，在风暴大海与魔神低语中建立起属于人类的秘教警局...', 142500, '2026-03-15', 2480000, 850, 1, '', '1', 4, 4, '2026-03-15 00:00:00', '2026-03-15 00:00:00'),
+(2, '重返2000大时代', '踏雪无痕', 'https://picsum.photos/seed/book_biz_88/300/400', 9.3, 3150, '2', '5', '["商战","年代","时代"]', '站在世纪交汇的浪尖，重新定义全球科技版图。', '顶级金融投资家陆商重生回2000年那个千禧之年的夏天。面对尚未崛起的互联网巨头与狂热的资本市场，他以领先20年的战略眼光，从一家小巧的软件工作室起家，一路操盘网游、社交平台与芯片产业链...', 189000, '2025-11-10', 3100000, 1020, 1, '', '1', 4, 4, '2025-11-10 00:00:00', '2025-11-10 00:00:00'),
+(3, '第十三位异客', '无名探员', 'https://picsum.photos/seed/book_detective_77/300/400', 9.5, 2980, '1', '6', '["悬疑","推理","侦探"]', '当十三个人走进密室，只有十二个人拥有影子。', '暴风雪封锁的阿尔卑斯山顶古堡内，十三位来自全球不同领域的犯罪学专家应邀出席一场死刑法医的神秘遗嘱发布会。然而当夜钟声响起，第一位专家在密室中遇害，凶手留下的唯有一张刻有死者罪行的扑克牌...', 165400, '2026-05-01', 450000, 190, 1, '', '1', 4, 4, '2026-05-01 00:00:00', '2026-05-01 00:00:00'),
+(4, '赛博朋克：永夜狂想', '电离霓虹', 'https://picsum.photos/seed/book_cyber_66/300/400', 9.1, 1820, '1', '1', '["赛博朋克","超级科技","人工智能"]', '在霓虹灯无法照亮的暗巷，代码是最后的信仰。', '2099年，新新东京的底层街区黑客K在一次黑吃黑的行动中，意外盗取了三大跨国集团秘密研发的意识上传协议代码。在这个义体改造率高达百分之八十的冷酷都市里，他必须在义警追捕与智脑猎杀下找到生路...', 98000, '2026-04-12', 1550000, 520, 0, '', '1', 4, 4, '2026-04-12 00:00:00', '2026-04-12 00:00:00'),
+(5, '锦绣山河不如卿', '月下独酌', 'https://picsum.photos/seed/book_palace_55/300/400', 9.4, 3670, '2', '10', '["宫廷","权谋","架空"]', '重活一世，她不仅要保全家人，更要执掌朝堂权力。', '相府嫡女沈清辞前世遭亲妹陷害、夫君背叛，惨死在冷宫深处。重生回到及笄之年，她敛去怯懦，凭惊人医术与谋略一步步拆穿阴谋，在大乾朝堂掀起权谋风暴，更引来身负战功的九王爷倾心...', 210000, '2025-09-08', 1980000, 680, 0, '', '1', 4, 4, '2025-09-08 00:00:00', '2025-09-08 00:00:00'),
+(6, '我的超能力居然是做饭', '猫咪大厨', 'https://picsum.photos/seed/book_food_44/300/400', 8.9, 1540, '1', '12', '["日常","治愈","搞笑"]', '吃下一碗黄金炒饭，巨龙也会乖乖蹲下。', '高中生林小天穿越到魔物横行的异世界，觉醒的竟不是禁咒而是神级厨艺。一碗红烧肉能恢复全队法力，一道麻婆豆腐让魔王都想投降，靠美食与温暖称霸大陆的轻松日常。', 86400, '2026-06-01', 280000, 95, 0, '', '1', 4, 4, '2026-06-01 00:00:00', '2026-06-01 00:00:00'),
+(7, '剑来红尘三万里', '长空无忌', 'https://picsum.photos/seed/book_sword_33/300/400', 9.7, 5200, '1', '2', '["仙侠","修真","热血"]', '一剑可破九重天，一念能镇万古魔。', '小镇少年陈十一本是打铁铺学徒，因机缘巧合得见仙人遗落的一柄无锋铁剑。从此踏上浩瀚无垠的三千大千世界，以平实真挚之剑意，斩尽世间伪善仙佛，还天下众生一个朗朗乾坤...', 258000, '2025-12-01', 3400000, 1140, 0, '', '1', 4, 4, '2025-12-01 00:00:00', '2025-12-01 00:00:00'),
+(8, '神级投资人：从抄底开始', '华尔街之狼', 'https://picsum.photos/seed/book_invest_22/300/400', 9.0, 2100, '2', '5', '["商战","职场","励志"]', '在众人恐惧时贪婪，在众人贪婪时离场。', '从月薪三千的实习分析师，到掌控万亿对冲基金的传奇大佬。看主角如何凭借敏锐的宏观经济洞察与果敢的交易决策，在多次全球金融海啸中精准抄底，建立跨国金融帝国...', 132000, '2026-01-15', 1680000, 580, 0, '', '1', 4, 4, '2026-01-15 00:00:00', '2026-01-15 00:00:00'),
+(9, '不可言说之证', '深渊观察者', 'https://picsum.photos/seed/book_horror_11/300/400', 9.3, 1980, '1', '6', '["悬疑","案件","诡异"]', '死人不会撒谎，尸体上的每一处伤痕都在诉说真相。', '天才法医学博士江舟调任特案组第一天，就接手了一宗没有被害人身份、死因极其蹊跷的无名连环案。随着解剖刀深入，他发现每一个受害者的骨骼内都刻着同一串神秘的古代密码...', 115000, '2026-04-20', 760000, 280, 0, '', '1', 4, 4, '2026-04-20 00:00:00', '2026-04-20 00:00:00'),
+(10, '末日废土庇护所', '钢筋混凝土', 'https://picsum.photos/seed/book_wasteland_00/300/400', 9.2, 2600, '1', '1', '["末世危机","未来世界","超级科技"]', '只要墙够厚，酸雨与异变体就伤不到我分毫！', '核冬天降临，地表沦为强辐射与变异兽的乐园。陈风绑定地下庇护所建设系统，从最初30平米的简陋地窖开始，一步步升级防核掩体、水循环农场、自动防空炮塔，最终打造出人类文明最后的绿洲...', 147000, '2026-02-18', 2100000, 710, 0, '', '1', 4, 4, '2026-02-18 00:00:00', '2026-02-18 00:00:00'),
+(11, '掌心娇宠：摄政王盛宠医妃', '微风袅袅', 'https://picsum.photos/seed/book_love_77/300/400', 8.8, 1430, '2', '10', '["宫廷","权谋","架空"]', '天下苍生归你管，而你，归我管。', '现代国医圣手穿越成落魄国公府三小姐，面对继母的刻薄与退婚的耻辱，她手握银针救死扶伤，名动京华。而权倾朝野、冷酷嗜血的摄政王却唯独在她面前化身护妻狂魔...', 79000, '2025-10-05', 1420000, 490, 0, '', '1', 4, 4, '2025-10-05 00:00:00', '2025-10-05 00:00:00'),
+(12, '学姐请留步，我的超能力泄露了', '二次元橘子', 'https://picsum.photos/seed/book_light_66/300/400', 9.0, 1650, '1', '12', '["校园","恋爱","日常"]', '谁能想到学校高冷的第一学姐，秘密身份居然是暗黑异能组组长？', '高中生苏星原以为自己只是个能读取动物想法的平凡宅男，直到有一天在图书室偶遇高冷校花学姐，脑海中突然响起了学姐内心深处无比呆萌反差的碎碎念...', 94000, '2026-05-19', 880000, 290, 0, '', '1', 4, 4, '2026-05-19 00:00:00', '2026-05-19 00:00:00');
 COMMIT;
 --
 -- ----------------------------
@@ -2724,7 +2956,7 @@ GREATEST(1, CEIL(CHAR_LENGTH('一、 引言：传统修仙体系在当代科幻�
 《第十三位异客》用扎实的文笔与逻辑，向我们证明了暴风雪山庄模式永不过时。只要作者能够洞察人性中的黑暗与光辉，严丝合缝地搭建逻辑链条，推理小说就永远拥有震撼人心的力量。',
 LEFT('一、 经典范式回顾：暴风雪山庄的魅力与困境
 
-自阿加莎·克里斯蒂写出《无人生还》以来，孤岛与暴风雪山庄便成为了悬疑推理小说中最令读者血脉偾张的模式。十几位背景各异的宾客被困在与世隔绝的封闭空间，凶手就在其中，随着人数减少，恐慌与猜忌如瘟疫般蔓延。', 150),
+自阿加莎·克里斯蒂写出《无人生还》以来，孤岛与暴风雪山庄便成为了悬疑推理小说中最令读���血脉偾张的模式。十几位背景各异的宾客被困在与世隔绝的封闭空间，凶手就在其中，随着人数减少，恐慌与猜忌如瘟疫般蔓延。', 150),
 CHAR_LENGTH('一、 经典范式回顾：暴风雪山庄的魅力与困境
 
 自阿加莎·克里斯蒂写出《无人生还》以来，孤岛与暴风雪山庄便成为了悬疑推理小说中最令读者血脉偾张的模式。十几位背景各异的宾客被困在与世隔绝的封闭空间，凶手就在其中，随着人数减少，恐慌与猜忌如瘟疫般蔓延。
@@ -2739,7 +2971,7 @@ CHAR_LENGTH('一、 经典范式回顾：暴风雪山庄的魅力与困境
 十三位犯罪学专家受邀来到位于阿尔卑斯山深处的悬崖城堡。城堡配备了全自动化防爆安保系统，但系统被神秘人注入了死人开关逻辑——任何试图对外发送信号或破坏门锁的行为，都会瞬间触发防爆气体释放。
 
 2. 逻辑链条的闭环设计
-受害者不再是被动等待屠戮的羊羔，而是各自怀揣禁忌罪恶的顶级猎手。每个人都在根据自己的专业知识推演凶手，这种人人皆为侦探、人人皆为嫌疑人的博弈，将心理悬疑推向了极致。
+受害者不再是被动等待屠戮的羊羔，而是各自怀揣禁忌罪恶的顶级猎手。每���人都在根据自己的专业知识推演凶手，这种人人皆为侦探、人人皆为嫌疑人的博弈，将心理悬疑推向了极致。
 
 三、 第九章核心高潮：双重伪解答的惊天反转
 
@@ -2795,7 +3027,7 @@ COMMIT;
 -- ----------------------------
 BEGIN;
 INSERT INTO "public"."app_novel_post_comment" ("id", "post_id", "user_id", "user_name", "user_avatar", "parent_id", "reply_to_user", "reply_to_comment_id", "content", "likes", "created_at") VALUES
-(1, 1, 5, '星海巡航', 'https://picsum.photos/seed/user_c1/100/100', NULL, '墨读书痴', NULL, '写得太透彻了！分析的大祭司算力超载那一段直接把我拉回了当时看书时的震撼场景，赞！', 12, '2026-08-09 10:20:00'),
+(1, 1, 5, '星海巡航', 'https://picsum.photos/seed/user_c1/100/100', NULL, '墨读书痴', NULL, '写得太透彻了！分析的大祭司算力超载那���段直接把我拉回了当时看书时的震撼场景，赞！', 12, '2026-08-09 10:20:00'),
 (2, 1, 7, '蒸汽狂热者', 'https://picsum.photos/seed/user_c2/100/100', NULL, '墨读书痴', NULL, '伏笔罗盘齿轮咬合频率那里如果不看你这篇万字分析，我真的忽略了！作者脑洞太深邃了！', 8, '2026-08-09 11:00:00'),
 (3, 2, 2, '赛博修仙爱好者', 'https://picsum.photos/seed/user_c3/100/100', NULL, '幻想小说家', NULL, '脑机接口炼丹和开源修仙社区的概念太绝了！这才是真正的硬核科幻修仙，期待大大赶紧开新书！', 35, '2026-08-10 20:10:00'),
 (4, 2, 2, '玄幻书友会', 'https://picsum.photos/seed/user_c4/100/100', NULL, '幻想小说家', NULL, '把九天雷劫解释为天道超级AI的EMP抹杀攻击，逻辑完全闭环了！强推这篇万字设想！', 19, '2026-08-11 09:30:00'),
