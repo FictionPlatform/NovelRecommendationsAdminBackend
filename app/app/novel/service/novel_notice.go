@@ -10,11 +10,9 @@ import (
 	cDto "go-admin/core/dto"
 	"go-admin/core/dto/service"
 	"go-admin/core/lang"
+
 	"gorm.io/gorm"
 )
-
-// 公告广播分批大小
-const noticeBroadcastBatch = 500
 
 type NovelNotice struct {
 	service.Service
@@ -50,7 +48,7 @@ func (e *NovelNotice) GetPage(c *dto.NovelNoticeQueryReq) ([]dto.NovelNoticeItem
 	return items, count, baseLang.SuccessCode, nil
 }
 
-// Insert app-发布公告并广播到全部读者
+// Insert app-发布公告（不再广播，登录时按需收取）
 func (e *NovelNotice) Insert(c *dto.NovelNoticeInsertReq) (int64, int, error) {
 	if strings.TrimSpace(c.Title) == "" {
 		return 0, baseLang.NovelNoticeTitleEmptyCode, lang.MsgErr(baseLang.NovelNoticeTitleEmptyCode, e.Lang)
@@ -64,49 +62,19 @@ func (e *NovelNotice) Insert(c *dto.NovelNoticeInsertReq) (int64, int, error) {
 	if len([]rune(c.Content)) > 2000 {
 		return 0, baseLang.NovelNoticeContentTooLongCode, lang.MsgErr(baseLang.NovelNoticeContentTooLongCode, e.Lang)
 	}
+	if c.ValidDays < 0 {
+		return 0, baseLang.NovelNoticeValidDaysErrCode, lang.MsgErr(baseLang.NovelNoticeValidDaysErrCode, e.Lang)
+	}
 	now := time.Now()
 	notice := models.NovelNotice{
 		Title:     c.Title,
 		Content:   c.Content,
+		ValidDays: c.ValidDays,
 		CreateBy:  c.CreateBy,
 		CreatedAt: &now,
 		UpdatedAt: &now,
 	}
-	err := e.Orm.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&notice).Error; err != nil {
-			return err
-		}
-		var userIds []int64
-		if err := tx.Model(&models.NovelReaderProfile{}).Pluck("user_id", &userIds).Error; err != nil {
-			return err
-		}
-		if len(userIds) == 0 {
-			return nil
-		}
-		notifications := make([]models.NovelNotification, 0, len(userIds))
-		for _, uid := range userIds {
-			notifications = append(notifications, models.NovelNotification{
-				UserId:    uid,
-				Title:     c.Title,
-				Content:   c.Content,
-				IsRead:    NovelNotifyUnread,
-				Source:    NovelNotifySourceNotice,
-				NoticeId:  &notice.Id,
-				CreatedAt: &now,
-			})
-		}
-		for i := 0; i < len(notifications); i += noticeBroadcastBatch {
-			end := i + noticeBroadcastBatch
-			if end > len(notifications) {
-				end = len(notifications)
-			}
-			if err := tx.Create(notifications[i:end]).Error; err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-	if err != nil {
+	if err := e.Orm.Create(&notice).Error; err != nil {
 		return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
 	}
 	return notice.Id, baseLang.SuccessCode, nil

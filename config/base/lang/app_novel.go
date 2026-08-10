@@ -64,6 +64,7 @@ const (
 	NovelMergeSourceNotExistCode  = 41061
 	NovelMergeTargetNotExistCode  = 41062
 	NovelMergeTargetOfflineCode   = 41063
+	NovelNoticeValidDaysErrCode   = 41064
 )
 
 func init() {
@@ -131,4 +132,5 @@ func init() {
 	lang.MsgInfo[NovelMergeSourceNotExistCode] = "源书不存在"
 	lang.MsgInfo[NovelMergeTargetNotExistCode] = "目标书不存在"
 	lang.MsgInfo[NovelMergeTargetOfflineCode] = "目标书已下架，不能作为合并目标"
+	lang.MsgInfo[NovelNoticeValidDaysErrCode] = "有效天数不能为负数"
 }

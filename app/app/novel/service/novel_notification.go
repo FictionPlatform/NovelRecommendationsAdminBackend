@@ -69,21 +69,83 @@ func (e *NovelNotification) Seed(userId int64) {
 	}
 }
 
+// PullNotices app-登录时按需收取未消费的未过期公告
+// 机制：发公告不再广播；用户登录/查看通知时，将「有效期内 + 该用户尚未消费」的公告生成为其通知
+func (e *NovelNotification) PullNotices(userId int64) {
+	if userId <= 0 {
+		return
+	}
+	now := time.Now()
+	// 未过期的公告：valid_days=0（永久）或 created_at 距今未超过 valid_days 天
+	// 跨库兼容：先取全部公告，再在内存中按 valid_days 过滤（公告量小，可接受）
+	var notices []models.NovelNotice
+	if err := e.Orm.Model(&models.NovelNotice{}).
+		Order("created_at desc, id desc").Find(&notices).Error; err != nil {
+		e.Log.Errorf("novel notification pull notices query error:%s", err.Error())
+		return
+	}
+	// 过滤未过期
+	valid := notices[:0]
+	for _, n := range notices {
+		if n.ValidDays <= 0 || n.CreatedAt == nil {
+			valid = append(valid, n)
+			continue
+		}
+		expireAt := n.CreatedAt.AddDate(0, 0, n.ValidDays)
+		if expireAt.After(now) {
+			valid = append(valid, n)
+		}
+	}
+	if len(valid) == 0 {
+		return
+	}
+	// 已消费的公告（该用户已有对应通知记录）
+	noticeIds := make([]int64, 0, len(valid))
+	for _, n := range valid {
+		noticeIds = append(noticeIds, n.Id)
+	}
+	var consumed []int64
+	if err := e.Orm.Model(&models.NovelNotification{}).
+		Where("user_id = ? and source = ? and notice_id in (?)", userId, NovelNotifySourceNotice, noticeIds).
+		Pluck("notice_id", &consumed).Error; err != nil {
+		e.Log.Errorf("novel notification pull consumed query error:%s", err.Error())
+		return
+	}
+	consumedMap := map[int64]bool{}
+	for _, id := range consumed {
+		consumedMap[id] = true
+	}
+	// 逐条生成未消费公告通知
+	for _, n := range valid {
+		if consumedMap[n.Id] {
+			continue
+		}
+		noticeId := n.Id
+		if err := e.Add(userId, n.Title, n.Content, NovelNotifySourceNotice, &noticeId); err != nil {
+			e.Log.Errorf("novel notification pull notice error:%s", err.Error())
+		}
+	}
+}
+
 // GetPage app-分页查询我的系统通知
 func (e *NovelNotification) GetPage(c *dto.NovelNotificationQueryReq) ([]models.NovelNotification, int64, int, error) {
 	if c.CurrUserId <= 0 {
 		return nil, 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
+	// 登录查看时按需收取未消费的未过期公告
+	e.PullNotices(c.CurrUserId)
 	var data models.NovelNotification
 	var list []models.NovelNotification
 	var count int64
 	err := e.Orm.Model(&data).Where("user_id = ?", c.CurrUserId).
-		Order("created_at desc, id desc").
 		Scopes(cDto.Paginate(c.GetPageSize(), c.GetPageIndex())).
+		Order("created_at desc, id desc").
 		Find(&list).Limit(-1).Offset(-1).Count(&count).Error
 	if err != nil {
 		return nil, 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
 	}
+	// 过滤已过期的公告通知（source=notice 且对应公告已过期 → 彻底不可见）
+	list, count = e.filterExpiredNotice(c.CurrUserId, list, count)
 	return list, count, baseLang.SuccessCode, nil
 }
 
@@ -92,13 +154,80 @@ func (e *NovelNotification) UnreadCount(userId int64) (int64, int, error) {
 	if userId <= 0 {
 		return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
+	// 登录查看时按需收取未消费的未过期公告
+	e.PullNotices(userId)
 	var count int64
 	err := e.Orm.Model(&models.NovelNotification{}).
 		Where("user_id = ? and is_read = ?", userId, NovelNotifyUnread).Count(&count).Error
 	if err != nil {
 		return 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
 	}
+	// 过滤已过期的公告通知未读数
+	expired := e.expiredNoticeIds()
+	if len(expired) > 0 {
+		var expiredUnread int64
+		err = e.Orm.Model(&models.NovelNotification{}).
+			Where("user_id = ? and is_read = ? and source = ? and notice_id in (?)", userId, NovelNotifyUnread, NovelNotifySourceNotice, expired).
+			Count(&expiredUnread).Error
+		if err == nil {
+			count = count - expiredUnread
+			if count < 0 {
+				count = 0
+			}
+		}
+	}
 	return count, baseLang.SuccessCode, nil
+}
+
+// expiredNoticeIds app-内部方法，返回已过期的公告 id 集合
+func (e *NovelNotification) expiredNoticeIds() []int64 {
+	now := time.Now()
+	var notices []models.NovelNotice
+	if err := e.Orm.Model(&models.NovelNotice{}).
+		Where("valid_days > 0").Find(&notices).Error; err != nil {
+		return nil
+	}
+	var expired []int64
+	for _, n := range notices {
+		if n.CreatedAt == nil {
+			continue
+		}
+		expireAt := n.CreatedAt.AddDate(0, 0, n.ValidDays)
+		if !expireAt.After(now) {
+			expired = append(expired, n.Id)
+		}
+	}
+	return expired
+}
+
+// filterExpiredNotice app-内部方法，从通知列表移除已过期的公告通知
+func (e *NovelNotification) filterExpiredNotice(userId int64, list []models.NovelNotification, count int64) ([]models.NovelNotification, int64) {
+	expired := e.expiredNoticeIds()
+	if len(expired) == 0 {
+		return list, count
+	}
+	expiredMap := map[int64]bool{}
+	for _, id := range expired {
+		expiredMap[id] = true
+	}
+	filtered := list[:0]
+	for _, n := range list {
+		if n.Source == NovelNotifySourceNotice && n.NoticeId != nil && expiredMap[*n.NoticeId] {
+			continue
+		}
+		filtered = append(filtered, n)
+	}
+	// 修正总数：从分页结果中减去的仅是当前页过期数，总数需另查
+	if len(list) != len(filtered) {
+		var realCount int64
+		if err := e.Orm.Model(&models.NovelNotification{}).
+			Where("user_id = ?", userId).
+			Where("not (source = ? and notice_id in (?))", NovelNotifySourceNotice, expired).
+			Count(&realCount).Error; err == nil {
+			count = realCount
+		}
+	}
+	return filtered, count
 }
 
 // Read app-标记已读（ids 为空表示全部标为已读）

@@ -7,9 +7,10 @@ import (
 
 // NovelNoticeInsertReq 发布公告请求
 type NovelNoticeInsertReq struct {
-	Title    string `json:"title" comment:"公告标题"`
-	Content  string `json:"content" comment:"公告内容"`
-	CreateBy int64  `json:"-" comment:"发布管理员编号"`
+	Title     string `json:"title" comment:"公告标题"`
+	Content   string `json:"content" comment:"公告内容"`
+	ValidDays int    `json:"validDays" comment:"有效天数(0=永久,过期后登录不再收取)"`
+	CreateBy  int64  `json:"-" comment:"发布管理员编号"`
 }
 
 // NovelNoticeQueryReq 公告分页查询
