@@ -9,14 +9,15 @@ import (
 
 func init() {
 	routerNoCheckRole = append(routerNoCheckRole, registerHomeRouter)
-	routerCheckRole = append(routerCheckRole, registerBookRouter)
-	routerCheckRole = append(routerCheckRole, registerCategoryRouter)
+	routerNoCheckRole = append(routerNoCheckRole, registerBookReadRouter)
+	routerNoCheckRole = append(routerNoCheckRole, registerCategoryRouter)
+	routerCheckRole = append(routerCheckRole, registerBookWriteRouter)
 }
 
-// registerCategoryRouter 注册小说分类路由（读者端，需登录）
+// registerCategoryRouter 注册小说分类路由（读者端浏览，公开；带 token 可选注入身份）
 func registerCategoryRouter(v1 *gin.RouterGroup) {
 	api := apis.NovelCategory{}
-	r := v1.Group("/app/novel/category").Use(middleware.Auth())
+	r := v1.Group("/app/novel/category").Use(middleware.AuthOptional())
 	{
 		r.GET("/list", api.List)
 	}
@@ -28,17 +29,20 @@ func registerHomeRouter(v1 *gin.RouterGroup) {
 	v1.GET("/app/novel/home", api.Home)
 }
 
-// registerBookRouter 注册小说书库路由
-func registerBookRouter(v1 *gin.RouterGroup) {
+// registerBookReadRouter 注册小说书库浏览路由（公开；带 token 可选注入身份以支持 isCollected 等）
+func registerBookReadRouter(v1 *gin.RouterGroup) {
 	api := apis.Book{}
-	// 读者浏览（仅需登录）
-	reader := v1.Group("/app/novel/book").Use(middleware.Auth())
+	r := v1.Group("/app/novel/book").Use(middleware.AuthOptional())
 	{
-		reader.GET("", api.GetPage)
-		reader.GET("/rank", api.Rank)
-		reader.GET("/:id", api.Get)
+		r.GET("", api.GetPage)
+		r.GET("/rank", api.Rank)
+		r.GET("/:id", api.Get)
 	}
-	// 内容管理（仅需登录，所有注册读者可发布书籍）
+}
+
+// registerBookWriteRouter 注册小说书库写路由（需登录）
+func registerBookWriteRouter(v1 *gin.RouterGroup) {
+	api := apis.Book{}
 	manager := v1.Group("/app/novel/book").Use(middleware.Auth())
 	{
 		manager.POST("", api.Insert)

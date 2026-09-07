@@ -139,6 +139,10 @@ func (e *NovelBook) Insert(c *dto.NovelBookInsertReq) (int64, int, error) {
 	if c.CurrUserId <= 0 {
 		return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
+	// 禁言校验：发布书籍属主动写操作
+	if respCode, err := CheckReaderWritePermission(&e.Service, c.CurrUserId); err != nil {
+		return 0, respCode, err
+	}
 	if strings.TrimSpace(c.Title) == "" {
 		return 0, baseLang.NovelBookTitleEmptyCode, lang.MsgErr(baseLang.NovelBookTitleEmptyCode, e.Lang)
 	}
@@ -248,6 +252,10 @@ func (e *NovelBook) Update(c *dto.NovelBookUpdateReq) (bool, int, error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, baseLang.NovelBookNotExistCode, lang.MsgErr(baseLang.NovelBookNotExistCode, e.Lang)
 	}
+	// 越权校验：仅创建者可编辑自己的书籍
+	if data.CreateBy != c.CurrUserId {
+		return false, baseLang.NovelNoPermissionCode, lang.MsgErr(baseLang.NovelNoPermissionCode, e.Lang)
+	}
 	// 改名时校验唯一
 	if strings.TrimSpace(c.Title) != "" && c.Title != data.Title {
 		if len([]rune(c.Title)) > 100 {
@@ -345,7 +353,7 @@ func (e *NovelBook) Update(c *dto.NovelBookUpdateReq) (bool, int, error) {
 }
 
 // Delete app-删除小说书库（级联清理书评/书架，话题关联置空）
-func (e *NovelBook) Delete(ids []int64) (int, error) {
+func (e *NovelBook) Delete(ids []int64, currUserId int64) (int, error) {
 	if len(ids) == 0 {
 		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
@@ -367,6 +375,20 @@ func (e *NovelBook) Delete(ids []int64) (int, error) {
 		}
 		e.Orm = baseOrm
 	}()
+
+	// 越权校验：仅创建者可删除自己的书籍
+	var books []models.NovelBook
+	if err = e.Orm.Where("id in (?)", ids).Find(&books).Error; err != nil {
+		return baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+	if len(books) != len(ids) {
+		return baseLang.NovelBookNotExistCode, lang.MsgErr(baseLang.NovelBookNotExistCode, e.Lang)
+	}
+	for _, b := range books {
+		if b.CreateBy != currUserId {
+			return baseLang.NovelNoPermissionCode, lang.MsgErr(baseLang.NovelNoPermissionCode, e.Lang)
+		}
+	}
 
 	err = e.Orm.Where("id in (?)", ids).Delete(&models.NovelBook{}).Error
 	if err != nil {

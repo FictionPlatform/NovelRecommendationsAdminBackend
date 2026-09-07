@@ -80,11 +80,7 @@ func (e Book) Get(c *gin.Context) {
 		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
 		return
 	}
-	uid, rCode, err := auth.Auth.GetUserId(c)
-	if err != nil {
-		e.Error(rCode, err.Error())
-		return
-	}
+	uid, _, _ := auth.Auth.GetUserId(c) // 公开读接口：游客 uid=0，带 token 时注入身份
 	result, respCode, err := s.Get(req.Id, uid)
 	if err != nil {
 		e.Error(respCode, err.Error())
@@ -195,7 +191,12 @@ func (e Book) Delete(c *gin.Context) {
 		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
 		return
 	}
-	respCode, err := s.Delete(req.Ids)
+	uid, rCode, err := auth.Auth.GetUserId(c)
+	if err != nil {
+		e.Error(rCode, err.Error())
+		return
+	}
+	respCode, err := s.Delete(req.Ids, uid)
 	if err != nil {
 		e.Error(respCode, err.Error())
 		return
@@ -226,11 +227,7 @@ func (e Book) Rank(c *gin.Context) {
 		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
 		return
 	}
-	uid, rCode, err := auth.Auth.GetUserId(c)
-	if err != nil {
-		e.Error(rCode, err.Error())
-		return
-	}
+	uid, _, _ := auth.Auth.GetUserId(c) // 公开读接口：游客 uid=0
 	req.CurrUserId = uid
 	list, respCode, err := s.Rank(&req)
 	if err != nil {

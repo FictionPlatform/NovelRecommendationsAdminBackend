@@ -1,5 +1,0 @@
-# .gobuild.yaml
-main: main.go              # 你的入口文件
-output: ./.build/             # 修改为你想要的输出目录
-args: ["server"]                   # 运行时的参数
-env: []                    # 环境变量

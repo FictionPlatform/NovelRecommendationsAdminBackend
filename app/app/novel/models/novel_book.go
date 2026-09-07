@@ -12,12 +12,14 @@ type NovelBook struct {
 	Rating       float64    `json:"rating" gorm:"column:rating;type:decimal(3,1);comment:综合评分"`
 	ReviewCount  int        `json:"reviewCount" gorm:"column:review_count;type:int;comment:书评数"`
 	SerialStatus string     `json:"serialStatus" gorm:"column:serial_status;type:char(1);comment:连载状态(1-连载中 2-已完结)"`
-	Category     string     `json:"category" gorm:"column:category;type:bigint;comment:分类id(app_novel_category.id)"`
-	Tags         string     `json:"-" gorm:"column:tags;type:json;comment:标签数组"`
-	TagList      []string   `json:"tags" gorm:"-"`
-	Slogan       string     `json:"slogan" gorm:"column:slogan;type:varchar(30);comment:一句话推荐语"`
-	Description  string     `json:"description" gorm:"column:description;type:varchar(500);comment:简介"`
-	Clicks       int        `json:"clicks" gorm:"column:clicks;type:int;comment:点击数"`
+	// Category 分类 id（app_novel_category.id）。SQL 列为 BIGINT，Go 侧用 string 承载：
+	// GORM `type:bigint` 控制建表类型，扫描由 database/sql convertAssign 安全转换（int64→string），与前端 categoryId 字符串契约一致。
+	Category    string     `json:"category" gorm:"column:category;type:bigint;comment:分类id(app_novel_category.id)"`
+	Tags        string     `json:"-" gorm:"column:tags;type:json;comment:标签数组"`
+	TagList     []string   `json:"tags" gorm:"-"`
+	Slogan      string     `json:"slogan" gorm:"column:slogan;type:varchar(30);comment:一句话推荐语"`
+	Description string     `json:"description" gorm:"column:description;type:varchar(500);comment:简介"`
+	Clicks      int        `json:"clicks" gorm:"column:clicks;type:int;comment:点击数"`
 	PublishDate  *time.Time `json:"publishDate" gorm:"column:publish_date;type:date;comment:发布日期"`
 	WordCount    int        `json:"wordCount" gorm:"column:word_count;type:int;comment:字数"`
 	Chapters     int        `json:"chapters" gorm:"column:chapters;type:int;comment:章节数"`

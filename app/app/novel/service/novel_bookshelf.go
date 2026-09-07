@@ -50,6 +50,10 @@ func (e *NovelBookshelf) Insert(c *dto.NovelShelfInsertReq) (int64, int, error) 
 	if c.CurrUserId <= 0 || c.BookId <= 0 {
 		return 0, baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
 	}
+	// 禁言校验：加入书架属主动写操作（业务总览 2.5 已拍板禁言禁收藏）
+	if respCode, err := CheckReaderWritePermission(&e.Service, c.CurrUserId); err != nil {
+		return 0, respCode, err
+	}
 	// 书籍存在性
 	book := &models.NovelBook{}
 	err := e.Orm.First(book, c.BookId).Error

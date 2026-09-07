@@ -363,7 +363,7 @@ proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 - C1 ✅ 密钥硬编码：JWT/AES 密钥启动校验（拒绝占位符/旧默认值/共用），配置随机化；`config/` 已停止 git 追踪；DSN 密码环境变量注入 `${DB_PASSWORD}` + 弱口令/空密码启动拒绝 + 日志脱敏
 - C2 ✅ app 用户密码：`pwd`/`pay_pwd` 改 bcrypt 哈希（`app/app/user/models/user.go` BeforeCreate/BeforeUpdate + CheckPwd 兼容），字段 `json:"-"`（commit 42784cc）
 - C3 ✅ 代码生成任意写：`sys-table` 路由挂 `AdminOnly()`；gen 路径字段白名单正则校验
-- C4 ⚠️ 部分：新增 `middleware.AdminOnly()`（仅 admin 角色）并挂载到敏感路由；数据权限 `PermissionAction()` 全量挂载待 create_by 语义统一后启用（enableDP 仍为 false）
+- C4 ✅ 数据权限中间件已挂载（2026-08 后）：`app/admin/sys/router/router.go` `checkRoleRouter` 的 `/admin-api/v1` 组统一挂 `middleware.PermissionAction()`，将其注入的 `data_scope` 接入全部已就位的 `service.Permission(tableName, p)` scope（此前仅注册未挂载，context 无 dataPermission 导致空数据权限全量放行）。`AdminOnly()` 保持挂载于敏感路由；`Permission()` 内部 `!EnableDP || p==nil` 守卫保证 enableDP=false（现配置）时行为零变化，开启后即按数据范围约束；reader（`/web-api`）不受影响
 - C5 ✅ 日志中间件：删除 bufio（原未 Flush 导致小 body 接口失效），`io.LimitReader` 1MB 上限
 - C6 ✅ 上传链路：filemgr_app 扩展名白名单 + 200MB 上限；头像 2MB + 魔数校验 + nil 检查；静态目录自实现路由（禁目录列举、防路径穿越、危险类型强制下载）
 - C7 ✅ IP 伪造：显式 `SetTrustedProxies`（未配置不信任任何代理），`GetClientIP` 直接用 `c.ClientIP()`，删除手工拼接 XFF
@@ -447,7 +447,6 @@ M1-M19 全部已处理（验证码强度项按约定保留，见待办）## Medi
 - L32 ✅ WAF：默认 `DetectionOnly` 试运行（观察 audit 日志后再开拦截）；`SecDataDir` 改项目私有目录 `./tmp/coraza/`；`SecRequestBodyLimit` 250MB 与 APP 安装包上传上限（200MB）对齐；multipart 改 permissive（`@eq 1`，仅拦明确畸形）
 
 ## 待办
-- C4 数据权限全量挂载（依赖 create_by 语义统一）
 - M3 验证码强度（4 位数字可穷举、dev 模式跳过验证码——按约定保留现状，需产品决策）
 - 存量库执行新增索引/唯一索引的 ALTER 语句（新装库直接跑 app_mysql.sql / app_pgsql.sql 即可）；存量库同步执行 default→default_val 改名、role_dept 索引、移除 salt 列
 - 提交 go.sum（已从 .gitignore 移除）

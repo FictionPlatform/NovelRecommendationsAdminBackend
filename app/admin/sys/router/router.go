@@ -8,6 +8,7 @@ import (
 
 	"go-admin/core/config"
 	"go-admin/core/global"
+	"go-admin/core/middleware"
 	"go-admin/core/runtime"
 	"go-admin/core/ws"
 	"mime"
@@ -56,6 +57,10 @@ func noCheckRoleRouter(r *gin.Engine) {
 func checkRoleRouter(r *gin.Engine) {
 	// 可根据业务需求来设置接口版本
 	v1 := r.Group(global.RouteRootPath + "/v1")
+	// 挂载数据权限中间件（C4）：注入 admin 用户的 data_scope 到 context，
+	// 供各 service 的 middleware.Permission(tableName, p) scope 消费。
+	// 注意：Permission() 内部有 !EnableDP || p==nil 守卫，settings 中 enableDP=false 时行为与零过滤一致（链路打通、零回归）。
+	v1.Use(middleware.PermissionAction())
 
 	for _, f := range routerCheckRole {
 		f(v1)
