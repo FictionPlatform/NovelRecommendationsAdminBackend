@@ -352,3 +352,102 @@ func (e NovelPostAdmin) ChangeStatus(c *gin.Context) {
 	}
 	e.OK(nil, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
 }
+
+type NotificationAdmin struct {
+	api.Api
+}
+
+// GetPage 后台分页查询读者通知（通知管理）
+// @Summary 后台分页查询读者通知
+// @Description 查询全部读者（读者端）系统通知，支持标题/内容关键字与来源筛选
+// @Tags 小说平台通知
+// @Accept json
+// @Produce json
+// @Param pageIndex query int false "页码"
+// @Param pageSize query int false "每页条数"
+// @Param keyword query string false "标题/内容关键字"
+// @Param source query string false "来源 system|notice|admin|feedback|complaint"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/novel/notification [get]
+func (e NotificationAdmin) GetPage(c *gin.Context) {
+	req := dto.NovelAdminNotificationQueryReq{}
+	s := service.NovelNotification{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
+		return
+	}
+	list, count, respCode, err := s.AdminGetPage(&req)
+	if err != nil {
+		e.Error(respCode, err.Error())
+		return
+	}
+	e.PageOK(list, nil, count, req.GetPageIndex(), req.GetPageSize(), lang.MsgByCode(baseLang.SuccessCode, e.Lang))
+}
+
+// Send 后台发送系统通知（指定读者或全员）
+// @Summary 后台发送系统通知
+// @Description userId>0 发给指定读者；userId=0 发给全部正常读者
+// @Tags 小说平台通知
+// @Accept json
+// @Produce json
+// @Param body body dto.NovelAdminNotificationSendReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/novel/notification [post]
+func (e NotificationAdmin) Send(c *gin.Context) {
+	req := dto.NovelAdminNotificationSendReq{}
+	s := service.NovelNotification{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
+		return
+	}
+	sent, respCode, err := s.AdminSend(&req)
+	if err != nil {
+		e.Error(respCode, err.Error())
+		return
+	}
+	e.OK(sent, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
+}
+
+// Delete 后台删除读者通知
+// @Summary 后台删除读者通知
+// @Tags 小说平台通知
+// @Accept json
+// @Produce json
+// @Param body body dto.NovelNotificationReadReq true "请求参数"
+// @Security Bearer
+// @Success 200 {object} response.Response "请求成功"
+// @Failure 400 {object} response.Response "请求失败"
+// @Router /app/novel/notification [delete]
+func (e NotificationAdmin) Delete(c *gin.Context) {
+	req := dto.NovelNotificationReadReq{}
+	s := service.NovelNotification{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Error(baseLang.DataDecodeCode, lang.MsgLogErrf(e.Logger, e.Lang, baseLang.DataDecodeCode, baseLang.DataDecodeLogCode, err).Error())
+		return
+	}
+	respCode, err := s.AdminDelete(req.Ids)
+	if err != nil {
+		e.Error(respCode, err.Error())
+		return
+	}
+	e.OK(nil, lang.MsgByCode(baseLang.SuccessCode, e.Lang))
+}

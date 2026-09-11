@@ -1,22 +1,30 @@
 package service
 
 import (
+	"errors"
+	"strings"
 	"time"
 
 	"go-admin/app/app/novel/models"
 	"go-admin/app/app/novel/service/dto"
+	userModels "go-admin/app/app/user/models"
 	baseLang "go-admin/config/base/lang"
 	cDto "go-admin/core/dto"
 	"go-admin/core/dto/service"
+	"go-admin/core/global"
 	"go-admin/core/lang"
+
+	"gorm.io/gorm"
 )
 
 // 通知常量
 const (
-	NovelNotifyUnread       = "0" // 未读
-	NovelNotifyRead         = "1" // 已读
-	NovelNotifySourceSystem = "system"
-	NovelNotifySourceNotice = "notice"
+	NovelNotifyUnread        = "0" // 未读
+	NovelNotifyRead          = "1" // 已读
+	NovelNotifySourceSystem  = "system"
+	NovelNotifySourceNotice  = "notice"
+	NovelNotifySourceAdmin   = "admin" // 后台通知管理页直接发送
+	NovelNotifySendToAllHint = 0       // 发送目标：userId=0 表示全员
 )
 
 type NovelNotification struct {
@@ -242,6 +250,120 @@ func (e *NovelNotification) Read(c *dto.NovelNotificationReadReq) (int, error) {
 	err := affectRows.Update("is_read", NovelNotifyRead).Error
 	if err != nil {
 		return baseLang.DataUpdateLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataUpdateCode, baseLang.DataUpdateLogCode, err)
+	}
+	return baseLang.SuccessCode, nil
+}
+
+// AdminGetPage 后台-分页查询全部读者通知（含收件人昵称），用于通知管理页
+func (e *NovelNotification) AdminGetPage(c *dto.NovelAdminNotificationQueryReq) ([]dto.NovelAdminNotificationItem, int64, int, error) {
+	var data models.NovelNotification
+	var list []models.NovelNotification
+	var count int64
+	db := e.Orm.Model(&data)
+	if strings.TrimSpace(c.Keyword) != "" {
+		kw := "%" + strings.TrimSpace(c.Keyword) + "%"
+		db = db.Where("title like ? or content like ?", kw, kw)
+	}
+	if c.Source != "" {
+		db = db.Where("source = ?", c.Source)
+	}
+	err := db.Scopes(cDto.Paginate(c.GetPageSize(), c.GetPageIndex())).
+		Order("created_at desc, id desc").
+		Find(&list).Limit(-1).Offset(-1).Count(&count).Error
+	if err != nil {
+		return nil, 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+	items := make([]dto.NovelAdminNotificationItem, 0, len(list))
+	for _, n := range list {
+		item := dto.NovelAdminNotificationItem{NovelNotification: n}
+		item.CreatedAtStr = n.CreatedAt.Format("2006-01-02 15:04:05")
+		// 收件人昵称联查（app_user.user_name）
+		var u userModels.User
+		if err := e.Orm.First(&u, n.UserId).Error; err == nil {
+			item.UserName = u.UserName
+		}
+		items = append(items, item)
+	}
+	return items, count, baseLang.SuccessCode, nil
+}
+
+// AdminSend 后台-发送系统通知：userId>0 发给指定读者；userId=0（NovelNotifySendToAllHint）发给全部正常读者
+func (e *NovelNotification) AdminSend(c *dto.NovelAdminNotificationSendReq) (int64, int, error) {
+	if strings.TrimSpace(c.Title) == "" {
+		return 0, baseLang.NovelNoticeTitleEmptyCode, lang.MsgErr(baseLang.NovelNoticeTitleEmptyCode, e.Lang)
+	}
+	if len([]rune(c.Title)) > 100 {
+		return 0, baseLang.NovelNoticeTitleTooLongCode, lang.MsgErr(baseLang.NovelNoticeTitleTooLongCode, e.Lang)
+	}
+	if strings.TrimSpace(c.Content) == "" {
+		return 0, baseLang.NovelNoticeContentEmptyCode, lang.MsgErr(baseLang.NovelNoticeContentEmptyCode, e.Lang)
+	}
+	if len([]rune(c.Content)) > 2000 {
+		return 0, baseLang.NovelNoticeContentTooLongCode, lang.MsgErr(baseLang.NovelNoticeContentTooLongCode, e.Lang)
+	}
+	sent := int64(0)
+	now := time.Now()
+	if c.UserId > 0 {
+		// 指定用户：校验存在（含注销/禁言用户仍可收到？仅正常读者）
+		var u userModels.User
+		if err := e.Orm.First(&u, c.UserId).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return 0, baseLang.NovelUserNotExistCode, lang.MsgErr(baseLang.NovelUserNotExistCode, e.Lang)
+			}
+			return 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+		}
+		data := models.NovelNotification{
+			UserId:    u.Id,
+			Title:     c.Title,
+			Content:   c.Content,
+			IsRead:    NovelNotifyUnread,
+			Source:    NovelNotifySourceAdmin,
+			CreatedAt: &now,
+		}
+		if err := e.Orm.Create(&data).Error; err != nil {
+			return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
+		}
+		sent = 1
+		return data.Id, baseLang.SuccessCode, nil
+	}
+	// 全员：向全部正常读者（status=1）发送，分批插入
+	var uids []int64
+	if err := e.Orm.Model(&userModels.User{}).
+		Where("status = ?", global.SysStatusOk).Pluck("id", &uids).Error; err != nil {
+		return 0, baseLang.DataQueryLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataQueryCode, baseLang.DataQueryLogCode, err)
+	}
+	const batchSize = 500
+	for i := 0; i < len(uids); i += batchSize {
+		end := i + batchSize
+		if end > len(uids) {
+			end = len(uids)
+		}
+		rows := make([]models.NovelNotification, 0, end-i)
+		for _, uid := range uids[i:end] {
+			rows = append(rows, models.NovelNotification{
+				UserId:    uid,
+				Title:     c.Title,
+				Content:   c.Content,
+				IsRead:    NovelNotifyUnread,
+				Source:    NovelNotifySourceAdmin,
+				CreatedAt: &now,
+			})
+		}
+		if err := e.Orm.Create(&rows).Error; err != nil {
+			return 0, baseLang.DataInsertLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataInsertCode, baseLang.DataInsertLogCode, err)
+		}
+		sent += int64(len(rows))
+	}
+	return sent, baseLang.SuccessCode, nil
+}
+
+// AdminDelete 后台-删除通知（按 id）
+func (e *NovelNotification) AdminDelete(ids []int64) (int, error) {
+	if len(ids) == 0 {
+		return baseLang.ParamErrCode, lang.MsgErr(baseLang.ParamErrCode, e.Lang)
+	}
+	if err := e.Orm.Where("id in ?", ids).Delete(&models.NovelNotification{}).Error; err != nil {
+		return baseLang.DataDeleteLogCode, lang.MsgLogErrf(e.Log, e.Lang, baseLang.DataDeleteCode, baseLang.DataDeleteLogCode, err)
 	}
 	return baseLang.SuccessCode, nil
 }
